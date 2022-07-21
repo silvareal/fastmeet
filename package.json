@@ -1,0 +1,26 @@
+{
+  "name": "fastmeet",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "install-server": "yarn install --prefix server",
+    "install-client": "yarn install --prefix client",
+    "install": "yarn run install-server && yarn run install-client",
+    "server": "yarn run watch --prefix server",
+    "client": "yarn run start --prefix client",
+    "watch": "yarn run server && yarn run client",
+    "deploy": "npm run build --prefix client && npm start --prefix server",
+    "test": "npm test --prefix server && npm test --prefix client"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/silvareal/fastmeet.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/silvareal/fastmeet/issues"
+  },
+  "homepage": "https://github.com/silvareal/fastmeet#readme"
+}

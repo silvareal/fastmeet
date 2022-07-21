@@ -13,19 +13,23 @@ on:
 jobs:
   # This workflow contains a single job called "build"
   build:
+    env:
+      CI: true
+    strategy:
+      matrix:
+        node-version: [14.x, 16.x]
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
-
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
       # Runs a single command using the runners shell
-      - name: use nodeJs version 16
+      - name: use nodeJs version ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: ${{ matrix.node-version }}
       - run: npm run install
       - run: npm run test
       - run: npm run build --prefix client

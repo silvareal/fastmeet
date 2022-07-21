@@ -4,14 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "install-server": "yarn install --prefix server",
-    "install-client": "yarn install --prefix client",
-    "install": "yarn run install-server && yarn run install-client",
-    "server": "yarn run watch --prefix server",
-    "client": "yarn run start --prefix client",
-    "watch": "yarn run server && yarn run client",
+    "install-server": "npm install --prefix server",
+    "install-client": "npm install --prefix client",
+    "install": "npm run install-server && npm run install-client",
+    "server": "npm run watch --prefix server",
+    "client": "npm run start --prefix client",
+    "watch": "npm run server && npm run client",
     "deploy": "npm run build --prefix client && npm start --prefix server",
-    "test": "npm test --prefix server && npm test --prefix client"
+    "test": "npm run test --prefix server && npm run test --prefix client"
   },
   "repository": {
     "type": "git",

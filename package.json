@@ -8,10 +8,11 @@
     "install-client": "npm install --prefix client",
     "install": "npm run install-server && npm run install-client",
     "server": "npm run watch --prefix server",
-    "client": "npm run start --prefix client",
-    "watch": "npm run server && npm run client",
+    "client": "PORT=4000 npm run start --prefix client",
+    "watch": "npm run server & npm run client",
     "deploy": "npm run build --prefix client && npm start --prefix server",
-    "test": "npm run test --prefix client"
+    "test": "npm run test --prefix client",
+    "lint": "npm run lint --prefix server"
   },
   "repository": {
     "type": "git",
@@ -22,5 +23,7 @@
   "bugs": {
     "url": "https://github.com/silvareal/fastmeet/issues"
   },
-  "homepage": "https://github.com/silvareal/fastmeet#readme"
+  "homepage": "https://github.com/silvareal/fastmeet#readme",
+  "dependencies": {
+  }
 }

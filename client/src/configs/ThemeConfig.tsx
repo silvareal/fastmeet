@@ -95,7 +95,7 @@ export const theme: any = customizeComponents({
       styleOverrides: {
         root: {
           "& .MuiInputBase-root": {
-            borderRadius: 8,
+            borderRadius: 0,
           },
         },
       },
@@ -113,7 +113,7 @@ export const theme: any = customizeComponents({
       defaultProps: {
         variant: "contained",
         style: {
-          borderRadius: 8,
+          borderRadius: 0,
         },
       },
     },

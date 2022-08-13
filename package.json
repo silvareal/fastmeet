@@ -25,5 +25,6 @@
   },
   "homepage": "https://github.com/silvareal/fastmeet#readme",
   "dependencies": {
+    "notistack": "^2.0.5"
   }
 }

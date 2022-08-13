@@ -3,17 +3,16 @@ import useDataRef from "hooks/useDataRef";
 import LoadingIndicator from "./LoadingIndicator";
 import ErrorContent from "common/ErrorContent";
 import clsx from "clsx";
-import "./LoadingContent.css";
 
 interface LoadingContentType {
   size: number;
   error: boolean;
   loading: boolean;
-  children: JSX.Element |  {() => JSX.Element};
+  children: JSX.Element | (() => JSX.Element);
   onReload: () => void;
   onMount: () => void;
-  loadingContent: JSX.Element | {(x: JSX.Element) => ReactNode};
-  errorContent: JSX.Element | {(x: JSX.Element) => ReactNode};
+  loadingContent: JSX.Element | ((x: JSX.Element) => ReactNode);
+  errorContent: JSX.Element | ((x: JSX.Element) => ReactNode);
   className: string;
 }
 /**
@@ -40,10 +39,9 @@ function LoadingContent(props: Partial<LoadingContentType>): JSX.Element {
     dataRef.current.onMount?.();
   }, [dataRef]);
 
-
   if (!loading && !error) {
     if (children !== undefined) {
-        return typeof children === "function" ? children() : children; 
+      return typeof children === "function" ? children() : children;
     }
   }
 
@@ -52,7 +50,13 @@ function LoadingContent(props: Partial<LoadingContentType>): JSX.Element {
   const defaultErrorContent = <ErrorContent onTryAgain={() => onReload?.()} />;
 
   return (
-    <div className={clsx("LoadingContent", className)} {...rest}>
+    <div
+      className={clsx(
+        "flex flex-col justify-center items-center p-4",
+        className
+      )}
+      {...rest}
+    >
       {error ? (
         <>
           {errorContent

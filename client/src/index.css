@@ -44,10 +44,10 @@ code {
    margin: auto 0;
    border-radius: 50%;
    background: #000000;
-   animation: loader-indicator-dr86d1 1s infinite;
+   animation: loader-indicator-animation 1s infinite;
 }
 
-@keyframes loader-indicator-dr86d1 {
+@keyframes loader-indicator-animation {
    90%, 100% {
       transform: translate(300%);
    }

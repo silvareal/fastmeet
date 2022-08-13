@@ -1,0 +1,56 @@
+.home-microphone {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+}
+
+.home-microphone__icon {
+    position: absolute;
+    z-index: 50;
+    color: #0FBE00;
+    transform: translateX(-50%) translateY(-50%);
+}
+
+.home-microphone::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    display: block;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+
+    z-index: 0;
+    background: #CFEBCE;
+    animation: pulse-border 1.5s ease-in-out infinite;
+}
+
+.home-microphone::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+
+    z-index: 1;
+    background: #B0E4AD;
+    transition: all 1.5s;
+}
+
+@keyframes pulse-border {
+    0% {
+      transform: translateX(-50%) translateY(-50%) translateZ(0) scale(1);
+      opacity: 1;
+    }
+  
+    100% {
+      transform: translateX(-50%) translateY(-50%) translateZ(0) scale(1.5);
+      opacity: 0;
+    }
+  }

@@ -10,28 +10,11 @@ import {
 } from "@mui/material";
 import format from "date-fns/format";
 
-import { useLayoutEffect, useState } from "react";
 import Logo from "common/Logo";
 
 function AppHeader() {
-  const [elevateHeader, setElevateHeader] = useState(false);
-
-  useLayoutEffect(() => {
-    function handleScroll() {
-      setElevateHeader(window.scrollY >= 20);
-    }
-    window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
-
   return (
-    <AppBar
-      color="transparent"
-      className="bg-gray-100"
-      elevation={elevateHeader ? 1 : 0}
-    >
+    <AppBar color="transparent" elevation={0}>
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           <Logo />

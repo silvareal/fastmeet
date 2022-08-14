@@ -44,10 +44,10 @@ const Home: FunctionComponent<HomeProps> = () => {
               <Typography variant="h5" className="text-gray-400">
                 No Account Needed
               </Typography>
-              <Typography variant="h1" mt={2} fontWeight={600}>
-                Start & join <br></br> meetings free
+              <Typography variant="h1" mt={1} fontWeight={600}>
+                Start & join meetings free
               </Typography>
-              <Typography className="max-w-[500px] mt-3">
+              <Typography className="max-w-[500px] mt-3" variant="h6">
                 We re-engineered the service we built for secure business and
                 social meetings to make it free and available for all.
               </Typography>

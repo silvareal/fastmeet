@@ -11,13 +11,17 @@ import {
 import format from "date-fns/format";
 
 import Logo from "common/Logo";
+import { Link } from "react-router-dom";
+import { RouteEnum } from "constants/RouteConstants";
 
 function AppHeader() {
   return (
     <AppBar color="transparent" elevation={0}>
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          <Logo />
+          <Link to={RouteEnum.HOME}>
+            <Logo />
+          </Link>
 
           <div className="flex-1" />
           <Typography>{format(new Date(), "p . E, LLL qo")}</Typography>

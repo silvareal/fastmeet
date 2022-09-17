@@ -22,6 +22,10 @@ const ROUTES = configureRoutes([
     element: <Navigate to={RouteEnum.HOME} replace />,
   },
   {
+    path: RouteEnum.MEET_JOIN,
+    element: lazy(() => import("features/videoMeet/VideoMeetJoin")),
+  },
+  {
     path: RouteEnum.HOME,
     element: lazy(() => import("features/home/Home")),
   },

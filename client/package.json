@@ -5,6 +5,7 @@
   "dependencies": {
     "@emotion/react": "^11.10.0",
     "@emotion/styled": "^11.10.0",
+    "@iconify/react": "^4.0.0",
     "@mui/material": "^5.10.0",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.3.0",
@@ -13,14 +14,24 @@
     "@types/node": "^16.11.45",
     "@types/react": "^18.0.15",
     "@types/react-dom": "^18.0.6",
+    "@types/simple-peer": "^9.11.5",
+    "axios": "^1.1.2",
+    "axios-hooks": "^4.0.0",
     "clsx": "^1.2.1",
     "date-fns": "^2.29.1",
+    "detectrtc": "^1.4.1",
+    "formik": "^2.2.9",
+    "material-ui-popup-state": "^4.1.0",
+    "notistack": "^2.0.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.3.0",
     "react-scripts": "^5.0.1",
+    "simple-peer": "^9.11.1",
+    "socket.io-client": "^4.5.2",
     "typescript": "^4.7.4",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "yup": "^0.32.11"
   },
   "scripts": {
     "start": "react-scripts start",

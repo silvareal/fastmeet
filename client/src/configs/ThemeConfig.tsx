@@ -4,6 +4,12 @@ import {
   ThemeOptions,
 } from "@mui/material/styles";
 
+declare module "@mui/material/Fab" {
+  interface FabPropsVariantOverrides {
+    opaque: true;
+  }
+}
+
 export const theme: any = customizeComponents({
   palette: {
     common: {
@@ -116,6 +122,30 @@ export const theme: any = customizeComponents({
           borderRadius: 0,
         },
       },
+    },
+    MuiFab: {
+      variants: [
+        {
+          props: { variant: "opaque" },
+          style: {
+            color: "#FFFFFF",
+            background: "rgba(255, 255, 255, 0.3)",
+          },
+        },
+        {
+          props: { variant: "opaque", color: "error" },
+          style: {
+            color: "#FFFFFF",
+            background: "#F8425F",
+            ":hover": {
+              color: "#FFFFFF",
+            },
+            ":active": {
+              color: "#FFFFFF",
+            },
+          },
+        },
+      ],
     },
   },
 });

@@ -1,8 +1,6 @@
 import React from "react";
 import { Typography, Icon } from "@mui/material";
 import clsx from "clsx";
-// import ErrorContentImg from "assets/images/ErrorContent.png";
-import "./ErrorContent.css";
 
 interface ErrorContentType {
   title: string;
@@ -21,15 +19,19 @@ function ErrorContent(props: ErrorContentType): JSX.Element {
 
   return (
     <div
-      className={clsx("p-8 flex justify-center items-center", className)}
+      className={clsx(
+        "p-8 flex flex-col justify-center items-center",
+        className
+      )}
       {...rest}
     >
       <Typography variant="h6" className="font-bold text-center">
         {title}
       </Typography>
       <div>
-        <Icon className={clsx("")}>sentiment_dissatisfied</Icon>
-        {/* <img src={ErrorContentImg} alt="ErrorContent" width={100} /> */}
+        <Icon className="text-error-main" style={{ fontSize: "100px" }}>
+          sentiment_dissatisfied
+        </Icon>
       </div>
       <Typography variant="body2" className="text-center mb-4 font-bold">
         {description}

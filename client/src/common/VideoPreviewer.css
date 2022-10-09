@@ -1,9 +1,6 @@
 .unpinned-video {
 	position: absolute;
-	/* bottom: 25px; */
 	text-align: center;
-	
-	/* right: 10px; */
 	z-index: 100;
 }
 
@@ -13,28 +10,29 @@
     border-radius: 16px;
     height: 100%;
     width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    max-height: calc(100vh - 100px);
+    display: block;
     overflow: hidden;
     position: relative;
     z-index: 1;
+    min-width: 250px;
 }
 
 .vids-preview-container > video {
     width: 100%;
 	height: 100%;
     border-radius: 50px;
+    transform: scaleX(-1);
 }
-
 
 .vids-preview-title {
 	color: white;
+    background-color: rgba(0,0,0,0.4);
+    padding: .2rem .5rem;
+    border-radius: .7rem;
     text-transform: capitalize;
-    position: absolute;
-    bottom: 20px;
-    left: 20px;
-    z-index: 2;
+    width: max-content;
+    user-select: none;
 }
 
 .vids-preview-status {
@@ -52,8 +50,6 @@
     border-radius: 50%;
     text-transform: capitalize;
     width: 100%;
-    font-size: 2vw;
-    font-weight: bold;
     height: 100%;
     max-width: 150px;
     max-height: 150px;
@@ -64,3 +60,7 @@
     align-items: center;
 }
 
+/* @media only screen and (max-width: 600px) {
+    .vids-preview-avatar {
+  }
+} */

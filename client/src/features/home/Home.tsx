@@ -1,6 +1,8 @@
 import { Button, Container, Icon, TextField, Typography } from "@mui/material";
 import AppHeader from "AppHeader";
-import React, { FunctionComponent, useRef, useState } from "react";
+import React, { FunctionComponent, useEffect, useRef, useState } from "react";
+import { useFormik } from "formik";
+import * as yup from "yup";
 
 import Memoji1 from "assets/img/memoji1.png";
 import Memoji2 from "assets/img/memoji2.png";
@@ -12,10 +14,13 @@ import Chat from "assets/img/chat.png";
 import VideoCamera from "assets/img/video-camera.png";
 
 import "./home.css";
+import { getRandomCharacters } from "utils/VideoUtils";
+import { useNavigate } from "react-router-dom";
 
 interface HomeProps {}
 
 const Home: FunctionComponent<HomeProps> = () => {
+  const navigate = useNavigate();
   const [xAxis, setXAxis] = useState(0);
   const [yAxis, setYAxis] = useState(0);
 
@@ -33,6 +38,31 @@ const Home: FunctionComponent<HomeProps> = () => {
     setXAxis(0);
     setYAxis(0);
   };
+
+  const formik = useFormik({
+    initialValues: {
+      meetingId: "",
+    },
+    enableReinitialize: true,
+    validationSchema: yup.object({
+      meetingId: yup
+        .string()
+        .label("Meeting Id")
+        .min(7, "Must be more than 7 characters")
+        .required("Required"),
+    }),
+    onSubmit: (values) => {
+      navigate(values.meetingId);
+    },
+  });
+
+  useEffect(() => {
+    const randomCharacters = getRandomCharacters(7);
+    if (randomCharacters) {
+      formik.setFieldValue("meetingId", randomCharacters);
+    }
+    // eslint-disable-next-line;
+  }, []);
 
   return (
     <div className="bg-gray-100 min-h-screen">
@@ -52,21 +82,30 @@ const Home: FunctionComponent<HomeProps> = () => {
                 social meetings to make it free and available for all.
               </Typography>
 
-              <div className="flex mt-16">
+              <form onSubmit={formik.handleSubmit} className="flex mt-16">
                 <TextField
                   label="FastMeetNow"
                   fullWidth
                   className="w-3/5 font-bold"
+                  placeholder="WUDUS83939JNE"
+                  {...formik.getFieldProps("meetingId")}
+                  error={
+                    formik.touched.meetingId && Boolean(formik.errors.meetingId)
+                  }
+                  helperText={
+                    formik.touched.meetingId && formik.errors.meetingId
+                  }
                 />
                 <Button
                   size="large"
                   disableElevation
                   className="h-full py-[15.7px] w-2/5 font-bold"
                   fullWidth
+                  type="submit"
                 >
                   New Meeting
                 </Button>
-              </div>
+              </form>
             </div>
           </div>
 

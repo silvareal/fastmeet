@@ -1,0 +1,4 @@
+.layout-grid-auto {
+    @apply grid gap-4 justify-center;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}

@@ -5,13 +5,19 @@ import { configureRoutes } from "utils/RouteUtils";
 import { RouteEnum } from "constants/RouteConstants";
 import AppThemeProvider from "AppThemeProvider";
 import Suspense from "common/Suspense";
+import { SnackbarProvider } from "notistack";
 
 function App() {
   const routes = useRoutes(ROUTES);
 
   return (
     <AppThemeProvider>
-      <Suspense>{routes}</Suspense>
+      <SnackbarProvider
+        anchorOrigin={{ horizontal: "center", vertical: "top" }}
+        preventDuplicate
+      >
+        <Suspense>{routes}</Suspense>
+      </SnackbarProvider>
     </AppThemeProvider>
   );
 }
@@ -23,6 +29,10 @@ const ROUTES = configureRoutes([
   },
   {
     path: RouteEnum.MEET_JOIN,
+    element: lazy(() => import("features/videoMeet/VideoMeetJoin")),
+  },
+  {
+    path: RouteEnum.MEET,
     element: lazy(() => import("features/videoMeet/VideoMeetJoin")),
   },
   {

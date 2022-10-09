@@ -26,5 +26,15 @@ export default function Video({ srcObject, muted, peer, ...props }: PropsType) {
     }
   }, [peer]);
 
-  return <video playsInline muted={muted} autoPlay ref={refVideo} {...props} />;
+  return (
+    <video
+      playsInline
+      muted={muted}
+      autoPlay
+      ref={refVideo}
+      width={"100%"}
+      height={"100%"}
+      {...props}
+    />
+  );
 }

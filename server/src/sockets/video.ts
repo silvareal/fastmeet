@@ -117,7 +117,10 @@ export function video(io: any) {
       });
     });
 
-    // once the peer acknowledge signal sending the acknowledgement back so that it can stream peer to peer.
+    /**
+     * once the peer acknowledge signal sending the acknowledgement
+     * back so that it can stream peer to peer.
+     */
     socket.on("acknowledge-signal", (payload) => {
       videoNamespace.to(payload.callerId).emit("signal-accepted", {
         signal: payload.signal,
@@ -133,7 +136,11 @@ export function video(io: any) {
         clients[roomId] = room;
       }
 
-      // emiting a signal and sending it to everyone that a user left
+      log.info<string>(
+        "[" + socket.id + "] disconnects from [room_id: " + roomId + "]"
+      );
+
+      // emiting a signal and sending it to everyone in the room that a user left
       await sendToRoom(socket, roomId, socket.id, clients, "userDisconnected", {
         socketId: socket.id,
       });

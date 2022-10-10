@@ -76,7 +76,7 @@ export function getPeerInfo() {
  * @param {MediaStream} stream
  * @param {object} iceServers
  * @param socket
- * @returns
+ * @returns peer
  */
 export function createPeer(
   userToSignal: string,
@@ -112,7 +112,7 @@ export function createPeer(
  * @param {MediaStream} stream
  * @param {object} iceServers
  * @param {Socket} socket
- * @returns
+ * @returns peer
  */
 export function addPeer(
   incomingSignal: string,

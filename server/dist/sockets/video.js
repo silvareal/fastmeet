@@ -8,8 +8,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.video = void 0;
+const GlobalUtils_1 = __importDefault(require("../helpers/GlobalUtils"));
+const videoUtils_1 = require("../helpers/videoUtils");
+const log = new GlobalUtils_1.default();
 function video(io) {
     const clients = {};
     const socketRoomMap = {};
@@ -19,7 +25,7 @@ function video(io) {
         socket.on("join", (roomId, clientDetails) => __awaiter(this, void 0, void 0, function* () {
             try {
                 // Add client to room
-                console.log(clientDetails.name + " - joined room: " + roomId);
+                console.log(clientDetails.peer_name + " - joined room: " + roomId);
                 // adding map clients to room
                 if (clients[roomId]) {
                     clients[roomId].push(Object.assign({ socketId: socket.id }, clientDetails));
@@ -30,7 +36,8 @@ function video(io) {
                 // adding map of socketid to room
                 socketRoomMap[socket.id] = roomId;
                 const clientsInRoom = clients[roomId].filter((client) => client.socketId !== socket.id);
-                console.log("All clients in room: ", clientsInRoom);
+                // console.log("All clients in room: ", clientsInRoom);
+                // console.log("clients", clients);
                 // once a new client has joined sending the details of clients who are already present in room.
                 socket.emit("clients-in-room", clientsInRoom);
             }
@@ -44,17 +51,47 @@ function video(io) {
             let clientDetails;
             if (room) {
                 const user = room.find((user) => user.socketId === socket.id);
-                if (user !== undefined) {
-                    clientDetails = user;
-                    // once a peer wants to initiate signal, To old user sending the user details along with signal
-                    videoNamespace.to(payload.userToSignal).emit("user-joined", {
-                        signal: payload.signal,
-                        callerId: payload.callerId,
-                        user: clientDetails,
-                    });
-                }
+                clientDetails = user;
             }
+            console.log("clientDetails", clientDetails);
+            // once a peer wants to initiate signal, To old user sending the user details along with signal
+            videoNamespace.to(payload.userToSignal).emit("user-joined", {
+                signal: payload.signal,
+                callerId: payload.callerId,
+                user: clientDetails,
+            });
         });
+        /**
+         * Relay actions to peers or specific peer in the same room
+         */
+        socket.on("peerAction", (config) => __awaiter(this, void 0, void 0, function* () {
+            // log.debug('Peer action', config);
+            const room_id = config.room_id;
+            const peer_name = config.peer_name;
+            const peer_audio = config.peer_audio;
+            const peer_video = config.peer_video;
+            const room = clients[room_id];
+            const roomIndex = room.findIndex((client) => client.socketId === socket.id);
+            const clientItem = room[roomIndex];
+            if (peer_name && peer_audio && peer_video) {
+                clientItem.peer_name = peer_name;
+                clientItem.peer_audio = peer_audio;
+                clientItem.peer_video = peer_video;
+            }
+            console.log("clientItem", clientItem);
+            log.debug("[" + socket.id + "] emit peerAction to [room_id: " + room_id + "]", {
+                peer_name: peer_name || "",
+                peer_audio: peer_audio || false,
+                peer_video: peer_video || false,
+            });
+            yield (0, videoUtils_1.sendToRoom)(socket, room_id, socket.id, clients, "peerAction", {
+                room_id: room_id,
+                socket_id: socket.id,
+                peer_name: peer_name,
+                peer_audio: peer_audio,
+                peer_video: peer_video,
+            });
+        }));
         // once the peer acknowledge signal sending the acknowledgement back so that it can stream peer to peer.
         socket.on("acknowledge-signal", (payload) => {
             videoNamespace.to(payload.callerId).emit("signal-accepted", {
@@ -62,7 +99,7 @@ function video(io) {
                 id: socket.id,
             });
         });
-        socket.on("disconnect", () => {
+        socket.on("disconnect", () => __awaiter(this, void 0, void 0, function* () {
             const roomId = socketRoomMap[socket.id];
             let room = clients[roomId];
             if (room) {
@@ -70,8 +107,10 @@ function video(io) {
                 clients[roomId] = room;
             }
             // emiting a signal and sending it to everyone that a user left
-            socket.broadcast.emit("user-disconnected", socket.id);
-        });
+            yield (0, videoUtils_1.sendToRoom)(socket, roomId, socket.id, clients, "userDisconnected", {
+                socketId: socket.id,
+            });
+        }));
     });
 }
 exports.video = video;

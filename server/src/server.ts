@@ -30,19 +30,18 @@ dependencies: {
  */
 
 
-const http = require("http");
-const io = require('socket.io');
-require("dotenv").config();
+import http from "http"
+import { Server } from "socket.io";
+import * as dotenv from 'dotenv' // see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-import
+dotenv.config()
 
 import sockets from "./sockets";
-
-
-const app = require("./app");
+import app  from "./app"
 
 const PORT = process.env.PORT || 5000;
 
 const server = http.createServer(app);
-const socketServer = io(server, {
+const socketServer = new Server(server, {
   cors: {
     origin: '*',
     methods: ['GET', 'POST'],

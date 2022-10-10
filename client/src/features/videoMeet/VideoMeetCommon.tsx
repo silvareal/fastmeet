@@ -43,10 +43,7 @@ export const toggleCamera = (
 };
 
 // Hanging up the call
-export function hangUp(
-  localMediaStream: MediaStream | undefined,
-  setter: (e: boolean) => void
-) {
+export function hangUp(localMediaStream: MediaStream | undefined) {
   if (localMediaStream !== undefined) {
     localMediaStream.getVideoTracks()[0].enabled = false;
   }

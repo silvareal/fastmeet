@@ -71,14 +71,17 @@ function video(io) {
             const peer_audio = config.peer_audio;
             const peer_video = config.peer_video;
             const room = clients[room_id];
-            const roomIndex = room.findIndex((client) => client.socketId === socket.id);
-            const clientItem = room[roomIndex];
-            if (peer_name && peer_audio && peer_video) {
-                clientItem.peer_name = peer_name;
-                clientItem.peer_audio = peer_audio;
-                clientItem.peer_video = peer_video;
+            if ((room === null || room === void 0 ? void 0 : room.length) >= 1) {
+                const roomIndex = room.findIndex((client) => client.socketId === socket.id);
+                const clientItem = room[roomIndex];
+                if (peer_name !== undefined &&
+                    peer_audio !== undefined &&
+                    peer_video !== undefined) {
+                    clientItem.peer_name = peer_name;
+                    clientItem.peer_audio = peer_audio;
+                    clientItem.peer_video = peer_video;
+                }
             }
-            console.log("clientItem", clientItem);
             log.debug("[" + socket.id + "] emit peerAction to [room_id: " + room_id + "]", {
                 peer_name: peer_name || "",
                 peer_audio: peer_audio || false,

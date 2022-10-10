@@ -1,9 +1,3 @@
-.unpinned-video {
-	position: absolute;
-	text-align: center;
-	z-index: 100;
-}
-
 /* video preview */
 .vids-preview-container {
     background: #3A3A3A;

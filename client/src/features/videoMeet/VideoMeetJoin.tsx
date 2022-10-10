@@ -9,14 +9,19 @@ import {
 import React, { useRef, useEffect, useState } from "react";
 import { useFormik } from "formik";
 import * as yup from "yup";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useSnackbar } from "notistack";
 import { io } from "socket.io-client";
 import Peer from "simple-peer";
 
 import AppHeader from "AppHeader";
 import VideoPreviewer from "common/VideoPreviewer";
-import { getPeerInfo, toggleAudio, toggleCamera } from "./VideoMeetCommon";
+import {
+  getPeerInfo,
+  hangUp,
+  toggleAudio,
+  toggleCamera,
+} from "./VideoMeetCommon";
 import VideoMeetJoinVideoPreviewerBody from "./VideoMeetJoinVideoPreviewerBody";
 import VideoMeetJoinVideoPreviewerHeader from "./VideoMeetJoinVideoPreviewerHeader";
 import VideoMeetJoinVideoPreviewerFooter from "./VideoMeetJoinVideoPreviewerFooter";
@@ -35,6 +40,7 @@ const socket = io(`${baseUrl}/video`);
 
 export default function VideoMeetJoin() {
   const { meetId } = useParams();
+  const navigate = useNavigate();
 
   const peersRef: { current: any } = useRef([]);
 
@@ -319,7 +325,6 @@ export default function VideoMeetJoin() {
             camera={camera}
             toggleCamera={() => {
               toggleCamera(localMediaStream, setCamera, function (camera) {
-                console.log("camera", camera);
                 socket.emit("peerAction", {
                   room_id: meetId,
                   socket_id: socket.id,
@@ -332,7 +337,6 @@ export default function VideoMeetJoin() {
             mic={mic}
             toggleAudio={() => {
               toggleAudio(localMediaStream, setMic, function (mic) {
-                console.log("mic", camera);
                 socket.emit("peerAction", {
                   room_id: meetId,
                   socket_id: socket.id,
@@ -340,6 +344,21 @@ export default function VideoMeetJoin() {
                   peer_audio: mic,
                   peer_video: camera,
                 });
+              });
+            }}
+            hangUp={() => {
+              hangUp(localMediaStream);
+              navigate("/");
+            }}
+            onInputName={(e: React.ChangeEvent<HTMLInputElement>) => {
+              console.log("event", e.target.innerHTML);
+              formik.setFieldValue("name", e.target.innerHTML);
+              socket.emit("peerAction", {
+                room_id: meetId,
+                socket_id: socket.id,
+                peer_name: e.target.innerHTML,
+                peer_audio: mic,
+                peer_video: camera,
               });
             }}
             localMediaStream={localMediaStream}

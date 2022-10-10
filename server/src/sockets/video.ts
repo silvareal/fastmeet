@@ -84,16 +84,21 @@ export function video(io: any) {
       const peer_video = config.peer_video;
 
       const room = clients[room_id];
-      const roomIndex: number = room.findIndex(
-        (client) => client.socketId === socket.id
-      );
-      const clientItem = room[roomIndex];
-      if (peer_name && peer_audio && peer_video) {
-        clientItem.peer_name = peer_name;
-        clientItem.peer_audio = peer_audio;
-        clientItem.peer_video = peer_video;
+      if (room?.length >= 1) {
+        const roomIndex: number = room.findIndex(
+          (client) => client.socketId === socket.id
+        );
+        const clientItem = room[roomIndex];
+        if (
+          peer_name !== undefined &&
+          peer_audio !== undefined &&
+          peer_video !== undefined
+        ) {
+          clientItem.peer_name = peer_name;
+          clientItem.peer_audio = peer_audio;
+          clientItem.peer_video = peer_video;
+        }
       }
-      console.log("clientItem", clientItem);
 
       log.debug<
         string,

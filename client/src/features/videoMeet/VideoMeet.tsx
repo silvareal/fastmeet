@@ -2,6 +2,7 @@ import { Fab, Icon, Tooltip, Typography } from "@mui/material";
 import React from "react";
 import { Icon as Iconify } from "@iconify/react";
 import { format } from "date-fns";
+import { FormikProps } from "formik";
 
 import VideoPreviewer from "common/VideoPreviewer";
 import "./VideoMeet.css";
@@ -11,23 +12,31 @@ import { PeersType } from "./VideoMeetType";
 interface VideoMeetProps {
   toggleCamera: () => void;
   toggleAudio: () => void;
+  hangUp: () => void;
   mic: boolean;
   camera: boolean;
   localMediaStream: MediaStream | undefined;
   peers: PeersType[];
-  formik: any;
+  formik: FormikProps<{
+    name: string;
+    gender: string;
+    meetId: string | undefined;
+  }>;
   getAvatarQuery: any;
+  onInputName: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export default function VideoMeet({
   toggleCamera,
   toggleAudio,
+  hangUp,
   mic,
   camera,
   localMediaStream,
   peers,
   formik,
   getAvatarQuery,
+  onInputName,
 }: VideoMeetProps) {
   console.log("peers", peers);
 
@@ -65,8 +74,11 @@ export default function VideoMeet({
                         className="vids-preview-title"
                         color={"white"}
                         variant="subtitle2"
+                        suppressContentEditableWarning={true}
+                        contentEditable={true}
+                        onInput={onInputName}
                       >
-                        {formik.values.name}(Me)
+                        {formik.values.name}
                       </Typography>
                     </div>
                   }
@@ -138,11 +150,14 @@ export default function VideoMeet({
                 footer={
                   <div>
                     <Typography
-                      className="capitalize vids-preview-title"
+                      className="vids-preview-title"
                       color={"white"}
                       variant="subtitle2"
+                      contentEditable="true"
+                      suppressContentEditableWarning={true}
+                      onInput={onInputName}
                     >
-                      {formik.values.name}(Me)
+                      {formik.values.name}
                     </Typography>
                   </div>
                 }
@@ -154,7 +169,7 @@ export default function VideoMeet({
 
       <footer className="flex justify-between gap-2 items-center my-3 mx-3">
         <div className="flex item-center">
-          <Typography variant="h6" fontWeight={500}>
+          <Typography color="white" variant="subtitle1" fontWeight={500}>
             {format(new Date(), "p")} | Fast Meet
           </Typography>
         </div>
@@ -164,6 +179,7 @@ export default function VideoMeet({
               variant="opaque"
               color={`${mic ? "primary" : "error"}`}
               onClick={toggleAudio}
+              size="medium"
             >
               <Icon>
                 <Iconify
@@ -179,11 +195,24 @@ export default function VideoMeet({
               variant="opaque"
               color={`${camera ? "primary" : "error"}`}
               onClick={toggleCamera}
+              size="medium"
             >
               <Icon>
                 <Iconify
                   icon={`${camera ? "bi:camera-video" : "bi:camera-video-off"}`}
                 />
+              </Icon>
+            </Fab>
+          </Tooltip>
+          <Tooltip title="End Call">
+            <Fab
+              variant="opaque"
+              color={"error"}
+              onClick={hangUp}
+              size="medium"
+            >
+              <Icon>
+                <Iconify icon="bi-telephone" />
               </Icon>
             </Fab>
           </Tooltip>

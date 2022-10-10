@@ -1,26 +1,44 @@
 import DetectRTC from "detectrtc";
 
+/**
+ * Toggle Audio on/off
+ * @param {MediaStream} localMediaStream
+ * @param {function} setter
+ * @param {function} callback
+ */
 export const toggleAudio = (
   localMediaStream: MediaStream | undefined,
-  setter: (e: boolean) => void
+  setter: (e: boolean) => void,
+  callback?: (camera: boolean) => void
 ) => {
   // https://developer.mozilla.org/en-US/docs/Web/API/MediaStream/getAudioTracks
   if (localMediaStream !== undefined) {
     localMediaStream.getAudioTracks()[0].enabled =
       !localMediaStream.getAudioTracks()[0].enabled;
     setter(localMediaStream.getAudioTracks()[0].enabled);
+    callback !== undefined &&
+      callback(localMediaStream.getAudioTracks()[0].enabled);
   }
 };
 
+/**
+ * Toggle video on/off
+ * @param {MediaStream} localMediaStream
+ * @param {function} setter
+ * @param {function} callback
+ */
 export const toggleCamera = (
   localMediaStream: MediaStream | undefined,
-  setter: (e: boolean) => void
+  setter: (e: boolean) => void,
+  callback?: (camera: boolean) => void
 ) => {
   // https://developer.mozilla.org/en-US/docs/Web/API/MediaStream/getVideoTracks
   if (localMediaStream !== undefined) {
     localMediaStream.getVideoTracks()[0].enabled =
       !localMediaStream.getVideoTracks()[0].enabled;
     setter(localMediaStream.getVideoTracks()[0].enabled);
+    callback !== undefined &&
+      callback(localMediaStream.getVideoTracks()[0].enabled);
   }
 };
 

@@ -17,7 +17,8 @@ export interface PeersType {
 
 export interface PeersRefType {
   peerId: string;
-  peer: any;
+  peerObj: any;
+  userObj: UserObjType;
 }
 
 export interface UserJoinedPayloadType {

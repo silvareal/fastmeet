@@ -74,10 +74,10 @@ export default function VideoMeet({
                 {peers?.map((peer: PeersType, index: number) => (
                   <VideoPreviewer
                     key={index}
-                    camera={peer.userObj.peer_audio}
-                    mic={peer.userObj.peer_video}
+                    camera={peer.userObj.peer_video}
+                    mic={peer.userObj.peer_audio}
                     muted={true}
-                    active={true}
+                    active={false}
                     avatar={peer.userObj.avatar}
                     peer={peer.peerObj}
                     name={peer.userObj.peer_name || ""}
@@ -151,6 +151,7 @@ export default function VideoMeet({
           </div>
         </div>
       </main>
+
       <footer className="flex justify-between gap-2 items-center my-3 mx-3">
         <div className="flex item-center">
           <Typography variant="h6" fontWeight={500}>
@@ -162,7 +163,7 @@ export default function VideoMeet({
             <Fab
               variant="opaque"
               color={`${mic ? "primary" : "error"}`}
-              onClick={toggleCamera}
+              onClick={toggleAudio}
             >
               <Icon>
                 <Iconify
@@ -177,7 +178,7 @@ export default function VideoMeet({
             <Fab
               variant="opaque"
               color={`${camera ? "primary" : "error"}`}
-              onClick={toggleAudio}
+              onClick={toggleCamera}
             >
               <Icon>
                 <Iconify

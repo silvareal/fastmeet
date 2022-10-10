@@ -34,7 +34,7 @@ export default function VideoPreviewer(props: Partial<VideoPreviewerProps>) {
     className,
     ...rest
   } = props;
-
+  console.log(name + "----peer----" + peer);
   return (
     <div
       {...rest}
@@ -51,7 +51,8 @@ export default function VideoPreviewer(props: Partial<VideoPreviewerProps>) {
         {camera ? (
           <Video srcObject={srcObject} peer={peer} muted={muted} />
         ) : (
-          name && (
+          name &&
+          avatar && (
             <div className="vids-preview-avatar">
               <img className="w-full" src={`${avatar || ""}`} alt={name} />
             </div>

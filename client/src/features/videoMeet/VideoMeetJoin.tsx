@@ -10,7 +10,6 @@ import React, { useRef, useEffect, useState } from "react";
 import { useFormik } from "formik";
 import * as yup from "yup";
 import { useParams } from "react-router-dom";
-import axios from "axios";
 import { useSnackbar } from "notistack";
 import { io } from "socket.io-client";
 import Peer from "simple-peer";
@@ -146,7 +145,8 @@ export default function VideoMeetJoin() {
 
         peersRef.current.push({
           peerId: user.socketId,
-          peer,
+          peerObj: peer,
+          userObj: user,
         });
         peers.push({
           peerId: user.socketId,
@@ -158,13 +158,16 @@ export default function VideoMeetJoin() {
       setPeers(peers);
     });
 
-    // once the users initiate signal we will call add peer
-    // to acknowledge the signal and send the stream
+    /**
+     * once the users initiate signal we will call add peer
+     * to acknowledge the signal and send the stream
+     */
     socket.on("user-joined", (payload: UserJoinedPayloadType) => {
       const peer = addPeer(payload.signal, payload.callerId, stream);
       peersRef.current.push({
-        peerId: payload.user?.socketId,
-        peer,
+        peerId: payload.callerId,
+        peerObj: peer,
+        userObj: payload.user,
       });
       setPeers((users: PeersType[]) => [
         ...users,
@@ -181,35 +184,67 @@ export default function VideoMeetJoin() {
 
     // once the signal is accepted calling the signal with signal
     // from other user so that stream can flow between peers
-    socket.on("signal-accepted", (payload: any) => {
+    socket.on("signal-accepted", (payload: { signal: any; id: string }) => {
       const item: PeersRefType = peersRef.current.find(
         (peer: PeersType) => peer.peerId === payload.id
       );
-      item.peer.signal(payload.signal);
+      item.peerObj.signal(payload.signal);
     });
 
-    // if some user is disconnected removing his references.
-    socket.on("user-disconnected", (payload: string) => {
-      const item = peersRef.current.find((p: any) => p.peerId === payload);
+    /**
+     * if some user is disconnected removing his references.
+     */
+    socket.on("userDisconnected", (payload: { socketId: string }) => {
+      const item: PeersType = peersRef.current.find(
+        (peer: PeersType) => peer.peerId === payload.socketId
+      );
+      // destroy peer
       if (item) {
-        item.peer.destroy();
+        item.peerObj.destroy();
       }
 
-      console.log("item", item);
-
       // removing the peer from the arrays and storing remaining peers in new array
-      const peers = (peersRef.current = peersRef.current.filter(
-        (peer: any) => peer.peerId !== payload
-      ));
-      peersRef.current = peers;
-      setPeers(peers);
-      enqueueSnackbar(`${"Someone"} Left meeting`, {
+      const peers = peersRef.current.filter(
+        (peer: PeersType) => peer.peerId !== payload.socketId
+      );
+
+      enqueueSnackbar(`${item.userObj.peer_name} Left meeting`, {
         anchorOrigin: {
           vertical: "top",
           horizontal: "center",
         },
       });
+
+      peersRef.current = peers;
+      setPeers(peers);
     });
+
+    /**
+     * Relay peer actions
+     */
+    socket.on(
+      "peerAction",
+      (payload: {
+        room_id: string;
+        socket_id: string;
+        peer_name: string;
+        peer_audio: boolean;
+        peer_video: boolean;
+      }) => {
+        var peerIndex = peersRef.current.findIndex(
+          (peer: PeersType) => peer.peerId === payload.socket_id
+        );
+        const newPeer: PeersType[] = [...peersRef.current];
+
+        var peerItem: PeersType = newPeer[peerIndex];
+        peerItem.userObj.peer_audio = payload.peer_audio;
+        peerItem.userObj.peer_video = payload.peer_video;
+        peerItem.userObj.peer_name = payload.peer_name;
+
+        peersRef.current = newPeer;
+        setPeers(newPeer);
+      }
+    );
   }
 
   function initEnumerateDevices() {
@@ -282,9 +317,31 @@ export default function VideoMeetJoin() {
         >
           <VideoMeet
             camera={camera}
-            toggleCamera={() => toggleAudio(localMediaStream, setMic)}
+            toggleCamera={() => {
+              toggleCamera(localMediaStream, setCamera, function (camera) {
+                console.log("camera", camera);
+                socket.emit("peerAction", {
+                  room_id: meetId,
+                  socket_id: socket.id,
+                  peer_name: formik.values.name,
+                  peer_audio: mic,
+                  peer_video: camera,
+                });
+              });
+            }}
             mic={mic}
-            toggleAudio={() => toggleCamera(localMediaStream, setCamera)}
+            toggleAudio={() => {
+              toggleAudio(localMediaStream, setMic, function (mic) {
+                console.log("mic", camera);
+                socket.emit("peerAction", {
+                  room_id: meetId,
+                  socket_id: socket.id,
+                  peer_name: formik.values.name,
+                  peer_audio: mic,
+                  peer_video: camera,
+                });
+              });
+            }}
             localMediaStream={localMediaStream}
             formik={formik}
             peers={peers}

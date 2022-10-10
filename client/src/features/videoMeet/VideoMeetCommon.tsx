@@ -1,4 +1,6 @@
 import DetectRTC from "detectrtc";
+import Peer from "simple-peer";
+import { Socket } from "socket.io-client";
 
 /**
  * Toggle Audio on/off
@@ -65,4 +67,74 @@ export function getPeerInfo() {
     browserName: DetectRTC.browser.name,
     browserVersion: DetectRTC.browser.version,
   };
+}
+
+/**
+ * Create Peer
+ * @param {string} userToSignal
+ * @param {string} callerId
+ * @param {MediaStream} stream
+ * @param {object} iceServers
+ * @param socket
+ * @returns
+ */
+export function createPeer(
+  userToSignal: string,
+  callerId: string,
+  stream: MediaStream,
+  iceServers: RTCIceServer[],
+  socket: Socket
+) {
+  const peer = new Peer({
+    initiator: true,
+    trickle: false,
+    stream,
+    config: {
+      iceServers: iceServers,
+    },
+  });
+
+  peer.on("signal", (signal) => {
+    socket.emit("initiate-signal", {
+      userToSignal,
+      callerId,
+      signal,
+    });
+  });
+
+  return peer;
+}
+
+/**
+ * Add peer peer to signal
+ * @param {string} incomingSignal
+ * @param {string} callerId
+ * @param {MediaStream} stream
+ * @param {object} iceServers
+ * @param {Socket} socket
+ * @returns
+ */
+export function addPeer(
+  incomingSignal: string,
+  callerId: string,
+  stream: MediaStream,
+  iceServers: RTCIceServer[],
+  socket: Socket
+) {
+  const peer = new Peer({
+    initiator: false,
+    trickle: false,
+    stream,
+    config: {
+      iceServers: iceServers,
+    },
+  });
+
+  peer.on("signal", (signal) => {
+    socket.emit("acknowledge-signal", { signal, callerId });
+  });
+
+  peer.signal(incomingSignal);
+
+  return peer;
 }

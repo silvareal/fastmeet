@@ -21,6 +21,8 @@ import {
   hangUp,
   toggleAudio,
   toggleCamera,
+  addPeer,
+  createPeer,
 } from "./VideoMeetCommon";
 import VideoMeetJoinVideoPreviewerBody from "./VideoMeetJoinVideoPreviewerBody";
 import VideoMeetJoinVideoPreviewerHeader from "./VideoMeetJoinVideoPreviewerHeader";
@@ -41,18 +43,20 @@ const socket = io(`${baseUrl}/video`);
 export default function VideoMeetJoin() {
   const { meetId } = useParams();
   const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
 
   const peersRef: { current: any } = useRef([]);
 
   const [camera, setCamera] = useState(false);
   const [mic, setMic] = useState(false);
+  const [screenRecord, setScreenRecord] = useState(false);
+  const [screenShare, setScreenShare] = useState(false);
+  const [handRaised, setHandRaised] = useState(false);
   const [localMediaStream, setLocalMediaStream] = useState<MediaStream>();
   const [streamError, setStreamError] = useState<string>("");
-  const [iceServers, setIceServers] = useState();
+  const [iceServers, setIceServers] = useState<RTCIceServer[]>();
   const [canJoinMeeting, setCanJoinMeeting] = useState<boolean>(false);
   const [peers, setPeers] = useState<PeersType[]>([]);
-
-  const { enqueueSnackbar } = useSnackbar();
 
   const [getTurnServerQuery] = useAxios({
     url: `${process.env.REACT_APP_BASE_URL}/turn-server`,
@@ -83,50 +87,6 @@ export default function VideoMeetJoin() {
     },
   });
 
-  function createPeer(
-    userToSignal: any,
-    callerId: string,
-    stream: MediaStream
-  ) {
-    const peer = new Peer({
-      initiator: true,
-      trickle: false,
-      stream,
-      config: {
-        iceServers,
-      },
-    });
-
-    peer.on("signal", (signal) => {
-      socket.emit("initiate-signal", {
-        userToSignal,
-        callerId,
-        signal,
-      });
-    });
-
-    return peer;
-  }
-
-  function addPeer(incomingSignal: any, callerId: string, stream: MediaStream) {
-    const peer = new Peer({
-      initiator: false,
-      trickle: false,
-      stream,
-      config: {
-        iceServers,
-      },
-    });
-
-    peer.on("signal", (signal) => {
-      socket.emit("acknowledge-signal", { signal, callerId });
-    });
-
-    peer.signal(incomingSignal);
-
-    return peer;
-  }
-
   /**
    * join to channel and send some peer info
    * @param stream MediaStream
@@ -141,24 +101,35 @@ export default function VideoMeetJoin() {
       peer_gender: formik.values.gender,
       peer_video: camera,
       peer_audio: mic,
+      peer_raised_hand: handRaised,
+      peer_screen_record: screenRecord,
+      peer_screen_share: screenShare,
     });
 
     socket.on("clients-in-room", (users: UserObjType[]) => {
       const peers: PeersType[] = [];
       // To all users who are already in the room initiating a peer connection
       users.forEach((user: UserObjType) => {
-        const peer = createPeer(user.socketId, socket.id, stream);
+        if (iceServers !== undefined) {
+          const peer = createPeer(
+            user.socketId,
+            socket.id,
+            stream,
+            iceServers,
+            socket
+          );
 
-        peersRef.current.push({
-          peerId: user.socketId,
-          peerObj: peer,
-          userObj: user,
-        });
-        peers.push({
-          peerId: user.socketId,
-          peerObj: peer,
-          userObj: user,
-        });
+          peersRef.current.push({
+            peerId: user.socketId,
+            peerObj: peer,
+            userObj: user,
+          });
+          peers.push({
+            peerId: user.socketId,
+            peerObj: peer,
+            userObj: user,
+          });
+        }
       });
 
       setPeers(peers);
@@ -169,23 +140,31 @@ export default function VideoMeetJoin() {
      * to acknowledge the signal and send the stream
      */
     socket.on("user-joined", (payload: UserJoinedPayloadType) => {
-      const peer = addPeer(payload.signal, payload.callerId, stream);
-      peersRef.current.push({
-        peerId: payload.callerId,
-        peerObj: peer,
-        userObj: payload.user,
-      });
-      setPeers((users: PeersType[]) => [
-        ...users,
-        { peerId: payload.callerId, peerObj: peer, userObj: payload.user },
-      ]);
+      if (iceServers !== undefined) {
+        const peer = addPeer(
+          payload.signal,
+          payload.callerId,
+          stream,
+          iceServers,
+          socket
+        );
+        peersRef.current.push({
+          peerId: payload.callerId,
+          peerObj: peer,
+          userObj: payload.user,
+        });
+        setPeers((users: PeersType[]) => [
+          ...users,
+          { peerId: payload.callerId, peerObj: peer, userObj: payload.user },
+        ]);
 
-      enqueueSnackbar(`${payload.user?.peer_name} joined meeting`, {
-        anchorOrigin: {
-          vertical: "top",
-          horizontal: "center",
-        },
-      });
+        enqueueSnackbar(`${payload.user?.peer_name} joined meeting`, {
+          anchorOrigin: {
+            vertical: "top",
+            horizontal: "center",
+          },
+        });
+      }
     });
 
     // once the signal is accepted calling the signal with signal
@@ -297,7 +276,11 @@ export default function VideoMeetJoin() {
   }
 
   useEffect(() => {
-    if (canJoinMeeting && localMediaStream !== undefined) {
+    if (
+      canJoinMeeting &&
+      localMediaStream !== undefined &&
+      iceServers !== undefined
+    ) {
       joinToChannel(localMediaStream);
     }
     // eslint-disable-next-line

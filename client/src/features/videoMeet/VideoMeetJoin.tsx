@@ -1,18 +1,10 @@
-import {
-  Button,
-  Container,
-  FormControlLabel,
-  Radio,
-  RadioGroup,
-  TextField,
-} from "@mui/material";
+import { Container } from "@mui/material";
 import React, { useRef, useEffect, useState } from "react";
 import { useFormik } from "formik";
 import * as yup from "yup";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSnackbar } from "notistack";
 import { io } from "socket.io-client";
-import Peer from "simple-peer";
 
 import AppHeader from "AppHeader";
 import VideoPreviewer from "common/VideoPreviewer";
@@ -299,105 +291,107 @@ export default function VideoMeetJoin() {
     }
   }, [iceServers]);
 
+  function toggleCameraFn() {
+    toggleCamera(localMediaStream, setCamera, function (camera) {
+      socket.emit("peerAction", {
+        room_id: meetId,
+        socket_id: socket.id,
+        peer_name: formik.values.name,
+        peer_audio: mic,
+        peer_video: camera,
+      });
+    });
+  }
+
+  function toggleAudioFn() {
+    toggleAudio(localMediaStream, setMic, function (mic) {
+      socket.emit("peerAction", {
+        room_id: meetId,
+        socket_id: socket.id,
+        peer_name: formik.values.name,
+        peer_audio: mic,
+        peer_video: camera,
+      });
+    });
+  }
+
+  function hangUpFn() {
+    hangUp(localMediaStream);
+    navigate("/");
+  }
+
+  function onInputChangeNameFn(e: React.ChangeEvent<HTMLInputElement>) {
+    console.log("event", e.target.innerHTML);
+    formik.setFieldValue("name", e.target.innerHTML);
+    socket.emit("peerAction", {
+      room_id: meetId,
+      socket_id: socket.id,
+      peer_name: e.target.innerHTML,
+      peer_audio: mic,
+      peer_video: camera,
+    });
+  }
+
+  if (canJoinMeeting) {
+    <LoadingContent
+      loading={getTurnServerQuery.loading || getAvatarQuery.loading}
+      error={!!getTurnServerQuery.error || !!getAvatarQuery.error}
+    >
+      <VideoMeet
+        camera={camera}
+        mic={mic}
+        toggleCamera={toggleCameraFn}
+        toggleAudio={toggleAudioFn}
+        hangUp={hangUpFn}
+        onInputName={onInputChangeNameFn}
+        localMediaStream={localMediaStream}
+        formik={formik}
+        peers={peers}
+        getAvatarQuery={getAvatarQuery}
+      />
+    </LoadingContent>;
+  }
+
   return (
-    <>
-      {canJoinMeeting ? (
-        <LoadingContent
-          loading={getTurnServerQuery.loading}
-          error={!!getTurnServerQuery.error}
-        >
-          <VideoMeet
-            camera={camera}
-            toggleCamera={() => {
-              toggleCamera(localMediaStream, setCamera, function (camera) {
-                socket.emit("peerAction", {
-                  room_id: meetId,
-                  socket_id: socket.id,
-                  peer_name: formik.values.name,
-                  peer_audio: mic,
-                  peer_video: camera,
-                });
-              });
-            }}
-            mic={mic}
-            toggleAudio={() => {
-              toggleAudio(localMediaStream, setMic, function (mic) {
-                socket.emit("peerAction", {
-                  room_id: meetId,
-                  socket_id: socket.id,
-                  peer_name: formik.values.name,
-                  peer_audio: mic,
-                  peer_video: camera,
-                });
-              });
-            }}
-            hangUp={() => {
-              hangUp(localMediaStream);
-              navigate("/");
-            }}
-            onInputName={(e: React.ChangeEvent<HTMLInputElement>) => {
-              console.log("event", e.target.innerHTML);
-              formik.setFieldValue("name", e.target.innerHTML);
-              socket.emit("peerAction", {
-                room_id: meetId,
-                socket_id: socket.id,
-                peer_name: e.target.innerHTML,
-                peer_audio: mic,
-                peer_video: camera,
-              });
-            }}
-            localMediaStream={localMediaStream}
-            formik={formik}
-            peers={peers}
-            getAvatarQuery={getAvatarQuery}
-          />
-        </LoadingContent>
-      ) : (
-        <div className="bg-gray-100 min-h-screen">
-          <AppHeader />
-          <LoadingContent
-            loading={getTurnServerQuery.loading}
-            error={!!getTurnServerQuery.error}
-          >
-            <Container maxWidth="xl" className="flex min-h-screen items-center">
-              <div className="grid grid-cols-3 gap-10 w-full">
-                <VideoMeetJoinForm formik={formik} />
-                <div className="col-span-2 h-[450px]">
-                  <VideoPreviewer
+    <div className="bg-gray-100 min-h-screen">
+      <AppHeader />
+      <LoadingContent
+        loading={getTurnServerQuery.loading}
+        error={!!getTurnServerQuery.error}
+      >
+        <Container maxWidth="xl" className="flex min-h-screen items-center">
+          <div className="grid grid-cols-3 gap-10 w-full">
+            <VideoMeetJoinForm formik={formik} />
+            <div className="col-span-2 h-[450px]">
+              <VideoPreviewer
+                camera={camera}
+                mic={mic}
+                muted={true}
+                active={true}
+                srcObject={localMediaStream}
+                header={
+                  <VideoMeetJoinVideoPreviewerHeader
+                    localMediaStream={localMediaStream}
+                  />
+                }
+                body={
+                  <VideoMeetJoinVideoPreviewerBody streamError={streamError} />
+                }
+                footer={
+                  <VideoMeetJoinVideoPreviewerFooter
                     camera={camera}
+                    toggleCamera={() => toggleAudio(localMediaStream, setMic)}
                     mic={mic}
-                    muted={true}
-                    active={true}
-                    srcObject={localMediaStream}
-                    header={
-                      <VideoMeetJoinVideoPreviewerHeader
-                        localMediaStream={localMediaStream}
-                      />
-                    }
-                    body={
-                      <VideoMeetJoinVideoPreviewerBody
-                        streamError={streamError}
-                      />
-                    }
-                    footer={
-                      <VideoMeetJoinVideoPreviewerFooter
-                        camera={camera}
-                        toggleCamera={() =>
-                          toggleAudio(localMediaStream, setMic)
-                        }
-                        mic={mic}
-                        toggleAudio={() =>
-                          toggleCamera(localMediaStream, setCamera)
-                        }
-                      />
+                    toggleAudio={() =>
+                      toggleCamera(localMediaStream, setCamera)
                     }
                   />
-                </div>
-              </div>
-            </Container>
-          </LoadingContent>
-        </div>
-      )}
-    </>
+                }
+              />
+            </div>
+          </div>
+        </Container>
+      </LoadingContent>
+    </div>
   );
 }

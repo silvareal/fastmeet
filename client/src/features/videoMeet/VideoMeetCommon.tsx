@@ -131,6 +131,7 @@ export function addPeer(
   });
 
   peer.on("signal", (signal) => {
+    // Aknowledge signal and accept offer
     socket.emit("acknowledge-signal", { signal, callerId });
   });
 

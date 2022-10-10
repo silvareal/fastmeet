@@ -300,6 +300,7 @@ export default function VideoMeetJoin() {
     if (canJoinMeeting && localMediaStream !== undefined) {
       joinToChannel(localMediaStream);
     }
+    // eslint-disable-next-line
   }, [canJoinMeeting, localMediaStream]);
 
   useEffect(() => {

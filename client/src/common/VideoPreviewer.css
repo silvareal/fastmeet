@@ -25,6 +25,10 @@
     transform: scaleX(-1);
 }
 
+.vids-preview-active {
+    border: 2px solid #F3F4F5;
+}
+
 .vids-preview-title {
 	color: white;
     background-color: rgba(0,0,0,0.4);
@@ -33,15 +37,6 @@
     text-transform: capitalize;
     width: max-content;
     user-select: none;
-}
-
-.vids-preview-status {
-	color: white;
-    position: absolute;
-    height: 100% !important;
-    top: 20px;
-    right: 20px;
-    z-index: 2;
 }
 
 .vids-preview-avatar {

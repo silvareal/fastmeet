@@ -38,8 +38,8 @@ export default function VideoPreviewer(props: Partial<VideoPreviewerProps>) {
   return (
     <div
       {...rest}
-      className={`${
-        className ? className : ""
+      className={`${className ? className : ""} ${
+        active ? "vids-preview-active" : ""
       } vids-preview-container relative `}
     >
       <div className="absolute top-0 py-3 px-5  w-full">{header}</div>

@@ -26,6 +26,7 @@ import {
   UserObjType,
   UserJoinedPayloadType,
   PeersRefType,
+  PeerActionStatusConfig,
 } from "./VideoMeetType";
 import LoadingContent from "common/LoadingContent";
 import VideoMeetJoinForm from "./VideoMeetJoinForm";
@@ -160,8 +161,10 @@ export default function VideoMeetJoin() {
       }
     });
 
-    // once the signal is accepted calling the signal with signal
-    // from other user so that stream can flow between peers
+    /**
+     *  once the signal is accepted calling the signal with signal
+     *from other user so that stream can flow between peers
+     */
     socket.on("signal-accepted", (payload: { signal: any; id: string }) => {
       const item: PeersRefType = peersRef.current.find(
         (peer: PeersType) => peer.peerId === payload.id
@@ -200,29 +203,39 @@ export default function VideoMeetJoin() {
     /**
      * Relay peer actions
      */
-    socket.on(
-      "peerAction",
-      (payload: {
-        room_id: string;
-        socket_id: string;
-        peer_name: string;
-        peer_audio: boolean;
-        peer_video: boolean;
-      }) => {
-        var peerIndex = peersRef.current.findIndex(
-          (peer: PeersType) => peer.peerId === payload.socket_id
-        );
-        const newPeer: PeersType[] = [...peersRef.current];
+    socket.on("peerActionStatus", (payload: PeerActionStatusConfig) => {
+      var peerIndex = peersRef.current.findIndex(
+        (peer: PeersType) => peer.peerId === payload.socket_id
+      );
+      const newPeer: PeersType[] = [...peersRef.current];
 
-        var peerItem: PeersType = newPeer[peerIndex];
-        peerItem.userObj.peer_audio = payload.peer_audio;
-        peerItem.userObj.peer_video = payload.peer_video;
-        peerItem.userObj.peer_name = payload.peer_name;
+      var peerItem: PeersType = newPeer[peerIndex];
 
-        peersRef.current = newPeer;
-        setPeers(newPeer);
+      if (peerItem) {
+        switch (payload.element) {
+          case "video":
+            peerItem.userObj.peer_video = payload.status as boolean;
+            break;
+          case "audio":
+            peerItem.userObj.peer_audio = payload.status as boolean;
+            break;
+          case "screen":
+            peerItem.userObj.peer_screen_share = payload.status as boolean;
+            break;
+          case "hand":
+            peerItem.userObj.peer_raised_hand = payload.status as boolean;
+            break;
+          case "rec":
+            peerItem.userObj.peer_screen_record = payload.status as boolean;
+            break;
+          case "name":
+            peerItem.userObj.peer_name = payload.status as string;
+            break;
+        }
       }
-    );
+      peersRef.current = newPeer;
+      setPeers(newPeer);
+    });
   }
 
   function initEnumerateDevices() {
@@ -293,25 +306,23 @@ export default function VideoMeetJoin() {
 
   function toggleCameraFn() {
     toggleCamera(localMediaStream, setCamera, function (camera) {
-      socket.emit("peerAction", {
+      socket.emit("peerActionStatus", {
         room_id: meetId,
         socket_id: socket.id,
-        peer_name: formik.values.name,
-        peer_audio: mic,
-        peer_video: camera,
-      });
+        element: "video",
+        status: camera,
+      } as PeerActionStatusConfig);
     });
   }
 
   function toggleAudioFn() {
     toggleAudio(localMediaStream, setMic, function (mic) {
-      socket.emit("peerAction", {
+      socket.emit("peerActionStatus", {
         room_id: meetId,
         socket_id: socket.id,
-        peer_name: formik.values.name,
-        peer_audio: mic,
-        peer_video: camera,
-      });
+        element: "audio",
+        status: mic,
+      } as PeerActionStatusConfig);
     });
   }
 
@@ -323,34 +334,37 @@ export default function VideoMeetJoin() {
   function onInputChangeNameFn(e: React.ChangeEvent<HTMLInputElement>) {
     console.log("event", e.target.innerHTML);
     formik.setFieldValue("name", e.target.innerHTML);
-    socket.emit("peerAction", {
+    socket.emit("peerActionStatus", {
       room_id: meetId,
       socket_id: socket.id,
-      peer_name: e.target.innerHTML,
-      peer_audio: mic,
-      peer_video: camera,
-    });
+      element: "name",
+      status: e.target.innerHTML,
+    } as PeerActionStatusConfig);
   }
 
   if (canJoinMeeting) {
-    <LoadingContent
-      loading={getTurnServerQuery.loading || getAvatarQuery.loading}
-      error={!!getTurnServerQuery.error || !!getAvatarQuery.error}
-    >
-      <VideoMeet
-        camera={camera}
-        mic={mic}
-        toggleCamera={toggleCameraFn}
-        toggleAudio={toggleAudioFn}
-        hangUp={hangUpFn}
-        onInputName={onInputChangeNameFn}
-        localMediaStream={localMediaStream}
-        formik={formik}
-        peers={peers}
-        getAvatarQuery={getAvatarQuery}
-      />
-    </LoadingContent>;
+    return (
+      <LoadingContent
+        loading={getTurnServerQuery.loading || getAvatarQuery.loading}
+        error={!!getTurnServerQuery.error || !!getAvatarQuery.error}
+      >
+        <VideoMeet
+          camera={camera}
+          mic={mic}
+          toggleCamera={toggleCameraFn}
+          toggleAudio={toggleAudioFn}
+          hangUp={hangUpFn}
+          onInputName={onInputChangeNameFn}
+          localMediaStream={localMediaStream}
+          formik={formik}
+          peers={peers}
+          getAvatarQuery={getAvatarQuery}
+        />
+      </LoadingContent>
+    );
   }
+
+  console.log("formik", formik);
 
   return (
     <div className="bg-gray-100 min-h-screen">

@@ -64,36 +64,57 @@ function video(io) {
         /**
          * Relay actions to peers or specific peer in the same room
          */
-        socket.on("peerAction", (config) => __awaiter(this, void 0, void 0, function* () {
-            // log.debug('Peer action', config);
+        socket.on("peerActionStatus", (config) => __awaiter(this, void 0, void 0, function* () {
             const room_id = config.room_id;
-            const peer_name = config.peer_name;
-            const peer_audio = config.peer_audio;
-            const peer_video = config.peer_video;
-            const room = clients[room_id];
-            if ((room === null || room === void 0 ? void 0 : room.length) >= 1) {
-                const roomIndex = room.findIndex((client) => client.socketId === socket.id);
-                const clientItem = room[roomIndex];
-                if (peer_name !== undefined &&
-                    peer_audio !== undefined &&
-                    peer_video !== undefined) {
-                    clientItem.peer_name = peer_name;
-                    clientItem.peer_audio = peer_audio;
-                    clientItem.peer_video = peer_video;
+            const element = config.element;
+            const status = config.status;
+            try {
+                const room = clients[room_id];
+                if ((room === null || room === void 0 ? void 0 : room.length) >= 1) {
+                    const roomIndex = room.findIndex((client) => client.socketId === socket.id);
+                    const clientItem = room[roomIndex];
+                    if (clientItem) {
+                        switch (element) {
+                            case "video":
+                                clientItem.peer_video = status;
+                                break;
+                            case "audio":
+                                clientItem.peer_audio = status;
+                                break;
+                            case "screen":
+                                clientItem.peer_screen_share = status;
+                                break;
+                            case "hand":
+                                clientItem.peer_raised_hand = status;
+                                break;
+                            case "rec":
+                                clientItem.peer_screen_record = status;
+                                break;
+                            case "name":
+                                clientItem.peer_name = status;
+                                break;
+                        }
+                    }
                 }
+                log.debug("[" +
+                    socket.id +
+                    "] emit peerActionStatus to [room_id: " +
+                    room_id +
+                    "]", {
+                    room_id,
+                    element,
+                    status,
+                });
+                yield (0, videoUtils_1.sendToRoom)(socket, room_id, socket.id, clients, "peerActionStatus", {
+                    room_id: room_id,
+                    socket_id: socket.id,
+                    element,
+                    status,
+                });
             }
-            log.debug("[" + socket.id + "] emit peerAction to [room_id: " + room_id + "]", {
-                peer_name: peer_name || "",
-                peer_audio: peer_audio || false,
-                peer_video: peer_video || false,
-            });
-            yield (0, videoUtils_1.sendToRoom)(socket, room_id, socket.id, clients, "peerAction", {
-                room_id: room_id,
-                socket_id: socket.id,
-                peer_name: peer_name,
-                peer_audio: peer_audio,
-                peer_video: peer_video,
-            });
+            catch (err) {
+                log.error("Peer Status", err);
+            }
         }));
         /**
          * once the peer acknowledge signal sending the acknowledgement

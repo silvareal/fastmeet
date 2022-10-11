@@ -1,5 +1,14 @@
-import { Fab, Icon, Tooltip, Typography } from "@mui/material";
-import React from "react";
+import {
+  Fab,
+  FabPropsColorOverrides,
+  FabPropsSizeOverrides,
+  FabPropsVariantOverrides,
+  FabTypeMap,
+  Icon,
+  Tooltip,
+  Typography,
+} from "@mui/material";
+import React, { useMemo } from "react";
 import { Icon as Iconify } from "@iconify/react";
 import { format } from "date-fns";
 import { FormikProps } from "formik";
@@ -8,6 +17,8 @@ import VideoPreviewer from "common/VideoPreviewer";
 import "./VideoMeet.css";
 import ThemeConfig from "configs/ThemeConfig";
 import { PeersType } from "./VideoMeetType";
+import { IconVariant } from "notistack";
+import { OverridableStringUnion } from "@mui/types";
 
 interface VideoMeetProps {
   toggleCamera: () => void;
@@ -26,6 +37,15 @@ interface VideoMeetProps {
   onInputName: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
+interface MainActionProps {
+  title: string;
+  variant: "circular" | "extended" | "opaque";
+  color: "error" | "primary";
+  onClick: () => void;
+  size: "small" | "medium" | "large";
+  icon: string;
+}
+
 export default function VideoMeet({
   toggleCamera,
   toggleAudio,
@@ -39,6 +59,44 @@ export default function VideoMeet({
   onInputName,
 }: VideoMeetProps) {
   console.log("peers", peers);
+
+  const mainActions: MainActionProps[] = useMemo(
+    () => [
+      {
+        title: "on/off microphone",
+        variant: "opaque",
+        color: `${mic ? "primary" : "error"}`,
+        onClick: toggleAudio,
+        size: "medium",
+        icon: `${mic ? "carbon:microphone" : "carbon:microphone-off"}`,
+      },
+      {
+        title: "on/off camera",
+        variant: "opaque",
+        color: `${camera ? "primary" : "error"}`,
+        onClick: toggleCamera,
+        size: "medium",
+        icon: `${camera ? "bi:camera-video" : "bi:camera-video-off"}`,
+      },
+      {
+        title: "End Call",
+        variant: "opaque",
+        color: "error",
+        onClick: hangUp,
+        size: "medium",
+        icon: "bi-telephone",
+      },
+      // {
+      //   title: "Layout",
+      //   variant: "opaque",
+      //   color: "primary",
+      //   onClick: hangUp,
+      //   size: "medium",
+      //   icon: "tabler:layout-grid",
+      // },
+    ],
+    [camera, mic]
+  );
 
   return (
     <div className="bg-[#000000] overflow-y-hidden h-screen max-h-screen min-h-[500px]">
@@ -174,55 +232,20 @@ export default function VideoMeet({
           </Typography>
         </div>
         <div className="flex gap-2">
-          <Tooltip title="on/off microphone">
-            <Fab
-              variant="opaque"
-              color={`${mic ? "primary" : "error"}`}
-              onClick={toggleAudio}
-              size="medium"
-            >
-              <Icon>
-                <Iconify
-                  icon={`${
-                    mic ? "carbon:microphone" : "carbon:microphone-off"
-                  }`}
-                />
-              </Icon>
-            </Fab>
-          </Tooltip>
-          <Tooltip title="on/off camera">
-            <Fab
-              variant="opaque"
-              color={`${camera ? "primary" : "error"}`}
-              onClick={toggleCamera}
-              size="medium"
-            >
-              <Icon>
-                <Iconify
-                  icon={`${camera ? "bi:camera-video" : "bi:camera-video-off"}`}
-                />
-              </Icon>
-            </Fab>
-          </Tooltip>
-          <Tooltip title="End Call">
-            <Fab
-              variant="opaque"
-              color={"error"}
-              onClick={hangUp}
-              size="medium"
-            >
-              <Icon>
-                <Iconify icon="bi-telephone" />
-              </Icon>
-            </Fab>
-          </Tooltip>
-          {/* <Tooltip title="layout">
-            <Fab variant="opaque">
-              <Icon>
-                <Iconify icon="tabler:layout-grid" />
-              </Icon>
-            </Fab>
-          </Tooltip> */}
+          {mainActions.map((action: MainActionProps, i: number) => (
+            <Tooltip key={i} title={action.title}>
+              <Fab
+                variant={action.variant}
+                color={action.color}
+                onClick={action.onClick}
+                size={action.size}
+              >
+                <Icon>
+                  <Iconify icon={action.icon} />
+                </Icon>
+              </Fab>
+            </Tooltip>
+          ))}
         </div>
         <div></div>
       </footer>

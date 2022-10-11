@@ -10,9 +10,10 @@ import {
 
 const log = new Logger();
 
-interface PeerActionConfig extends Partial<ClientDetailsType> {
+interface PeerActionStatusConfig {
   room_id: string;
-  send_to_all: boolean;
+  element: "name" | "video" | "hand" | "audio" | "screen" | "rec";
+  status: string | boolean;
 }
 
 export function video(io: any) {
@@ -76,50 +77,72 @@ export function video(io: any) {
     /**
      * Relay actions to peers or specific peer in the same room
      */
-    socket.on("peerAction", async (config: PeerActionConfig) => {
-      // log.debug('Peer action', config);
+    socket.on("peerActionStatus", async (config: PeerActionStatusConfig) => {
       const room_id = config.room_id;
-      const peer_name = config.peer_name;
-      const peer_audio = config.peer_audio;
-      const peer_video = config.peer_video;
+      const element = config.element;
+      const status = config.status;
 
-      const room = clients[room_id];
-      if (room?.length >= 1) {
-        const roomIndex: number = room.findIndex(
-          (client) => client.socketId === socket.id
+      try {
+        const room = clients[room_id];
+        if (room?.length >= 1) {
+          const roomIndex: number = room.findIndex(
+            (client) => client.socketId === socket.id
+          );
+          const clientItem = room[roomIndex];
+
+          if (clientItem) {
+            switch (element) {
+              case "video":
+                clientItem.peer_video = status as boolean;
+                break;
+              case "audio":
+                clientItem.peer_audio = status as boolean;
+                break;
+              case "screen":
+                clientItem.peer_screen_share = status as boolean;
+                break;
+              case "hand":
+                clientItem.peer_raised_hand = status as boolean;
+                break;
+              case "rec":
+                clientItem.peer_screen_record = status as boolean;
+                break;
+              case "name":
+                clientItem.peer_name = status as string;
+                break;
+            }
+          }
+        }
+
+        log.debug<string, PeerActionStatusConfig>(
+          "[" +
+            socket.id +
+            "] emit peerActionStatus to [room_id: " +
+            room_id +
+            "]",
+          {
+            room_id,
+            element,
+            status,
+          }
         );
-        const clientItem = room[roomIndex];
-        if (
-          peer_name !== undefined &&
-          peer_audio !== undefined &&
-          peer_video !== undefined
-        ) {
-          clientItem.peer_name = peer_name;
-          clientItem.peer_audio = peer_audio;
-          clientItem.peer_video = peer_video;
-        }
+
+        await sendToRoom(
+          socket,
+          room_id,
+          socket.id,
+          clients,
+          "peerActionStatus",
+          {
+            room_id: room_id,
+            socket_id: socket.id,
+            element,
+            status,
+          }
+        );
+      } catch (err) {
+        log.error("Peer Status", err);
       }
-
-      log.debug<
-        string,
-        {
-          peer_name: string;
-          peer_audio: boolean;
-          peer_video: boolean | undefined;
-        }
-      >("[" + socket.id + "] emit peerAction to [room_id: " + room_id + "]", {
-        peer_name: peer_name || "",
-        peer_audio: peer_audio || false,
-        peer_video: peer_video || false,
-      });
-
-      await sendToRoom(socket, room_id, socket.id, clients, "peerAction", {
-        room_id: room_id,
-        socket_id: socket.id,
-        peer_name: peer_name,
-        peer_audio: peer_audio,
-        peer_video: peer_video,
-      });
     });
 
     /**

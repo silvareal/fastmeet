@@ -7,6 +7,9 @@ export interface ClientDetailsType {
   avatar: string;
   peer_video: boolean;
   peer_audio: boolean;
+  peer_raised_hand: boolean;
+  peer_screen_record: boolean;
+  peer_screen_share: boolean;
 }
 
 export interface ClientDetailsSocketType extends ClientDetailsType {

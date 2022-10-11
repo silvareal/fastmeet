@@ -188,7 +188,16 @@ export default function VideoMeet({
                       </div>
                     }
                     footer={
-                      <div>
+                      <div className="flex gap-2">
+                        {peer.userObj.peer_raised_hand && (
+                          <Tooltip title="Hand Raised" placement="top">
+                            <Icon className="wave-hand">
+                              <Iconify
+                                icon={`emojione:waving-hand-medium-dark-skin-tone`}
+                              />
+                            </Icon>
+                          </Tooltip>
+                        )}
                         <Typography
                           className="vids-preview-title"
                           color={"white"}

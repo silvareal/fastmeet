@@ -30,6 +30,7 @@ import {
 } from "./VideoMeetType";
 import LoadingContent from "common/LoadingContent";
 import VideoMeetJoinForm from "./VideoMeetJoinForm";
+import { callerFn } from "utils/GLobalUtils";
 
 const baseUrl: string = process.env.REACT_APP_BASE_URL || "";
 const socket = io(`${baseUrl}/video`);
@@ -41,11 +42,11 @@ export default function VideoMeetJoin() {
 
   const peersRef: { current: any } = useRef([]);
 
-  const [camera, setCamera] = useState(false);
-  const [mic, setMic] = useState(false);
-  const [screenRecord, setScreenRecord] = useState(false);
-  const [screenShare, setScreenShare] = useState(false);
-  const [handRaised, setHandRaised] = useState(false);
+  const [camera, setCamera] = useState<boolean>(false);
+  const [mic, setMic] = useState<boolean>(false);
+  const [screenRecord, setScreenRecord] = useState<boolean>(false);
+  const [screenShare, setScreenShare] = useState<boolean>(false);
+  const [handRaised, setHandRaised] = useState<boolean>(false);
   const [localMediaStream, setLocalMediaStream] = useState<MediaStream>();
   const [streamError, setStreamError] = useState<string>("");
   const [iceServers, setIceServers] = useState<RTCIceServer[]>();
@@ -204,12 +205,12 @@ export default function VideoMeetJoin() {
      * Relay peer actions
      */
     socket.on("peerActionStatus", (payload: PeerActionStatusConfig) => {
-      var peerIndex = peersRef.current.findIndex(
+      const peerIndex = peersRef.current.findIndex(
         (peer: PeersType) => peer.peerId === payload.socket_id
       );
       const newPeer: PeersType[] = [...peersRef.current];
 
-      var peerItem: PeersType = newPeer[peerIndex];
+      const peerItem: PeersType = newPeer[peerIndex];
 
       if (peerItem) {
         switch (payload.element) {
@@ -342,14 +343,17 @@ export default function VideoMeetJoin() {
   }
 
   function raiseHandFn() {
-    setHandRaised(!handRaised);
-    socket.emit("peerActionStatus", {
-      room_id: meetId,
-      socket_id: socket.id,
-      element: "hand",
-      status: handRaised,
-    } as PeerActionStatusConfig);
+    setHandRaised((handRaised) => {
+      socket.emit("peerActionStatus", {
+        room_id: meetId,
+        socket_id: socket.id,
+        element: "hand",
+        status: !handRaised,
+      } as PeerActionStatusConfig);
+      return !handRaised;
+    });
   }
+
   if (canJoinMeeting) {
     return (
       <LoadingContent

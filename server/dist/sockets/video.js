@@ -8,14 +8,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.video = void 0;
-const GlobalUtils_1 = __importDefault(require("../helpers/GlobalUtils"));
+const GlobalUtils_1 = require("../helpers/GlobalUtils");
 const videoUtils_1 = require("../helpers/videoUtils");
-const log = new GlobalUtils_1.default();
+const log = new GlobalUtils_1.Logger();
 function video(io) {
     const clients = {};
     const socketRoomMap = {};

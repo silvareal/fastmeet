@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.callerFn = exports.Logger = void 0;
 const util_1 = __importDefault(require("util"));
 const colors_1 = __importDefault(require("colors"));
 colors_1.default.enable(); //colors.disable();
@@ -77,4 +78,13 @@ class Logger {
         return colors_1.default.magenta("+" + time + type);
     }
 }
-exports.default = Logger;
+exports.Logger = Logger;
+/**
+ * A caller function to callback other function with args
+ * @param {Function} callBack
+ * @param {rest} args
+ */
+function callerFn(callBack, args) {
+    callBack(args);
+}
+exports.callerFn = callerFn;

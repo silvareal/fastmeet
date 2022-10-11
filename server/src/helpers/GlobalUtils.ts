@@ -11,7 +11,7 @@ const options = {
 /**
  * Logger for logging errors, info and debug
  */
-class Logger {
+export class Logger {
   appName: string;
   debugOn: boolean;
   timeStart: number;
@@ -110,4 +110,11 @@ class Logger {
   }
 }
 
-export default Logger;
+/**
+ * A caller function to callback other function with args
+ * @param {Function} callBack
+ * @param {rest} args
+ */
+export function callerFn<T>(callBack: (args: T) => void, args: T) {
+  callBack(args);
+}

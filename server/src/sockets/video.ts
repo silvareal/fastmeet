@@ -1,6 +1,6 @@
 import { Socket } from "socket.io";
 
-import Logger from "../helpers/GlobalUtils";
+import { Logger } from "../helpers/GlobalUtils";
 import { sendToRoom } from "../helpers/videoUtils";
 import {
   ClientDetailsType,

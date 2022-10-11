@@ -332,7 +332,6 @@ export default function VideoMeetJoin() {
   }
 
   function onInputChangeNameFn(e: React.ChangeEvent<HTMLInputElement>) {
-    console.log("event", e.target.innerHTML);
     formik.setFieldValue("name", e.target.innerHTML);
     socket.emit("peerActionStatus", {
       room_id: meetId,
@@ -342,6 +341,15 @@ export default function VideoMeetJoin() {
     } as PeerActionStatusConfig);
   }
 
+  function raiseHandFn() {
+    setHandRaised(!handRaised);
+    socket.emit("peerActionStatus", {
+      room_id: meetId,
+      socket_id: socket.id,
+      element: "hand",
+      status: handRaised,
+    } as PeerActionStatusConfig);
+  }
   if (canJoinMeeting) {
     return (
       <LoadingContent
@@ -350,6 +358,8 @@ export default function VideoMeetJoin() {
       >
         <VideoMeet
           camera={camera}
+          raiseHand={raiseHandFn}
+          hand={handRaised}
           mic={mic}
           toggleCamera={toggleCameraFn}
           toggleAudio={toggleAudioFn}

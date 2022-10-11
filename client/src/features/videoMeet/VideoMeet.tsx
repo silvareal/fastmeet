@@ -17,15 +17,15 @@ import VideoPreviewer from "common/VideoPreviewer";
 import "./VideoMeet.css";
 import ThemeConfig from "configs/ThemeConfig";
 import { PeersType } from "./VideoMeetType";
-import { IconVariant } from "notistack";
-import { OverridableStringUnion } from "@mui/types";
 
 interface VideoMeetProps {
   toggleCamera: () => void;
   toggleAudio: () => void;
   hangUp: () => void;
+  raiseHand: () => void;
   mic: boolean;
   camera: boolean;
+  hand: boolean;
   localMediaStream: MediaStream | undefined;
   peers: PeersType[];
   formik: FormikProps<{
@@ -49,9 +49,11 @@ interface MainActionProps {
 export default function VideoMeet({
   toggleCamera,
   toggleAudio,
+  raiseHand,
   hangUp,
   mic,
   camera,
+  hand,
   localMediaStream,
   peers,
   formik,
@@ -67,7 +69,7 @@ export default function VideoMeet({
         variant: "opaque",
         color: `${mic ? "primary" : "error"}`,
         onClick: toggleAudio,
-        size: "medium",
+        size: "small",
         icon: `${mic ? "carbon:microphone" : "carbon:microphone-off"}`,
       },
       {
@@ -75,15 +77,23 @@ export default function VideoMeet({
         variant: "opaque",
         color: `${camera ? "primary" : "error"}`,
         onClick: toggleCamera,
-        size: "medium",
+        size: "small",
         icon: `${camera ? "bi:camera-video" : "bi:camera-video-off"}`,
+      },
+      {
+        title: "Raise Hand",
+        variant: "opaque",
+        color: "primary",
+        onClick: raiseHand,
+        size: "small",
+        icon: "fluent-emoji:raised-hand-medium-light",
       },
       {
         title: "End Call",
         variant: "opaque",
         color: "error",
         onClick: hangUp,
-        size: "medium",
+        size: "small",
         icon: "bi-telephone",
       },
       // {
@@ -127,7 +137,16 @@ export default function VideoMeet({
                     </div>
                   }
                   footer={
-                    <div>
+                    <div className="flex gap-2">
+                      {hand && (
+                        <Tooltip title="Hand Raised" placement="top">
+                          <Icon className="wave-hand">
+                            <Iconify
+                              icon={`emojione:waving-hand-medium-dark-skin-tone`}
+                            />
+                          </Icon>
+                        </Tooltip>
+                      )}
                       <Typography
                         className="vids-preview-title"
                         color={"white"}
@@ -137,7 +156,7 @@ export default function VideoMeet({
                         onInput={onInputName}
                       >
                         {formik.values.name}
-                      </Typography>
+                      </Typography>{" "}
                     </div>
                   }
                 />
@@ -206,7 +225,16 @@ export default function VideoMeet({
                   </div>
                 }
                 footer={
-                  <div>
+                  <div className="flex gap-2">
+                    {hand && (
+                      <Tooltip title="Hand Raised" placement="top">
+                        <Icon className="wave-hand">
+                          <Iconify
+                            icon={`emojione:waving-hand-medium-dark-skin-tone`}
+                          />
+                        </Icon>
+                      </Tooltip>
+                    )}
                     <Typography
                       className="vids-preview-title"
                       color={"white"}

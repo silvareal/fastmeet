@@ -4,7 +4,7 @@ export interface UserObjType {
   channel_password: string;
   peer_info: { [field: string]: string };
   peer_name: string;
-  peer_gender: string;
+  peer_gender: "male" | "female";
   avatar: string;
   peer_video: boolean;
   peer_audio: boolean;

@@ -34,7 +34,7 @@ export default function VideoPreviewer(props: Partial<VideoPreviewerProps>) {
     className,
     ...rest
   } = props;
-  console.log(name + "----peer----" + peer, camera);
+
   return (
     <div
       {...rest}
@@ -48,17 +48,19 @@ export default function VideoPreviewer(props: Partial<VideoPreviewerProps>) {
       </div>
 
       <div className="flex justify-center items-center h-full">
-        {camera ? (
-          <Video srcObject={srcObject} peer={peer} muted={muted} />
-        ) : (
-          name &&
-          avatar && (
-            <div className="vids-preview-avatar">
-              <img className="w-full" src={`${avatar || ""}`} alt={name} />
-            </div>
-          )
+        <Video
+          style={{ display: `${camera ? "block" : "none"}` }}
+          srcObject={srcObject}
+          peer={peer}
+          muted={muted}
+        />
+        {!camera && name && (
+          <div className="vids-preview-avatar">
+            <img className="w-full" src={`${avatar || ""}`} alt={name} />
+          </div>
         )}
       </div>
+
       <div className="absolute bottom-0 py-3 px-5  w-full">{footer}</div>
     </div>
   );

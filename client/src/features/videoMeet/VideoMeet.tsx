@@ -51,8 +51,6 @@ export default function VideoMeet({
   getAvatarQuery,
   onInputName,
 }: VideoMeetProps) {
-  console.log("peers", peers);
-
   const mainActions: MainActionProps[] = useMemo(
     () => [
       {
@@ -77,7 +75,7 @@ export default function VideoMeet({
         color: "primary",
         onClick: raiseHand,
         size: "small",
-        icon: "fluent-emoji:raised-hand-medium-light",
+        icon: "emojione-monotone:hand-with-fingers-splayed",
       },
       {
         title: "End Call",
@@ -121,7 +119,9 @@ export default function VideoMeet({
                       >
                         <Iconify
                           icon={`${
-                            mic ? "carbon:microphone" : "carbon:microphone-off"
+                            mic
+                              ? "clarity:microphone-solid"
+                              : "clarity:microphone-mute-solid"
                           }`}
                         />
                       </Icon>
@@ -171,8 +171,8 @@ export default function VideoMeet({
                           <Iconify
                             icon={`${
                               peer.userObj.peer_audio
-                                ? "carbon:microphone"
-                                : "carbon:microphone-off"
+                                ? "clarity:microphone-solid"
+                                : "clarity:microphone-mute-solid"
                             }`}
                           />
                         </Icon>
@@ -218,7 +218,9 @@ export default function VideoMeet({
                     >
                       <Iconify
                         icon={`${
-                          mic ? "carbon:microphone" : "carbon:microphone-off"
+                          mic
+                            ? "clarity:microphone-solid"
+                            : "clarity:microphone-mute-solid"
                         }`}
                       />
                     </Icon>

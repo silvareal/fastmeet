@@ -30,6 +30,7 @@ import {
 } from "./VideoMeetType";
 import LoadingContent from "common/LoadingContent";
 import VideoMeetJoinForm from "./VideoMeetJoinForm";
+import { genderToPronoun } from "utils/GLobalUtils";
 
 const baseUrl: string = process.env.REACT_APP_BASE_URL || "";
 const socket = io(`${baseUrl}/video`);
@@ -43,7 +44,9 @@ export default function VideoMeetJoin() {
 
   const [camera, setCamera] = useState<boolean>(false);
   const [mic, setMic] = useState<boolean>(false);
+  // eslint-disable-next-line
   const [screenRecord, setScreenRecord] = useState<boolean>(false);
+  // eslint-disable-next-line
   const [screenShare, setScreenShare] = useState<boolean>(false);
   const [handRaised, setHandRaised] = useState<boolean>(false);
   const [localMediaStream, setLocalMediaStream] = useState<MediaStream>();
@@ -189,12 +192,12 @@ export default function VideoMeetJoin() {
         (peer: PeersType) => peer.peerId !== payload.socketId
       );
 
-      // enqueueSnackbar(`${item.userObj.peer_name} Left meeting`, {
-      //   anchorOrigin: {
-      //     vertical: "top",
-      //     horizontal: "center",
-      //   },
-      // });
+      enqueueSnackbar(`${item.userObj.peer_name} Left meeting`, {
+        anchorOrigin: {
+          vertical: "top",
+          horizontal: "center",
+        },
+      });
 
       peersRef.current = peers;
       setPeers(peers);
@@ -225,6 +228,19 @@ export default function VideoMeetJoin() {
               break;
             case "hand":
               peerItem.userObj.peer_raised_hand = payload.status as boolean;
+              if (peerItem.userObj.peer_raised_hand) {
+                enqueueSnackbar(
+                  `${peerItem.userObj.peer_name} Raised ${genderToPronoun(
+                    peerItem.userObj.peer_gender
+                  )} Hand ✋`,
+                  {
+                    anchorOrigin: {
+                      vertical: "top",
+                      horizontal: "right",
+                    },
+                  }
+                );
+              }
               break;
             case "rec":
               peerItem.userObj.peer_screen_record = payload.status as boolean;
@@ -308,12 +324,15 @@ export default function VideoMeetJoin() {
 
   function toggleCameraFn() {
     toggleCamera(localMediaStream, setCamera, function (camera) {
-      socket.emit("peerActionStatus", {
-        room_id: meetId,
-        socket_id: socket.id,
-        element: "video",
-        status: camera,
-      } as PeerActionStatusConfig);
+      setCamera((camera) => {
+        socket.emit("peerActionStatus", {
+          room_id: meetId,
+          socket_id: socket.id,
+          element: "video",
+          status: camera,
+        } as PeerActionStatusConfig);
+        return camera;
+      });
     });
   }
 
@@ -351,6 +370,13 @@ export default function VideoMeetJoin() {
         element: "hand",
         status: !handRaised,
       } as PeerActionStatusConfig);
+
+      enqueueSnackbar(`${!handRaised ? "Hand Raised ✋" : "Hand Down✋"}`, {
+        anchorOrigin: {
+          vertical: "top",
+          horizontal: "right",
+        },
+      });
       return !handRaised;
     });
   }
@@ -363,10 +389,10 @@ export default function VideoMeetJoin() {
       >
         <VideoMeet
           camera={camera}
-          raiseHand={raiseHandFn}
           hand={handRaised}
           mic={mic}
           toggleCamera={toggleCameraFn}
+          raiseHand={raiseHandFn}
           toggleAudio={toggleAudioFn}
           hangUp={hangUpFn}
           onInputName={onInputChangeNameFn}

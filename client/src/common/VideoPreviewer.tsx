@@ -34,7 +34,7 @@ export default function VideoPreviewer(props: Partial<VideoPreviewerProps>) {
     className,
     ...rest
   } = props;
-  console.log(name + "----peer----" + peer);
+  console.log(name + "----peer----" + peer, camera);
   return (
     <div
       {...rest}

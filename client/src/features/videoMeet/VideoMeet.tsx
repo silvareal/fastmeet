@@ -1,13 +1,4 @@
-import {
-  Fab,
-  FabPropsColorOverrides,
-  FabPropsSizeOverrides,
-  FabPropsVariantOverrides,
-  FabTypeMap,
-  Icon,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { Fab, Icon, Tooltip, Typography } from "@mui/material";
 import React, { useMemo } from "react";
 import { Icon as Iconify } from "@iconify/react";
 import { format } from "date-fns";
@@ -169,7 +160,7 @@ export default function VideoMeet({
                     active={false}
                     avatar={peer.userObj.avatar}
                     peer={peer.peerObj}
-                    name={peer.userObj.peer_name || ""}
+                    name={peer.userObj.peer_name}
                     header={
                       <div>
                         <Icon

@@ -4,9 +4,9 @@ import { Socket } from "socket.io-client";
 
 /**
  * Toggle Audio on/off
- * @param {MediaStream} localMediaStream
- * @param {function} setter
- * @param {function} callback
+ * @param {MediaStream} localMediaStream media stream
+ * @param {Function} setter setter hooks setState
+ * @param {Function} callback callback function
  */
 export const toggleAudio = (
   localMediaStream: MediaStream | undefined,
@@ -25,9 +25,9 @@ export const toggleAudio = (
 
 /**
  * Toggle video on/off
- * @param {MediaStream} localMediaStream
- * @param {function} setter
- * @param {function} callback
+ * @param {MediaStream} localMediaStream media stream
+ * @param {Function} setter setter hooks setState
+ * @param {Function} callback callback function
  */
 export const toggleCamera = (
   localMediaStream: MediaStream | undefined,
@@ -44,7 +44,10 @@ export const toggleCamera = (
   }
 };
 
-// Hanging up the call
+/**
+ *
+ * @param {MediaStream | undefined} localMediaStream media stream
+ */
 export function hangUp(localMediaStream: MediaStream | undefined) {
   if (localMediaStream !== undefined) {
     localMediaStream.getVideoTracks()[0].enabled = false;

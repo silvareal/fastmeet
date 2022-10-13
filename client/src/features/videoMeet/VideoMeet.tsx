@@ -94,6 +94,7 @@ export default function VideoMeet({
       //   icon: "tabler:layout-grid",
       // },
     ],
+    // eslint-disable-next-line
     [camera, mic]
   );
 
@@ -101,109 +102,9 @@ export default function VideoMeet({
     <div className="bg-[#000000] overflow-y-hidden h-screen max-h-screen min-h-[500px]">
       <main className="overflow-y-scroll">
         <div className="h-[calc(100vh-80px)] pt-5 px-3">
-          <div>
-            {peers.length >= 1 ? (
-              <div className="layout-grid-auto">
-                <VideoPreviewer
-                  camera={camera}
-                  mic={mic}
-                  muted={true}
-                  active={true}
-                  name={formik.values.name}
-                  avatar={getAvatarQuery.data.data}
-                  srcObject={localMediaStream}
-                  header={
-                    <div>
-                      <Icon
-                        style={{ color: `${ThemeConfig.palette.common.white}` }}
-                      >
-                        <Iconify
-                          icon={`${
-                            mic
-                              ? "clarity:microphone-solid"
-                              : "clarity:microphone-mute-solid"
-                          }`}
-                        />
-                      </Icon>
-                    </div>
-                  }
-                  footer={
-                    <div className="flex gap-2">
-                      {hand && (
-                        <Tooltip title="Hand Raised" placement="top">
-                          <Icon className="wave-hand">
-                            <Iconify
-                              icon={`emojione:waving-hand-medium-dark-skin-tone`}
-                            />
-                          </Icon>
-                        </Tooltip>
-                      )}
-                      <Typography
-                        className="vids-preview-title"
-                        color={"white"}
-                        variant="subtitle2"
-                        suppressContentEditableWarning={true}
-                        contentEditable={true}
-                        onInput={onInputName}
-                      >
-                        {formik.values.name}
-                      </Typography>{" "}
-                    </div>
-                  }
-                />
-                {peers?.map((peer: PeersType, index: number) => (
-                  <VideoPreviewer
-                    key={index}
-                    camera={peer.userObj.peer_video}
-                    mic={peer.userObj.peer_audio}
-                    muted={true}
-                    active={false}
-                    avatar={peer.userObj.avatar}
-                    peer={peer.peerObj}
-                    name={peer.userObj.peer_name}
-                    header={
-                      <div>
-                        <Icon
-                          style={{
-                            color: `${ThemeConfig.palette.common.white}`,
-                          }}
-                        >
-                          <Iconify
-                            icon={`${
-                              peer.userObj.peer_audio
-                                ? "clarity:microphone-solid"
-                                : "clarity:microphone-mute-solid"
-                            }`}
-                          />
-                        </Icon>
-                      </div>
-                    }
-                    footer={
-                      <div className="flex gap-2">
-                        {peer.userObj.peer_raised_hand && (
-                          <Tooltip title="Hand Raised" placement="top">
-                            <Icon className="wave-hand">
-                              <Iconify
-                                icon={`emojione:waving-hand-medium-dark-skin-tone`}
-                              />
-                            </Icon>
-                          </Tooltip>
-                        )}
-                        <Typography
-                          className="vids-preview-title"
-                          color={"white"}
-                          variant="subtitle2"
-                        >
-                          {peer.userObj.peer_name}
-                        </Typography>
-                      </div>
-                    }
-                  />
-                ))}
-              </div>
-            ) : (
+          {peers.length >= 1 ? (
+            <div className="layout-grid-auto h-full">
               <VideoPreviewer
-                className="h-[calc(100vh-100px)]"
                 camera={camera}
                 mic={mic}
                 muted={true}
@@ -241,17 +142,115 @@ export default function VideoMeet({
                       className="vids-preview-title"
                       color={"white"}
                       variant="subtitle2"
-                      contentEditable="true"
                       suppressContentEditableWarning={true}
+                      contentEditable={true}
                       onInput={onInputName}
                     >
                       {formik.values.name}
-                    </Typography>
+                    </Typography>{" "}
                   </div>
                 }
               />
-            )}
-          </div>
+              {peers?.map((peer: PeersType, index: number) => (
+                <VideoPreviewer
+                  key={index}
+                  camera={peer.userObj.peer_video}
+                  mic={peer.userObj.peer_audio}
+                  muted={true}
+                  active={false}
+                  avatar={peer.userObj.avatar}
+                  peer={peer.peerObj}
+                  name={peer.userObj.peer_name}
+                  header={
+                    <div>
+                      <Icon
+                        style={{
+                          color: `${ThemeConfig.palette.common.white}`,
+                        }}
+                      >
+                        <Iconify
+                          icon={`${
+                            peer.userObj.peer_audio
+                              ? "clarity:microphone-solid"
+                              : "clarity:microphone-mute-solid"
+                          }`}
+                        />
+                      </Icon>
+                    </div>
+                  }
+                  footer={
+                    <div className="flex gap-2">
+                      {peer.userObj.peer_raised_hand && (
+                        <Tooltip title="Hand Raised" placement="top">
+                          <Icon className="wave-hand">
+                            <Iconify
+                              icon={`emojione:waving-hand-medium-dark-skin-tone`}
+                            />
+                          </Icon>
+                        </Tooltip>
+                      )}
+                      <Typography
+                        className="vids-preview-title"
+                        color={"white"}
+                        variant="subtitle2"
+                      >
+                        {peer.userObj.peer_name}
+                      </Typography>
+                    </div>
+                  }
+                />
+              ))}
+            </div>
+          ) : (
+            <VideoPreviewer
+              className="h-[calc(100vh-100px)]"
+              camera={camera}
+              mic={mic}
+              muted={true}
+              active={true}
+              name={formik.values.name}
+              avatar={getAvatarQuery.data.data}
+              srcObject={localMediaStream}
+              header={
+                <div>
+                  <Icon
+                    style={{ color: `${ThemeConfig.palette.common.white}` }}
+                  >
+                    <Iconify
+                      icon={`${
+                        mic
+                          ? "clarity:microphone-solid"
+                          : "clarity:microphone-mute-solid"
+                      }`}
+                    />
+                  </Icon>
+                </div>
+              }
+              footer={
+                <div className="flex gap-2">
+                  {hand && (
+                    <Tooltip title="Hand Raised" placement="top">
+                      <Icon className="wave-hand">
+                        <Iconify
+                          icon={`emojione:waving-hand-medium-dark-skin-tone`}
+                        />
+                      </Icon>
+                    </Tooltip>
+                  )}
+                  <Typography
+                    className="vids-preview-title"
+                    color={"white"}
+                    variant="subtitle2"
+                    contentEditable="true"
+                    suppressContentEditableWarning={true}
+                    onInput={onInputName}
+                  >
+                    {formik.values.name}
+                  </Typography>
+                </div>
+              }
+            />
+          )}
         </div>
       </main>
 

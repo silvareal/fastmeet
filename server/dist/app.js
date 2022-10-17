@@ -44,6 +44,7 @@ app.get("/get-avatar", (req, res) => __awaiter(void 0, void 0, void 0, function*
 // Server images staticfiles directory
 app.use(express_1.default.static("public"));
 app.use("/images", express_1.default.static("images"));
+app.use("/sounds", express_1.default.static("sounds"));
 app.get("/*", (req, res) => {
     res.sendFile(path_1.default.join(__dirname, "..", "public", "index.html"));
 });

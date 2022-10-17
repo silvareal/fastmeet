@@ -40,6 +40,7 @@ app.get("/get-avatar", async (req: Request, res: Response) => {
 // Server images staticfiles directory
 app.use(express.static("public"));
 app.use("/images", express.static("images"));
+app.use("/sounds", express.static("sounds"));
 
 app.get("/*", (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, "..", "public", "index.html"));

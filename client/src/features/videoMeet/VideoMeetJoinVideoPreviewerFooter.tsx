@@ -20,7 +20,7 @@ export default function VideoMeetJoinVideoPreviewerFooter({
       <Fab
         variant="opaque"
         color={`${mic ? "primary" : "error"}`}
-        onClick={toggleCamera}
+        onClick={toggleAudio}
       >
         <Icon>
           <Iconify
@@ -32,7 +32,7 @@ export default function VideoMeetJoinVideoPreviewerFooter({
       <Fab
         variant="opaque"
         color={`${camera ? "primary" : "error"}`}
-        onClick={toggleAudio}
+        onClick={toggleCamera}
       >
         <Icon>
           <Iconify

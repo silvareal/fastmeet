@@ -1,9 +1,9 @@
 import React from "react";
 
 /**
- * PlaySound
- * @param name
- * @returns
+ * PlaySound from server
+ * @param {string} name
+ * @returns HTMLAudioElement
  */
 export default function usePlaySound(
   name:
@@ -24,7 +24,11 @@ export default function usePlaySound(
     | "removePeer"
     | "snapShot"
     | "speech"
+    | "onlyParticipant"
 ): HTMLAudioElement {
-  const audio = new Audio(`assets/sounds/${name}.mp4`);
+  const [audio] = React.useState<HTMLAudioElement>(
+    new Audio(`${process.env.REACT_APP_BASE_URL}/sounds/${name}.mp3`)
+  );
+
   return audio;
 }

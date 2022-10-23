@@ -14,6 +14,7 @@ app.use(
   })
 );
 
+app.enable("trust proxy");
 app.use(morgan("combined"));
 
 // Frontend as staticfiles

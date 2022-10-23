@@ -18,7 +18,7 @@
     "type": "git",
     "url": "git+https://github.com/silvareal/fastmeet.git"
   },
-  "author": "",
+  "author": "Sylvernus Akubo",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/silvareal/fastmeet/issues"
@@ -26,5 +26,9 @@
   "homepage": "https://github.com/silvareal/fastmeet#readme",
   "dependencies": {
     "react-query": "^3.39.2"
+  },
+  "devDependencies": {
+    "concurrently": "^7.5.0",
+    "typescript": "^4.8.4"
   }
 }

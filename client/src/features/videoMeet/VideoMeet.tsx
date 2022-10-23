@@ -14,6 +14,7 @@ interface VideoMeetProps {
   toggleAudio: () => void;
   hangUp: () => void;
   raiseHand: () => void;
+  shareScreen: () => void;
   mic: boolean;
   camera: boolean;
   hand: boolean;
@@ -42,6 +43,7 @@ export default function VideoMeet({
   toggleAudio,
   raiseHand,
   hangUp,
+  shareScreen,
   mic,
   camera,
   hand,
@@ -76,6 +78,14 @@ export default function VideoMeet({
         onClick: raiseHand,
         size: "small",
         icon: "emojione-monotone:hand-with-fingers-splayed",
+      },
+      {
+        title: "Share Screen",
+        variant: "opaque",
+        color: "primary",
+        onClick: shareScreen,
+        size: "small",
+        icon: "fluent:share-screen-start-24-regular",
       },
       {
         title: "End Call",

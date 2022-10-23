@@ -1,0 +1,20 @@
+version: "3.9"
+services:
+  fast-meet:
+    build: .
+    ports:
+      - "4000:4000"
+      - "5000:5000"
+    volumes:
+      - ./:/app
+      - /app/node_modules
+      - /app/client/node_modules
+      - /app/server/node_modules
+    env_file:
+      - client/.env
+      - server/.env
+    command: npm run watch
+    expose:
+      - 4000
+      - 5000
+    

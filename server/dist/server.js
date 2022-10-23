@@ -6,17 +6,17 @@ http://patorjk.com/software/taag/#p=display&f=ANSI%20Regular&t=Server
  )__)/(__)\ \__ \  )(     )    (  )__)  )__)   )(
 (__)(__)(__)(___/ (__)   (_/\/\_)(____)(____) (__)
                                 
-dependencies: {
-    cors                    : https://www.npmjs.com/package/cors
-    dotenv                  : https://www.npmjs.com/package/dotenv
-    express                 : https://www.npmjs.com/package/express
-    ngrok                   : https://www.npmjs.com/package/ngrok
-    socket.io               : https://www.npmjs.com/package/socket.io
-    swagger                 : https://www.npmjs.com/package/swagger-ui-express
-    uuid                    : https://www.npmjs.com/package/uuid
-    yamljs                  : https://www.npmjs.com/package/yamljs
-}
-*/
+/**
+ * Fast Meet- Server component
+ *
+ * @link    GitHub: https://github.com/silvareal/fastmeet.git
+ * @link    Live demo: https://fastmeet.live
+ * @license For open source use: AGPLv3
+ * @license For commercial or closed source, akubosylvernus@gmail.com
+ * @author  Sylvernus Akubo- akubosylvernus@gmail.com
+ * @version 1.0.1
+ *
+ */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -53,24 +53,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-/**
- * Fast Meet- Server component
- *
- * @link    GitHub: https://github.com/silvareal/fastmeet.git
- * @link    Live demo: https://p2p.mirotalk.org or https://mirotalk.up.railway.app or https://mirotalk.herokuapp.com
- * @license For open source use: AGPLv3
- * @license For commercial or closed source, contact us at info.mirotalk@gmail.com
- * @author  Sylvernus Akubo- akubosylvernus5@gmail.com
- * @version 1.0.1
- *
- */
 const http_1 = __importDefault(require("http"));
 const socket_io_1 = require("socket.io");
 const dotenv = __importStar(require("dotenv")); // see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-import
 dotenv.config();
 const sockets_1 = __importDefault(require("./sockets"));
 const app_1 = __importDefault(require("./app"));
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.SERVER_PORT || 5000;
 const server = http_1.default.createServer(app_1.default);
 const socketServer = new socket_io_1.Server(server, {
     cors: {

@@ -36,7 +36,7 @@ import usePlaySound from "hooks/usePlaySound";
 import ThemeConfig from "configs/ThemeConfig";
 
 const baseUrl: string = process.env.REACT_APP_BASE_URL || "";
-const socket = io(`${baseUrl}/video`);
+const socket = io(`${baseUrl}/video`, { forceNew: false });
 
 export default function VideoMeetJoin() {
   const { meetId } = useParams();
@@ -44,11 +44,11 @@ export default function VideoMeetJoin() {
   const { enqueueSnackbar } = useSnackbar();
 
   const peersRef: { current: any } = useRef([]);
+  const screenRecordRef: { current: any } = useRef<boolean>(false);
 
   const [camera, setCamera] = useState<boolean>(false);
   const [mic, setMic] = useState<boolean>(false);
-  // eslint-disable-next-line
-  const [screenRecord, setScreenRecord] = useState<boolean>(false);
+
   // eslint-disable-next-line
   const [screenShare, setScreenShare] = useState<boolean>(false);
   const [handRaised, setHandRaised] = useState<boolean>(false);
@@ -108,7 +108,7 @@ export default function VideoMeetJoin() {
       peer_video: camera,
       peer_audio: mic,
       peer_raised_hand: handRaised,
-      peer_screen_record: screenRecord,
+      peer_screen_record: screenRecordRef.current,
       peer_screen_share: screenShare,
     });
 
@@ -156,6 +156,7 @@ export default function VideoMeetJoin() {
      * to acknowledge the signal and send the stream
      */
     socket.on("user-joined", (payload: UserJoinedPayloadType) => {
+      console.log("payload", payload);
       if (iceServers !== undefined) {
         const peer = addPeer(
           payload.signal,
@@ -478,6 +479,62 @@ export default function VideoMeetJoin() {
     });
   }
 
+  /**
+   * Enable - disable screen sharing
+   * https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia
+   */
+  async function toggleScreenSharing() {
+    const constraints = {
+      // audio: true, // enable tab audio
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        sampleRate: 44100,
+      },
+      // video: { frameRate: { max: screenMaxFrameRate } },
+      video: true,
+    };
+
+    let screenMediaPromise: MediaStream;
+
+    try {
+      if (!screenRecordRef.current) {
+        // on screen sharing start
+        screenMediaPromise = await navigator.mediaDevices.getDisplayMedia(
+          constraints
+        );
+      } else {
+        // on screen sharing stop
+        screenMediaPromise = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+          video: true,
+        });
+      }
+      if (screenMediaPromise) {
+        console.log("screenMediaPromise", screenMediaPromise);
+        screenRecordRef.current = !screenRecordRef.current;
+        socket.emit("peerActionStatus", {
+          room_id: meetId,
+          socket_id: socket.id,
+          element: "screen",
+          status: !screenRecordRef,
+        } as PeerActionStatusConfig);
+
+        setLocalMediaStream(screenMediaPromise);
+
+        // await stopLocalVideoTrack();
+        // await refreshMyLocalStream(screenMediaPromise);
+        // await refreshMyStreamToPeers(screenMediaPromise);
+      }
+    } catch (err) {
+      console.error("[Error] Unable to share the screen", err);
+    }
+  }
+
+  function shareScreenFn() {
+    toggleScreenSharing();
+  }
+
   if (canJoinMeeting) {
     return (
       <LoadingContent
@@ -492,6 +549,7 @@ export default function VideoMeetJoin() {
           raiseHand={raiseHandFn}
           toggleAudio={toggleAudioFn}
           hangUp={hangUpFn}
+          shareScreen={shareScreenFn}
           onInputName={onInputChangeNameFn}
           localMediaStream={localMediaStream}
           formik={formik}

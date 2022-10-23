@@ -2,25 +2,22 @@ FROM node:lts-alpine
 
 # Create app directory
 WORKDIR /app
-
-# Install app dependencies
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
-# where available (npm@5+)
+USER root
 COPY package*.json ./
 
+# Install app dependencies
 COPY client/package*.json client/
-RUN npm run install-client --only=production
+RUN npm run install-client 
 
 COPY server/package*.json server/
-RUN npm run install-server --only=production
+RUN npm run install-server
 
 COPY client/ client/
-RUN npm run build --prefix client
 
 COPY server/ server/
+
+RUN mkdir client/build && chmod -R 777 client/build
 
 USER node
 
 CMD [ "npm", "start", "--prefix", "server" ]
-
-EXPOSE 4000

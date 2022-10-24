@@ -7,6 +7,14 @@ services:
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
   fast-meet:
+    deploy:
+      replicas: 8
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 2
+        delay: 15s
+    image: silvareal/fast-meet
     env_file:
       - client/.env
       - server/.env

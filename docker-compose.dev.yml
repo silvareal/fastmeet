@@ -4,7 +4,7 @@ services:
     build: .
     ports:
       - "4000:4000"
-      - "5000:5000"
+      - "9000:9000"
     volumes:
       - ./:/app
       - /app/node_modules
@@ -16,5 +16,5 @@ services:
     command: npm run watch
     expose:
       - 4000
-      - 5000
+      - 9000
     

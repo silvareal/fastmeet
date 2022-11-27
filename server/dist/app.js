@@ -22,6 +22,7 @@ const app = (0, express_1.default)();
 app.use((0, cors_1.default)({
     origin: "http://localhost:4000",
 }));
+app.enable("trust proxy");
 app.use((0, morgan_1.default)("combined"));
 // Frontend as staticfiles
 app.use(express_1.default.json());

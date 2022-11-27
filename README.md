@@ -16,8 +16,7 @@ A p2p decentralized video conferencing application
 ## Docker
 
 1. Ensure you have the latest version of Docker installed
-2. Run `docker build -t fast-meet .`
-3. Run `docker run -it -p 4000:4000 fast-meet`
+2. Run `docker-compose -f docker-compose.yml -f docker-compose.dev.yml up`
 
 ## Running the Tests
 

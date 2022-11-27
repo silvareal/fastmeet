@@ -59,7 +59,7 @@ const dotenv = __importStar(require("dotenv")); // see https://github.com/motdot
 dotenv.config();
 const sockets_1 = __importDefault(require("./sockets"));
 const app_1 = __importDefault(require("./app"));
-const PORT = process.env.SERVER_PORT || 5000;
+const PORT = process.env.SERVER_PORT || 9000;
 const server = http_1.default.createServer(app_1.default);
 const socketServer = new socket_io_1.Server(server, {
     cors: {

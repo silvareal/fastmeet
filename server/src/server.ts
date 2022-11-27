@@ -26,7 +26,7 @@ dotenv.config()
 import sockets from "./sockets";
 import app  from "./app"
 
-const PORT = process.env.SERVER_PORT || 5000;
+const PORT = process.env.SERVER_PORT || 9000;
 
 const server = http.createServer(app);
 const socketServer = new Server(server, {

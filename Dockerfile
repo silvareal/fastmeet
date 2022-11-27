@@ -2,7 +2,7 @@ FROM node:lts-alpine
 
 # Create app directory
 WORKDIR /app
-USER root
+
 COPY package*.json ./
 
 # Install app dependencies

@@ -46,6 +46,7 @@ export default function VideoMeetJoin() {
   const peersRef: { current: any } = useRef([]);
   const screenRecordRef: { current: any } = useRef<boolean>(false);
 
+  console.log("peersRef", peersRef);
   const [camera, setCamera] = useState<boolean>(false);
   const [mic, setMic] = useState<boolean>(false);
 
@@ -445,6 +446,7 @@ export default function VideoMeetJoin() {
   function hangUpFn() {
     hangUp(localMediaStream);
     navigate("/");
+    onlyParticipantSound.pause();
     socket.disconnect();
   }
 
@@ -534,6 +536,12 @@ export default function VideoMeetJoin() {
   function shareScreenFn() {
     toggleScreenSharing();
   }
+
+  useEffect(() => {
+    return () => {
+      onlyParticipantSound.pause();
+    };
+  }, []);
 
   if (canJoinMeeting) {
     return (

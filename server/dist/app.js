@@ -27,6 +27,7 @@ app.use((0, morgan_1.default)("combined"));
 // Frontend as staticfiles
 app.use(express_1.default.json());
 app.use(express_1.default.static(path_1.default.join(__dirname, "..", "public")));
+app.use(express_1.default.static(path_1.default.join(__dirname, "../../client/build")));
 app.get("/turn-server", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const turnServerURLs = yield (0, external_service_1.getTwilioTurnServer)();
     return res.status(200).json({ data: turnServerURLs });
@@ -46,7 +47,7 @@ app.get("/get-avatar", (req, res) => __awaiter(void 0, void 0, void 0, function*
 app.use(express_1.default.static("public"));
 app.use("/images", express_1.default.static("images"));
 app.use("/sounds", express_1.default.static("sounds"));
-app.get("/*", (req, res) => {
-    res.sendFile(path_1.default.join(__dirname, "..", "public", "index.html"));
+app.get("*", (req, res) => {
+    res.sendFile(path_1.default.join(__dirname, "../../client/build"));
 });
 exports.default = app;

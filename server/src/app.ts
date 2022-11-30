@@ -20,6 +20,7 @@ app.use(morgan("combined"));
 // Frontend as staticfiles
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "..", "public")));
+app.use(express.static(path.join(__dirname, "../../client/build")));
 
 app.get("/turn-server", async (req: Request, res: Response) => {
   const turnServerURLs = await getTwilioTurnServer();
@@ -43,8 +44,8 @@ app.use(express.static("public"));
 app.use("/images", express.static("images"));
 app.use("/sounds", express.static("sounds"));
 
-app.get("/*", (req: Request, res: Response) => {
-  res.sendFile(path.join(__dirname, "..", "public", "index.html"));
+app.get("*", (req: Request, res: Response) => {
+  res.sendFile(path.join(__dirname, "../../client/build"));
 });
 
 export default app;

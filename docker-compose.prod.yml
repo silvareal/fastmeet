@@ -9,8 +9,8 @@ services:
   fast-meet:
     deploy:
       replicas: 8
-      restart_policy:
-        condition: always
+      # restart_policy:
+      #   condition: always
       update_config:
         parallelism: 2
         delay: 15s

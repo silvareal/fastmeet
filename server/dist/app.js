@@ -46,6 +46,9 @@ app.get("/get-avatar", (req, res) => __awaiter(void 0, void 0, void 0, function*
     const randomImage = yield (0, video_service_1.generateRandomImages)(category);
     return res.status(200).json({ data: `${baseUrl}/${randomImage}` });
 }));
+app.get("*", (req, res) => {
+    res.sendFile(path_1.default.join(__dirname, "../../client/build"));
+});
 // Server images staticfiles directory
 app.use(express_1.default.static("public"));
 app.use("/images", express_1.default.static("images"));

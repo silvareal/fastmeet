@@ -33,5 +33,5 @@ services:
     env_file:
       - client/.env
       - server/.env
-    command: npm run deploy
+    # command: npm run deploy
     

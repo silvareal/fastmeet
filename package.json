@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/silvareal/fastmeet#readme",
   "dependencies": {
+    "react-ga": "^3.3.1",
     "react-query": "^3.39.2"
   },
   "devDependencies": {

@@ -1,11 +1,17 @@
 import React, { lazy } from "react";
 import { Navigate, useRoutes } from "react-router-dom";
+import ReactGA from "react-ga";
 
 import { configureRoutes } from "utils/RouteUtils";
 import { RouteEnum } from "constants/RouteConstants";
 import AppThemeProvider from "AppThemeProvider";
 import Suspense from "common/Suspense";
 import { SnackbarProvider } from "notistack";
+
+const TRACKING_ID = process.env.REACT_APP_GA_TRACKING_ID;
+if (process.env.NODE_ENV === "production" && TRACKING_ID) {
+  ReactGA.initialize(TRACKING_ID);
+}
 
 function App() {
   const routes = useRoutes(ROUTES);

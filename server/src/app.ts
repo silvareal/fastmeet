@@ -42,11 +42,7 @@ app.get("/get-avatar", async (req: Request, res: Response) => {
   return res.status(200).json({ data: `${baseUrl}/${randomImage}` });
 });
 
-// app.get("/*", (req: Request, res: Response) => {
-//   res.sendFile(path.join(__dirname, "../../client/build"));
-// });
-
-app.use('/*', (req, res) => {
+app.get("/*", (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, "../../client/build", 'index.html'));
 });
 

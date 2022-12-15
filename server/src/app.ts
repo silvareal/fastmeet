@@ -23,6 +23,8 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "..", "public")));
 app.use(express.static(path.join(__dirname, "../../client/build")));
 
+
+
 app.get("/turn-server", async (req: Request, res: Response) => {
   const turnServerURLs = await getTwilioTurnServer();
   return res.status(200).json({ data: turnServerURLs });
@@ -40,9 +42,14 @@ app.get("/get-avatar", async (req: Request, res: Response) => {
   return res.status(200).json({ data: `${baseUrl}/${randomImage}` });
 });
 
-app.get("*", (req: Request, res: Response) => {
-  res.sendFile(path.join(__dirname, "../../client/build"));
+// app.get("/*", (req: Request, res: Response) => {
+//   res.sendFile(path.join(__dirname, "../../client/build"));
+// });
+
+app.use('/*', (req, res) => {
+  res.sendFile(path.join(__dirname, "../../client/build", 'index.html'));
 });
+
 
 // Server images staticfiles directory
 app.use(express.static("public"));

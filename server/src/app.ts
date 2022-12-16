@@ -25,12 +25,12 @@ app.use(express.static(path.join(__dirname, "../../client/build")));
 
 
 
-app.get("/turn-server", async (req: Request, res: Response) => {
+app.get("/api/turn-server", async (req: Request, res: Response) => {
   const turnServerURLs = await getTwilioTurnServer();
   return res.status(200).json({ data: turnServerURLs });
 });
 
-app.get("/get-avatar", async (req: Request, res: Response) => {
+app.get("/api/get-avatar", async (req: Request, res: Response) => {
   const { category } = req.query;
   const baseUrl = `${req.protocol}://${req.headers.host}`;
   if (category !== "male" && category !== "female") {

@@ -30,6 +30,8 @@ services:
       #   delay: 15s
     image: silvareal/fast-meet
     restart: unless-stopped
+    environment:
+      - NODE_ENV=production
     env_file:
       - client/.env
       - server/.env

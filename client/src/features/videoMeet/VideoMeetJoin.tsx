@@ -66,7 +66,7 @@ export default function VideoMeetJoin() {
   const onlyParticipantSound = usePlaySound("onlyParticipant");
 
   const [getTurnServerQuery] = useAxios({
-    url: `${process.env.REACT_APP_BASE_URL}/turn-server`,
+    url: `${process.env.REACT_APP_BASE_URL}/api/turn-server`,
     method: "GET",
   });
 
@@ -87,7 +87,7 @@ export default function VideoMeetJoin() {
   });
 
   const [getAvatarQuery] = useAxios({
-    url: `${process.env.REACT_APP_BASE_URL}/get-avatar`,
+    url: `${process.env.REACT_APP_BASE_URL}/api/get-avatar`,
     method: "GET",
     params: {
       category: formik.values.gender,

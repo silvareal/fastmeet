@@ -15,7 +15,7 @@ COPY client/ client/
 
 COPY server/ server/
 
-RUN mkdir client/build && chmod -R 777 client/build
+# RUN mkdir client/build && chmod -R 777 client/build/
 
 USER node
 

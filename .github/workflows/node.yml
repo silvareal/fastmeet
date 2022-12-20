@@ -31,5 +31,5 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: npm run install
-      - run: npm run test
+      # - run: npm run test
       - run: npm run build --prefix client

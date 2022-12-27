@@ -15,6 +15,7 @@ jobs:
   build:
     env:
       CI: false
+      NODE_ENV: "production"
     strategy:
       matrix:
         node-version: [16.x]

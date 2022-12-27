@@ -14,7 +14,7 @@ jobs:
   # This workflow contains a single job called "build"
   build:
     env:
-      CI: true
+      CI: false
     strategy:
       matrix:
         node-version: [16.x]

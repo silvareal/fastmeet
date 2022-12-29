@@ -9,6 +9,7 @@ services:
     volumes:
       - ./:/app
       -  ./client/build:/app/client/build
+      -  ./server/public/sounds:/app/server/public/sounds
       -  ./client/build:/var/www/html
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
       - ./certbot/conf:/etc/letsencrypt

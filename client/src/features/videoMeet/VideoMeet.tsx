@@ -1,12 +1,20 @@
-import { Fab, Icon, Tooltip, Typography } from "@mui/material";
-import React, { useMemo } from "react";
 import { Icon as Iconify } from "@iconify/react";
+import {
+  Badge,
+  Fab,
+  Icon,
+  IconButton,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import { format } from "date-fns";
 import { FormikProps } from "formik";
+import React, { useMemo, useState } from "react";
 
 import VideoPreviewer from "common/VideoPreviewer";
-import "./VideoMeet.css";
 import ThemeConfig from "configs/ThemeConfig";
+import "./VideoMeet.css";
+import { VideoMeetChatDrawer } from "./VideoMeetChatDrawer";
 import { PeersType } from "./VideoMeetType";
 
 interface VideoMeetProps {
@@ -108,10 +116,12 @@ export default function VideoMeet({
     [camera, mic]
   );
 
+  const [openChatDrawer, setOpenChatDrawer] = useState<boolean>(true);
+
   return (
     <div className="bg-[#000000] overflow-y-hidden h-screen max-h-screen min-h-[500px]">
-      <main className="overflow-y-scroll">
-        <div className="h-[calc(100vh-80px)] pt-5 px-3">
+      <main className="overflow-y-scroll w-100">
+        <div className="h-[calc(100vh-80px)] pt-5 px-3 flex gap-2">
           {peers.length >= 1 ? (
             <div className="layout-grid-auto h-full">
               <VideoPreviewer
@@ -261,7 +271,14 @@ export default function VideoMeet({
               }
             />
           )}
-        </div>
+
+          <VideoMeetChatDrawer
+            onClose={() => {
+              setOpenChatDrawer(false);
+            }}
+            open={openChatDrawer}
+          />
+        </div>{" "}
       </main>
 
       <footer className="flex justify-between gap-2 items-center my-3 mx-3">
@@ -286,7 +303,24 @@ export default function VideoMeet({
             </Tooltip>
           ))}
         </div>
-        <div></div>
+        <div>
+          <Tooltip title="chat" placement="top">
+            <IconButton
+              onClick={() => {
+                setOpenChatDrawer((prev) => !prev);
+              }}
+            >
+              <Badge variant="dot" color="info">
+                <Icon>
+                  <Iconify
+                    icon="carbon:chat"
+                    color={ThemeConfig.palette.common.white}
+                  />
+                </Icon>
+              </Badge>
+            </IconButton>
+          </Tooltip>
+        </div>
       </footer>
     </div>
   );

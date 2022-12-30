@@ -126,7 +126,7 @@ export default function VideoMeetJoin() {
             socket
           );
 
-          addPeerSound.play();
+          addPeerSound.play();  
           peersRef.current.push({
             peerId: user.socketId,
             peerObj: peer,

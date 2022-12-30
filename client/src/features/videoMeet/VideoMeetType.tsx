@@ -37,3 +37,12 @@ export interface PeerActionStatusConfig {
   element: "name" | "video" | "hand" | "audio" | "screen" | "rec";
   status: string | boolean;
 }
+
+export interface SenderDetails {
+  userName: string;
+  ID: string;
+}
+export interface MessageDetails {
+  message: string;
+  senderDetails: SenderDetails;
+}

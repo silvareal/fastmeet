@@ -24,6 +24,7 @@ export default function VideoMeetJoinForm({ formik }: VideoMeetJoinFormProps) {
     >
       <div className="w-full">
         <TextField
+          autoFocus
           label="Name"
           placeholder="Sylvernus Akubo"
           fullWidth

@@ -1,8 +1,8 @@
 import { Box, Typography } from "@mui/material";
 import { FC } from "react";
-import { MessageDetails } from "./VideoMeetType";
+import { MessageDetailsType } from "./ChatType";
 
-export const VideoMeetChatMessagePill: FC<{ message: MessageDetails }> = ({
+export const ChatMessagePill: FC<{ message: MessageDetailsType }> = ({
   message,
 }) => {
   const messageTime = new Date();
@@ -11,7 +11,7 @@ export const VideoMeetChatMessagePill: FC<{ message: MessageDetails }> = ({
       <Typography variant="body1" className=" break-all">
         {message?.message}
       </Typography>
-      <Typography variant="caption" mr={1}>
+      <Typography variant="caption" className="mr-1">
         {message.senderDetails?.userName || "Sam"}
       </Typography>
       <Typography variant="caption" sx={{ opacity: "0.7" }}>

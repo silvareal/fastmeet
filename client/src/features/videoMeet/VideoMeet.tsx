@@ -5,7 +5,7 @@ import {
   Icon,
   IconButton,
   Tooltip,
-  Typography,
+  Typography
 } from "@mui/material";
 import { format } from "date-fns";
 import { FormikProps } from "formik";
@@ -13,8 +13,8 @@ import React, { useMemo, useState } from "react";
 
 import VideoPreviewer from "common/VideoPreviewer";
 import ThemeConfig from "configs/ThemeConfig";
+import { ChatDrawer } from "features/chat/ChatDrawer";
 import "./VideoMeet.css";
-import { VideoMeetChatDrawer } from "./VideoMeetChatDrawer";
 import { PeersType } from "./VideoMeetType";
 
 interface VideoMeetProps {
@@ -272,11 +272,12 @@ export default function VideoMeet({
             />
           )}
 
-          <VideoMeetChatDrawer
+          <ChatDrawer
             onClose={() => {
               setOpenChatDrawer(false);
             }}
             open={openChatDrawer}
+            title="In-Call Messages"
           />
         </div>{" "}
       </main>

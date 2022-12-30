@@ -38,11 +38,3 @@ export interface PeerActionStatusConfig {
   status: string | boolean;
 }
 
-export interface SenderDetails {
-  userName: string;
-  ID: string;
-}
-export interface MessageDetails {
-  message: string;
-  senderDetails: SenderDetails;
-}

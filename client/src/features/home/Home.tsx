@@ -3,6 +3,7 @@ import AppHeader from "AppHeader";
 import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import { useFormik } from "formik";
 import * as yup from "yup";
+import ReactGA from "react-ga";
 
 import Memoji1 from "assets/img/memoji1.png";
 import Memoji2 from "assets/img/memoji2.png";
@@ -53,6 +54,10 @@ const Home: FunctionComponent<HomeProps> = () => {
     }),
     onSubmit: (values) => {
       navigate(values.meetingId);
+      ReactGA.event({
+        category: "New Meeting",
+        action: "Join New Meeting",
+      });
     },
   });
 
@@ -78,8 +83,8 @@ const Home: FunctionComponent<HomeProps> = () => {
                 Start & join meetings free
               </Typography>
               <Typography className="max-w-[500px] mt-3" variant="h6">
-                We re-engineered the service we built for secure business and
-                social meetings to make it free and available for all.
+                Opensource service we built for secure business and social
+                meetings to make it free and available for all.
               </Typography>
 
               <form onSubmit={formik.handleSubmit} className="flex mt-16">

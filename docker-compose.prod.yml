@@ -7,6 +7,10 @@ services:
       - "80:80"
       - "443:443"
     volumes:
+      - ./:/app
+      -  ./client/build:/app/client/build
+      -  ./server/public/sounds:/app/server/public/sounds
+      -  ./client/build:/var/www/html
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
@@ -30,8 +34,11 @@ services:
       #   delay: 15s
     image: silvareal/fast-meet
     restart: unless-stopped
+    environment:
+      - NODE_ENV=production
     env_file:
       - client/.env
       - server/.env
-    command: npm run deploy
+    # command: npm run deploy
+    command: npm start --prefix server
     

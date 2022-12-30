@@ -27,7 +27,7 @@ describe("Home Component", () => {
     it("renders Third header texts", async () => {
       render(<MockHome />);
       const headerElement = await screen.findByRole("heading", {
-        name: /We re-engineered the service we built for secure business and social meetings to make it free and available for all./i,
+        name: /Opensource service we built for secure business and social meetings to make it free and available for all./i,
       });
       expect(headerElement).toBeInTheDocument();
     });

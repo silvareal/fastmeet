@@ -28,11 +28,11 @@ app.use((0, morgan_1.default)("combined"));
 app.use(express_1.default.json());
 app.use(express_1.default.static(path_1.default.join(__dirname, "..", "public")));
 app.use(express_1.default.static(path_1.default.join(__dirname, "../../client/build")));
-app.get("/turn-server", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.get("/api/turn-server", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const turnServerURLs = yield (0, external_service_1.getTwilioTurnServer)();
     return res.status(200).json({ data: turnServerURLs });
 }));
-app.get("/get-avatar", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.get("/api/get-avatar", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { category } = req.query;
     const baseUrl = `${req.protocol}://${req.headers.host}`;
     if (category !== "male" && category !== "female") {
@@ -43,8 +43,8 @@ app.get("/get-avatar", (req, res) => __awaiter(void 0, void 0, void 0, function*
     const randomImage = yield (0, video_service_1.generateRandomImages)(category);
     return res.status(200).json({ data: `${baseUrl}/${randomImage}` });
 }));
-app.get("*", (req, res) => {
-    res.sendFile(path_1.default.join(__dirname, "../../client/build"));
+app.get("/*", (req, res) => {
+    res.sendFile(path_1.default.join(__dirname, "../../client/build", 'index.html'));
 });
 // Server images staticfiles directory
 app.use(express_1.default.static("public"));

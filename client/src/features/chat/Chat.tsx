@@ -1,13 +1,45 @@
 import { Icon } from "@iconify/react";
 import { Box, IconButton, TextField } from "@mui/material";
-import React, { useRef, useState } from "react";
+import React, { Dispatch, useState } from "react";
 import { ChatMessagePill } from "./ChatMessagePill";
 import { MessageDetailsType } from "./ChatType";
 import { useFormik } from "formik";
 import * as yup from "yup";
+import { socket } from "utils/VideoUtils";
+import { useParams } from "react-router-dom";
+import { PeersRefType, PeersType } from "features/videoMeet/VideoMeetType";
 
-export const Chat = () => {
+export const Chat = (props: {
+  setPeers: Function;
+  peersRef: { current: PeersRefType[] };
+}) => {
+  const { setPeers, peersRef } = props;
+
   const [messages, setMessages] = useState<MessageDetailsType[]>([]);
+  const { meetId } = useParams();
+
+  /**
+   * Message actions
+   */
+  socket.on(
+    "messageAction",
+    (payload: { room_id: string; socket_id: string; message: string }) => {
+      setPeers((peers: PeersType[]) => {
+        const peerIndex = peers.findIndex(
+          (peer: PeersType) => peer.peerId === payload.socket_id
+        );
+        const newPeer: PeersType[] = [...peers];
+
+        const peerItem: PeersType = newPeer[peerIndex];
+
+        if (peerItem && payload.message) {
+          console.log("payload.message", payload.message);
+        }
+        peersRef.current = newPeer;
+        return newPeer;
+      });
+    }
+  );
 
   const formik = useFormik({
     initialValues: {
@@ -18,6 +50,12 @@ export const Chat = () => {
       message: yup.string().required().trim(),
     }),
     onSubmit: (values, { resetForm }) => {
+      socket.emit("messageAction", {
+        room_id: meetId,
+        socket_id: socket.id,
+        message: values.message,
+      } as any);
+
       setMessages([
         ...messages,
         {
@@ -35,8 +73,8 @@ export const Chat = () => {
   return (
     <Box className="max-h-full mx-4 my-0 flex flex-col box-border">
       <Box className="max-h-full overflow-scroll box-border">
-        {messages.map((message) => (
-          <ChatMessagePill message={message} />
+        {messages.map((message, index) => (
+          <ChatMessagePill key={index} message={message} />
         ))}
       </Box>
 

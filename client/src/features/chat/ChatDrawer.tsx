@@ -1,7 +1,8 @@
 import { Icon } from "@iconify/react";
 import { Box, IconButton, Typography } from "@mui/material";
 import ThemeConfig from "configs/ThemeConfig";
-import { FC, useRef, useState } from "react";
+import { PeersRefType, PeersType } from "features/videoMeet/VideoMeetType";
+import { Dispatch, FC, useRef, useState } from "react";
 import { Chat } from "./Chat";
 import { MessageDetailsType } from "./ChatType";
 
@@ -9,7 +10,9 @@ export const ChatDrawer: FC<{
   open: boolean;
   onClose: () => void;
   title: string;
-}> = ({ open, onClose, title }) => {
+  setPeers: Function;
+  peersRef: { current: PeersRefType[] };
+}> = ({ open, onClose, title, setPeers, peersRef }) => {
   return (
     <Box
       className={`rounded-lg ${
@@ -33,7 +36,7 @@ export const ChatDrawer: FC<{
       )}
 
       {/* chat messages and input */}
-      {!!open && <Chat />}
+      {!!open && <Chat setPeers={setPeers} peersRef={peersRef} />}
     </Box>
   );
 };

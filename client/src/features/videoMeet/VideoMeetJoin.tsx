@@ -34,9 +34,7 @@ import VideoMeetJoinForm from "./VideoMeetJoinForm";
 import { genderToPronoun } from "utils/GLobalUtils";
 import usePlaySound from "hooks/usePlaySound";
 import ThemeConfig from "configs/ThemeConfig";
-
-const baseUrl: string = process.env.REACT_APP_BASE_URL || "";
-const socket = io(`${baseUrl}/video`, { forceNew: false });
+import { socket } from "utils/VideoUtils";
 
 export default function VideoMeetJoin() {
   const { meetId } = useParams();
@@ -126,7 +124,7 @@ export default function VideoMeetJoin() {
             socket
           );
 
-          addPeerSound.play();  
+          addPeerSound.play();
           peersRef.current.push({
             peerId: user.socketId,
             peerObj: peer,
@@ -562,6 +560,8 @@ export default function VideoMeetJoin() {
           localMediaStream={localMediaStream}
           formik={formik}
           peers={peers}
+          peersRef={peersRef}
+          setPeers={setPeers}
           getAvatarQuery={getAvatarQuery}
         />
       </LoadingContent>

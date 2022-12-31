@@ -4,7 +4,6 @@ import { useFormik } from "formik";
 import * as yup from "yup";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSnackbar } from "notistack";
-import { io } from "socket.io-client";
 import { Icon as Iconify } from "@iconify/react";
 
 import AppHeader from "AppHeader";
@@ -34,9 +33,7 @@ import VideoMeetJoinForm from "./VideoMeetJoinForm";
 import { genderToPronoun } from "utils/GLobalUtils";
 import usePlaySound from "hooks/usePlaySound";
 import ThemeConfig from "configs/ThemeConfig";
-
-const baseUrl: string = process.env.REACT_APP_BASE_URL || "";
-const socket = io(`${baseUrl}/video`, { forceNew: false });
+import { BASE_URL, socket } from "utils/VideoUtils";
 
 export default function VideoMeetJoin() {
   const { meetId } = useParams();
@@ -66,7 +63,7 @@ export default function VideoMeetJoin() {
   const onlyParticipantSound = usePlaySound("onlyParticipant");
 
   const [getTurnServerQuery] = useAxios({
-    url: `${process.env.REACT_APP_BASE_URL}/api/turn-server`,
+    url: `${BASE_URL}/api/turn-server`,
     method: "GET",
   });
 
@@ -87,7 +84,7 @@ export default function VideoMeetJoin() {
   });
 
   const [getAvatarQuery] = useAxios({
-    url: `${process.env.REACT_APP_BASE_URL}/api/get-avatar`,
+    url: `${BASE_URL}/api/get-avatar`,
     method: "GET",
     params: {
       category: formik.values.gender,

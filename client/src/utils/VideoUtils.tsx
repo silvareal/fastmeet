@@ -1,3 +1,5 @@
+import { io } from "socket.io-client";
+
 /**
  * Get random number
  * @param {integer} length of string
@@ -12,3 +14,10 @@ export function getRandomCharacters(length: number): string {
   }
   return result;
 }
+
+export const BASE_URL: string =
+  process.env.NODE_ENV === "development"
+    ? `${window.location.protocol}//${window.location.hostname}:9000`
+    : `${window.location.protocol}//${window.location.hostname}`;
+console.log("BASE_URL", BASE_URL);
+export const socket = io(`${BASE_URL}/video`, { forceNew: false });

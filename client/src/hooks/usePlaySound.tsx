@@ -1,4 +1,5 @@
 import React from "react";
+import { BASE_URL } from "utils/VideoUtils";
 
 /**
  * PlaySound from server
@@ -27,7 +28,7 @@ export default function usePlaySound(
     | "onlyParticipant"
 ): HTMLAudioElement {
   const [audio] = React.useState<HTMLAudioElement>(
-    new Audio(`${process.env.REACT_APP_BASE_URL}/sounds/${name}.mp3`)
+    new Audio(`${BASE_URL}/sounds/${name}.mp3`)
   );
 
   return audio;

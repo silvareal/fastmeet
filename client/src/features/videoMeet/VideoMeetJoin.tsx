@@ -309,7 +309,7 @@ export default function VideoMeetJoin() {
 
   function initEnumerateDevices() {
     navigator.mediaDevices
-      .getUserMedia({ video: true, audio: { echoCancellation: true } })
+      ?.getUserMedia({ video: true, audio: { echoCancellation: true } })
       .then((stream: MediaStream) => {
         setLocalMediaStream(stream);
         setCamera(true);
@@ -320,7 +320,6 @@ export default function VideoMeetJoin() {
         setCamera(false);
         setMic(false);
         setStreamError(err?.name);
-
         /* handle the error */
         if (
           err.name === "NotFoundError" ||
@@ -573,9 +572,9 @@ export default function VideoMeetJoin() {
         error={!!getTurnServerQuery.error}
       >
         <Container maxWidth="xl" className="flex min-h-screen items-center">
-          <div className="grid grid-cols-3 gap-10 w-full">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 w-full">
             <VideoMeetJoinForm formik={formik} />
-            <div className="col-span-2 h-[450px]">
+            <div className="col-span-2 -order-1 md:order-1 h-[450px]">
               <VideoPreviewer
                 camera={camera}
                 mic={mic}

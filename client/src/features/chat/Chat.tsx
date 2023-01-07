@@ -34,7 +34,7 @@ export const Chat = () => {
 
   return (
     <Box className="max-h-full mx-4 my-0 flex flex-col box-border">
-      <Box className="max-h-full overflow-scroll box-border">
+      <Box className="max-h-[83%] overflow-scroll box-border mb-2 ">
         {messages.map((message) => (
           <ChatMessagePill message={message} />
         ))}

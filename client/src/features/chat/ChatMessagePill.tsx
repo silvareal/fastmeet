@@ -7,7 +7,7 @@ export const ChatMessagePill: FC<{ message: MessageDetailsType }> = ({
 }) => {
   const messageTime = new Date();
   return (
-    <Box className="bg-common-black text-common-white mb-3 p-2 max-w-[80%] w-max rounded-lg box-border">
+    <Box className="bg-common-black text-common-white mb-1 p-2 max-w-[80%] w-max rounded-lg box-border">
       <Typography variant="body1" className=" break-all">
         {message?.message}
       </Typography>

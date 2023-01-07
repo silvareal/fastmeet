@@ -5,7 +5,7 @@ import {
   Icon,
   IconButton,
   Tooltip,
-  Typography
+  Typography,
 } from "@mui/material";
 import { format } from "date-fns";
 import { FormikProps } from "formik";

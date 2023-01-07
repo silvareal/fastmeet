@@ -173,5 +173,45 @@ export function video(io: any) {
         socketId: socket.id,
       });
     });
+
+    /**
+     * Message to peers or specific peer in the same room
+     */
+    socket.on(
+      "messageAction",
+      async (config: { room_id: string; message: string }) => {
+        const room_id = config.room_id;
+        const message = config.message;
+
+        try {
+          log.debug<string, { room_id: string; message: string }>(
+            "[" +
+              socket.id +
+              "] emit messageAction to [room_id: " +
+              room_id +
+              "]",
+            {
+              room_id,
+              message,
+            }
+          );
+
+          await sendToRoom(
+            socket,
+            room_id,
+            socket.id,
+            clients,
+            "messageAction",
+            {
+              room_id: room_id,
+              socket_id: socket.id,
+              message,
+            }
+          );
+        } catch (err) {
+          log.error("message Peer", err);
+        }
+      }
+    );
   });
 }

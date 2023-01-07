@@ -1,3 +1,4 @@
+import { io } from "socket.io-client";
 /**
  * Get random number
  * @param {integer} length of string
@@ -12,3 +13,6 @@ export function getRandomCharacters(length: number): string {
   }
   return result;
 }
+
+export const baseUrl: string = process.env.REACT_APP_BASE_URL || "";
+export const socket = io(`${baseUrl}/video`, { forceNew: false });

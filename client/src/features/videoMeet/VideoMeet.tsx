@@ -9,13 +9,13 @@ import {
 } from "@mui/material";
 import { format } from "date-fns";
 import { FormikProps } from "formik";
-import React, { useMemo, useState } from "react";
+import React, { Dispatch, useMemo, useState } from "react";
 
 import VideoPreviewer from "common/VideoPreviewer";
 import ThemeConfig from "configs/ThemeConfig";
 import { ChatDrawer } from "features/chat/ChatDrawer";
 import "./VideoMeet.css";
-import { PeersType } from "./VideoMeetType";
+import { PeersRefType, PeersType } from "./VideoMeetType";
 
 interface VideoMeetProps {
   toggleCamera: () => void;
@@ -28,6 +28,8 @@ interface VideoMeetProps {
   hand: boolean;
   localMediaStream: MediaStream | undefined;
   peers: PeersType[];
+  setPeers: Function;
+  peersRef: { current: PeersRefType[] };
   formik: FormikProps<{
     name: string;
     gender: string;
@@ -57,6 +59,8 @@ export default function VideoMeet({
   hand,
   localMediaStream,
   peers,
+  setPeers,
+  peersRef,
   formik,
   getAvatarQuery,
   onInputName,
@@ -278,6 +282,8 @@ export default function VideoMeet({
             }}
             open={openChatDrawer}
             title="In-Call Messages"
+            setPeers={setPeers}
+            peersRef={peersRef}
           />
         </div>{" "}
       </main>

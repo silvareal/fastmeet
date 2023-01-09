@@ -1,8 +1,10 @@
 export interface SenderDetailsType {
-  userName: string;
-  ID: string;
+  userName?: string;
+  ID?: string;
+  isFromMe?: boolean;
 }
 export interface MessageDetailsType {
   message: string;
-  senderDetails: SenderDetailsType;
+  senderDetails?: SenderDetailsType;
+  isMessageRead?:boolean;
 }

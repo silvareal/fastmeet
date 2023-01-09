@@ -23,7 +23,16 @@ export const Chat = (props: {
    */
   socket.on(
     "messageAction",
-    (payload: { room_id: string; socket_id: string; message: string }) => {
+    async (payload: {
+      room_id: string;
+      socket_id: string;
+      message: string;
+    }) => {
+      try {
+        console.log("payload data", payload);
+      } catch (err) {
+        if (err) console.log(err);
+      }
       setPeers((peers: PeersType[]) => {
         const peerIndex = peers.findIndex(
           (peer: PeersType) => peer.peerId === payload.socket_id
@@ -33,7 +42,17 @@ export const Chat = (props: {
         const peerItem: PeersType = newPeer[peerIndex];
 
         if (peerItem && payload.message) {
-          console.log("payload.message", payload.message);
+          setMessages([
+            ...messages,
+            {
+              message: payload.message,
+              senderDetails: {
+                userName: peerItem?.userObj?.peer_name,
+                ID: peerItem?.userObj?.socketId,
+              },
+              isMessageRead: false,
+            },
+          ]);
         }
         peersRef.current = newPeer;
         return newPeer;
@@ -61,9 +80,9 @@ export const Chat = (props: {
         {
           message: values.message,
           senderDetails: {
-            userName: "samankwe",
-            ID: Math.random().toString(),
+            isFromMe: true,
           },
+          isMessageRead: false,
         },
       ]);
       resetForm();
@@ -72,15 +91,9 @@ export const Chat = (props: {
 
   return (
     <Box className="max-h-full mx-4 my-0 flex flex-col box-border">
-<<<<<<< HEAD
-      <Box className="max-h-[83%] overflow-scroll box-border mb-2 ">
-        {messages.map((message) => (
-          <ChatMessagePill message={message} />
-=======
-      <Box className="max-h-full overflow-scroll box-border">
+      <Box className="max-h-full overflow-scroll box-border flex flex-col">
         {messages.map((message, index) => (
           <ChatMessagePill key={index} message={message} />
->>>>>>> 8e9ff1094bfcb3ba7bbbeadb23212b8315b725e9
         ))}
       </Box>
 

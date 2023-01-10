@@ -9,11 +9,14 @@ import {
 } from "@mui/material";
 import { format } from "date-fns";
 import { FormikProps } from "formik";
-import React, { Dispatch, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import VideoPreviewer from "common/VideoPreviewer";
 import ThemeConfig from "configs/ThemeConfig";
 import { ChatDrawer } from "features/chat/ChatDrawer";
+import { MessageDetailsType } from "features/chat/ChatType";
+import usePlaySound from "hooks/usePlaySound";
+import { useSnackbar } from "notistack";
 import "./VideoMeet.css";
 import { PeersRefType, PeersType } from "./VideoMeetType";
 
@@ -120,14 +123,60 @@ export default function VideoMeet({
     [camera, mic]
   );
 
-  const [openChatDrawer, setOpenChatDrawer] = useState<boolean>(true);
+  const { enqueueSnackbar } = useSnackbar();
+  const chatMessageSound = usePlaySound("chatMessage");
+  const [isChatDrawerOpen, setIsChatDrawerOpen] = useState<boolean>(false);
+  const [messages, setMessages] = useState<MessageDetailsType[]>([]);
+  const [hasUnreadMessages, setHasUnreadMessages] = useState<boolean>(false);
+
+  useEffect(() => {
+    messages.map((message) => message.isMessageRead).includes(false)
+      ? setHasUnreadMessages(true)
+      : setHasUnreadMessages(false);
+
+    console.log("hasUnreadMessages", hasUnreadMessages);
+  }, [JSON.stringify(messages)]);
+
+  const toggleOpenChatDrawer = () => {
+    setIsChatDrawerOpen((prev) => !prev);
+    if (isChatDrawerOpen) {
+      // set all messages to read once chatdrawer is opened
+      const readMessages = messages.map((message) => {
+        return { ...message, isMessageRead: true };
+      });
+      setMessages(readMessages);
+      return;
+    }
+  };
+
+  const updateMessages = (message: MessageDetailsType) => {
+    if (isChatDrawerOpen && !message.senderDetails?.isFromMe) {
+      enqueueSnackbar(
+        ` you have a message from ${message?.senderDetails?.userName} 💬`,
+        {
+          anchorOrigin: {
+            vertical: "top",
+            horizontal: "right",
+          },
+        }
+      );
+      chatMessageSound.play();
+    }
+    const incomingMessage: MessageDetailsType = {
+      ...message,
+      isMessageRead: isChatDrawerOpen ? true : false,
+    };
+    setMessages([...messages, incomingMessage]);
+
+    return;
+  };
 
   return (
     <div className="bg-[#000000] overflow-y-hidden h-screen max-h-screen min-h-[500px]">
       <main className="overflow-y-scroll w-100">
-        <div className="h-[calc(100vh-80px)] pt-5 px-3 flex gap-2">
+        <div className="h-[calc(100vh-80px)] pt-5 px-3 flex gap-2 w-full">
           {peers.length >= 1 ? (
-            <div className="layout-grid-auto h-full">
+            <div className="grid grid-cols-2 gap-1 h-full">
               <VideoPreviewer
                 camera={camera}
                 mic={mic}
@@ -277,10 +326,10 @@ export default function VideoMeet({
           )}
 
           <ChatDrawer
-            onClose={() => {
-              setOpenChatDrawer(false);
-            }}
-            open={openChatDrawer}
+            messages={messages}
+            updateMessages={updateMessages}
+            onClose={toggleOpenChatDrawer}
+            open={isChatDrawerOpen}
             title="In-Call Messages"
             setPeers={setPeers}
             peersRef={peersRef}
@@ -312,12 +361,8 @@ export default function VideoMeet({
         </div>
         <div>
           <Tooltip title="chat" placement="top">
-            <IconButton
-              onClick={() => {
-                setOpenChatDrawer((prev) => !prev);
-              }}
-            >
-              <Badge variant="dot" color="info">
+            <IconButton onClick={toggleOpenChatDrawer}>
+              <Badge variant="dot" color="info" invisible={!hasUnreadMessages}>
                 <Icon>
                   <Iconify
                     icon="carbon:chat"

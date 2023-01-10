@@ -1,21 +1,21 @@
 import { Icon } from "@iconify/react";
 import { Box, IconButton, TextField } from "@mui/material";
-import React, { Dispatch, useState } from "react";
+import { PeersRefType, PeersType } from "features/videoMeet/VideoMeetType";
+import { useFormik } from "formik";
+import { useParams } from "react-router-dom";
+import { socket } from "utils/VideoUtils";
+import * as yup from "yup";
 import { ChatMessagePill } from "./ChatMessagePill";
 import { MessageDetailsType } from "./ChatType";
-import { useFormik } from "formik";
-import * as yup from "yup";
-import { socket } from "utils/VideoUtils";
-import { useParams } from "react-router-dom";
-import { PeersRefType, PeersType } from "features/videoMeet/VideoMeetType";
 
 export const Chat = (props: {
   setPeers: Function;
   peersRef: { current: PeersRefType[] };
+  messages: MessageDetailsType[];
+  updateMessages: (message: MessageDetailsType) => void;
 }) => {
-  const { setPeers, peersRef } = props;
+  const { setPeers, peersRef, messages, updateMessages } = props;
 
-  const [messages, setMessages] = useState<MessageDetailsType[]>([]);
   const { meetId } = useParams();
 
   /**
@@ -42,17 +42,13 @@ export const Chat = (props: {
         const peerItem: PeersType = newPeer[peerIndex];
 
         if (peerItem && payload.message) {
-          setMessages([
-            ...messages,
-            {
-              message: payload.message,
-              senderDetails: {
-                userName: peerItem?.userObj?.peer_name,
-                ID: peerItem?.userObj?.socketId,
-              },
-              isMessageRead: false,
+          updateMessages({
+            message: payload.message,
+            senderDetails: {
+              userName: peerItem?.userObj?.peer_name,
+              ID: peerItem?.userObj?.socketId,
             },
-          ]);
+          });
         }
         peersRef.current = newPeer;
         return newPeer;
@@ -75,16 +71,12 @@ export const Chat = (props: {
         message: values.message,
       } as any);
 
-      setMessages([
-        ...messages,
-        {
-          message: values.message,
-          senderDetails: {
-            isFromMe: true,
-          },
-          isMessageRead: false,
+      updateMessages({
+        message: values.message,
+        senderDetails: {
+          isFromMe: true,
         },
-      ]);
+      });
       resetForm();
     },
   });

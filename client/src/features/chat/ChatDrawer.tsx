@@ -1,8 +1,8 @@
 import { Icon } from "@iconify/react";
 import { Box, IconButton, Typography } from "@mui/material";
 import ThemeConfig from "configs/ThemeConfig";
-import { PeersRefType, PeersType } from "features/videoMeet/VideoMeetType";
-import { Dispatch, FC, useRef, useState } from "react";
+import { PeersRefType } from "features/videoMeet/VideoMeetType";
+import { FC } from "react";
 import { Chat } from "./Chat";
 import { MessageDetailsType } from "./ChatType";
 
@@ -12,11 +12,23 @@ export const ChatDrawer: FC<{
   title: string;
   setPeers: Function;
   peersRef: { current: PeersRefType[] };
-}> = ({ open, onClose, title, setPeers, peersRef }) => {
+  messages: MessageDetailsType[];
+  updateMessages: (message: MessageDetailsType) => void;
+}> = ({
+  open,
+  onClose,
+  title,
+  setPeers,
+  peersRef,
+  messages,
+  updateMessages,
+}) => {
   return (
     <Box
       className={`rounded-lg ${
-        open ? "w-[500px]" : "w-0"
+        !!open ? "w-[500px]" : "w-0"
+      }   ${
+        !!open ? "w-[500px]" : "w-0"
       }  h-full min-h-full box-border bg-common-white flex flex-col justify-between pb-4`}
       style={{
         transition: ThemeConfig.transitions.create("width", {
@@ -35,8 +47,14 @@ export const ChatDrawer: FC<{
         </Box>
       )}
 
-      {/* chat messages and input */}
-      {!!open && <Chat setPeers={setPeers} peersRef={peersRef} />}
+      {!!open && (
+        <Chat
+          messages={messages}
+          updateMessages={updateMessages}
+          setPeers={setPeers}
+          peersRef={peersRef}
+        />
+      )}
     </Box>
   );
 };

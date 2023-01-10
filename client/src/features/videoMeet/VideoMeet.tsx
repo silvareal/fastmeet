@@ -1,5 +1,5 @@
-import { Fab, Icon, Tooltip, Typography } from "@mui/material";
-import React, { useMemo } from "react";
+import { Fab, Icon, InputBase, styled, Tooltip, Typography } from "@mui/material";
+import React, { KeyboardEvent, useMemo, useState } from "react";
 import { Icon as Iconify } from "@iconify/react";
 import { format } from "date-fns";
 import { FormikProps } from "formik";
@@ -8,6 +8,18 @@ import VideoPreviewer from "common/VideoPreviewer";
 import "./VideoMeet.css";
 import ThemeConfig from "configs/ThemeConfig";
 import { PeersType } from "./VideoMeetType";
+
+const PreviewInput = styled(InputBase)(({ theme }) => ({
+  '& .MuiInputBase-input': {
+    position: 'relative',
+    backgroundColor: 'transparent',
+    border: 'none',
+    width: 'auto',
+    padding: '.2rem .5rem',
+    color:'white',
+    fontSize:'0.75rem'
+  },
+}));
 
 interface VideoMeetProps {
   toggleCamera: () => void;
@@ -51,7 +63,7 @@ export default function VideoMeet({
   peers,
   formik,
   getAvatarQuery,
-  onInputName,
+  onInputName
 }: VideoMeetProps) {
   const mainActions: MainActionProps[] = useMemo(
     () => [
@@ -61,7 +73,7 @@ export default function VideoMeet({
         color: `${mic ? "primary" : "error"}`,
         onClick: toggleAudio,
         size: "small",
-        icon: `${mic ? "carbon:microphone" : "carbon:microphone-off"}`,
+        icon: `${mic ? "carbon:microphone" : "carbon:microphone-off"}`
       },
       {
         title: "on/off camera",
@@ -69,7 +81,7 @@ export default function VideoMeet({
         color: `${camera ? "primary" : "error"}`,
         onClick: toggleCamera,
         size: "small",
-        icon: `${camera ? "bi:camera-video" : "bi:camera-video-off"}`,
+        icon: `${camera ? "bi:camera-video" : "bi:camera-video-off"}`
       },
       {
         title: "Raise Hand",
@@ -77,7 +89,7 @@ export default function VideoMeet({
         color: "primary",
         onClick: raiseHand,
         size: "small",
-        icon: "emojione-monotone:hand-with-fingers-splayed",
+        icon: "emojione-monotone:hand-with-fingers-splayed"
       },
       {
         title: "Share Screen",
@@ -85,7 +97,7 @@ export default function VideoMeet({
         color: "primary",
         onClick: shareScreen,
         size: "small",
-        icon: "fluent:share-screen-start-24-regular",
+        icon: "fluent:share-screen-start-24-regular"
       },
       {
         title: "End Call",
@@ -93,8 +105,8 @@ export default function VideoMeet({
         color: "error",
         onClick: hangUp,
         size: "small",
-        icon: "bi-telephone",
-      },
+        icon: "bi-telephone"
+      }
       // {
       //   title: "Layout",
       //   variant: "opaque",
@@ -107,6 +119,21 @@ export default function VideoMeet({
     // eslint-disable-next-line
     [camera, mic]
   );
+  const [isEditing, setIsEditing] = useState(false);
+
+  function handleClick() {
+    setIsEditing(true);
+  }
+
+  function handleBlur() {
+    setIsEditing(false);
+  }
+
+  function handleKeyPress(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key === "Enter") {
+      setIsEditing(false);
+    }
+  }
 
   return (
     <div className="bg-[#000000] overflow-y-hidden h-screen max-h-screen min-h-[500px]">
@@ -175,7 +202,7 @@ export default function VideoMeet({
                     <div>
                       <Icon
                         style={{
-                          color: `${ThemeConfig.palette.common.white}`,
+                          color: `${ThemeConfig.palette.common.white}`
                         }}
                       >
                         <Iconify
@@ -247,16 +274,27 @@ export default function VideoMeet({
                       </Icon>
                     </Tooltip>
                   )}
-                  <Typography
-                    className="vids-preview-title"
-                    color={"white"}
-                    variant="subtitle2"
-                    contentEditable="true"
-                    suppressContentEditableWarning={true}
-                    onChange={onInputName}
-                  >
-                    {formik.values.name}
-                  </Typography>
+                  {isEditing ? (
+                    <PreviewInput
+                      autoFocus
+                      value={formik.values.name}
+                      onBlur={handleBlur}
+                      onKeyPress={handleKeyPress}
+                      onChange={onInputName}
+                    />
+                  ) : (
+                    <Typography
+                      className="vids-preview-title"
+                      color={"white"}
+                      variant="subtitle2"
+                      sx={{
+                        cursor: "pointer"
+                      }}
+                      onClick={handleClick}
+                    >
+                      {formik.values.name}
+                    </Typography>
+                  )}
                 </div>
               }
             />

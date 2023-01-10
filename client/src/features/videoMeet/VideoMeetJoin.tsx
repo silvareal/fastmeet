@@ -6,6 +6,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useSnackbar } from "notistack";
 import { io } from "socket.io-client";
 import { Icon as Iconify } from "@iconify/react";
+import escape from 'lodash/escape';
 
 import AppHeader from "AppHeader";
 import VideoPreviewer from "common/VideoPreviewer";
@@ -15,7 +16,7 @@ import {
   toggleAudio,
   toggleCamera,
   addPeer,
-  createPeer,
+  createPeer
 } from "./VideoMeetCommon";
 import VideoMeetJoinVideoPreviewerBody from "./VideoMeetJoinVideoPreviewerBody";
 import VideoMeetJoinVideoPreviewerHeader from "./VideoMeetJoinVideoPreviewerHeader";
@@ -27,7 +28,7 @@ import {
   UserObjType,
   UserJoinedPayloadType,
   PeersRefType,
-  PeerActionStatusConfig,
+  PeerActionStatusConfig
 } from "./VideoMeetType";
 import LoadingContent from "common/LoadingContent";
 import VideoMeetJoinForm from "./VideoMeetJoinForm";
@@ -67,31 +68,31 @@ export default function VideoMeetJoin() {
 
   const [getTurnServerQuery] = useAxios({
     url: `${process.env.REACT_APP_BASE_URL}/api/turn-server`,
-    method: "GET",
+    method: "GET"
   });
 
   const formik = useFormik({
     initialValues: {
       name: "",
       gender: "male",
-      meetId,
+      meetId
     },
     enableReinitialize: true,
     validationSchema: yup.object({
       name: yup.string().label("Full Name").required("Required"),
-      gender: yup.string().label("Full Name").required("Required"),
+      gender: yup.string().label("Full Name").required("Required")
     }),
     onSubmit: (values) => {
       setCanJoinMeeting(true);
-    },
+    }
   });
 
   const [getAvatarQuery] = useAxios({
     url: `${process.env.REACT_APP_BASE_URL}/api/get-avatar`,
     method: "GET",
     params: {
-      category: formik.values.gender,
-    },
+      category: formik.values.gender
+    }
   });
 
   /**
@@ -110,7 +111,7 @@ export default function VideoMeetJoin() {
       peer_audio: mic,
       peer_raised_hand: handRaised,
       peer_screen_record: screenRecordRef.current,
-      peer_screen_share: screenShare,
+      peer_screen_share: screenShare
     });
 
     socket.on("clients-in-room", (users: UserObjType[]) => {
@@ -130,12 +131,12 @@ export default function VideoMeetJoin() {
           peersRef.current.push({
             peerId: user.socketId,
             peerObj: peer,
-            userObj: user,
+            userObj: user
           });
           peers.push({
             peerId: user.socketId,
             peerObj: peer,
-            userObj: user,
+            userObj: user
           });
         }
       });
@@ -169,11 +170,11 @@ export default function VideoMeetJoin() {
         peersRef.current.push({
           peerId: payload.user?.socketId,
           peerObj: peer,
-          userObj: payload.user,
+          userObj: payload.user
         });
         setPeers((users: PeersType[]) => [
           ...users,
-          { peerId: payload.callerId, peerObj: peer, userObj: payload.user },
+          { peerId: payload.callerId, peerObj: peer, userObj: payload.user }
         ]);
 
         if (peersRef.current.length >= 1) {
@@ -195,8 +196,8 @@ export default function VideoMeetJoin() {
           {
             anchorOrigin: {
               vertical: "top",
-              horizontal: "center",
-            },
+              horizontal: "center"
+            }
           }
         );
       }
@@ -242,8 +243,8 @@ export default function VideoMeetJoin() {
       enqueueSnackbar(`${item.userObj.peer_name} Left meeting`, {
         anchorOrigin: {
           vertical: "bottom",
-          horizontal: "left",
-        },
+          horizontal: "left"
+        }
       });
 
       peersRef.current = peers;
@@ -290,8 +291,8 @@ export default function VideoMeetJoin() {
                   {
                     anchorOrigin: {
                       vertical: "top",
-                      horizontal: "right",
-                    },
+                      horizontal: "right"
+                    }
                   }
                 );
               }
@@ -383,7 +384,7 @@ export default function VideoMeetJoin() {
           room_id: meetId,
           socket_id: socket.id,
           element: "video",
-          status: camera,
+          status: camera
         } as PeerActionStatusConfig);
         return camera;
       });
@@ -404,8 +405,8 @@ export default function VideoMeetJoin() {
         {
           anchorOrigin: {
             vertical: "top",
-            horizontal: "right",
-          },
+            horizontal: "right"
+          }
         }
       );
     });
@@ -417,7 +418,7 @@ export default function VideoMeetJoin() {
         room_id: meetId,
         socket_id: socket.id,
         element: "audio",
-        status: mic,
+        status: mic
       } as PeerActionStatusConfig);
 
       enqueueSnackbar(
@@ -436,8 +437,8 @@ export default function VideoMeetJoin() {
         {
           anchorOrigin: {
             vertical: "top",
-            horizontal: "right",
-          },
+            horizontal: "right"
+          }
         }
       );
     });
@@ -451,12 +452,15 @@ export default function VideoMeetJoin() {
   }
 
   function onInputChangeNameFn(e: React.ChangeEvent<HTMLInputElement>) {
-    formik.setFieldValue("name", e.target.innerHTML);
+    formik.setFieldValue("name", e.target.value);
+    
+    const sanitizedText = escape(e.target.value);
+
     socket.emit("peerActionStatus", {
       room_id: meetId,
       socket_id: socket.id,
       element: "name",
-      status: e.target.innerHTML,
+      status: sanitizedText
     } as PeerActionStatusConfig);
   }
 
@@ -466,7 +470,7 @@ export default function VideoMeetJoin() {
         room_id: meetId,
         socket_id: socket.id,
         element: "hand",
-        status: !handRaised,
+        status: !handRaised
       } as PeerActionStatusConfig);
       if (!handRaised) {
         raisedHandSound.play();
@@ -474,8 +478,8 @@ export default function VideoMeetJoin() {
       enqueueSnackbar(`${!handRaised ? "Hand Raised ✋" : "Hand Down ✋"}`, {
         anchorOrigin: {
           vertical: "top",
-          horizontal: "right",
-        },
+          horizontal: "right"
+        }
       });
       return !handRaised;
     });
@@ -491,10 +495,10 @@ export default function VideoMeetJoin() {
       audio: {
         echoCancellation: true,
         noiseSuppression: true,
-        sampleRate: 44100,
+        sampleRate: 44100
       },
       // video: { frameRate: { max: screenMaxFrameRate } },
-      video: true,
+      video: true
     };
 
     let screenMediaPromise: MediaStream;
@@ -509,7 +513,7 @@ export default function VideoMeetJoin() {
         // on screen sharing stop
         screenMediaPromise = await navigator.mediaDevices.getUserMedia({
           audio: true,
-          video: true,
+          video: true
         });
       }
       if (screenMediaPromise) {
@@ -519,7 +523,7 @@ export default function VideoMeetJoin() {
           room_id: meetId,
           socket_id: socket.id,
           element: "screen",
-          status: !screenRecordRef,
+          status: !screenRecordRef
         } as PeerActionStatusConfig);
 
         setLocalMediaStream(screenMediaPromise);
@@ -545,6 +549,7 @@ export default function VideoMeetJoin() {
 
   if (canJoinMeeting) {
     return (
+      <>
       <LoadingContent
         loading={getTurnServerQuery.loading || getAvatarQuery.loading}
         error={!!getTurnServerQuery.error || !!getAvatarQuery.error}
@@ -565,6 +570,7 @@ export default function VideoMeetJoin() {
           getAvatarQuery={getAvatarQuery}
         />
       </LoadingContent>
+      </>
     );
   }
 

@@ -1,5 +1,12 @@
-import { Fab, Icon, Tooltip, Typography } from "@mui/material";
-import React, { useMemo } from "react";
+import {
+  Fab,
+  Icon,
+  InputBase,
+  styled,
+  Tooltip,
+  Typography,
+} from "@mui/material";
+import React, { KeyboardEvent, useMemo, useState } from "react";
 import { Icon as Iconify } from "@iconify/react";
 import { format } from "date-fns";
 import { FormikProps } from "formik";
@@ -8,6 +15,18 @@ import VideoPreviewer from "common/VideoPreviewer";
 import "./VideoMeet.css";
 import ThemeConfig from "configs/ThemeConfig";
 import { PeersType } from "./VideoMeetType";
+
+const PreviewInput = styled(InputBase)(({ theme }) => ({
+  "& .MuiInputBase-input": {
+    position: "relative",
+    backgroundColor: "transparent",
+    border: "none",
+    width: "auto",
+    padding: ".2rem .5rem",
+    color: "white",
+    fontSize: "0.75rem",
+  },
+}));
 
 interface VideoMeetProps {
   toggleCamera: () => void;
@@ -107,6 +126,21 @@ export default function VideoMeet({
     // eslint-disable-next-line
     [camera, mic]
   );
+  const [isEditing, setIsEditing] = useState(false);
+
+  function handleClick() {
+    setIsEditing(true);
+  }
+
+  function handleBlur() {
+    setIsEditing(false);
+  }
+
+  function handleKeyPress(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key === "Enter") {
+      setIsEditing(false);
+    }
+  }
 
   return (
     <div className="bg-[#000000] overflow-y-hidden h-screen max-h-screen min-h-[500px]">
@@ -247,16 +281,27 @@ export default function VideoMeet({
                       </Icon>
                     </Tooltip>
                   )}
-                  <Typography
-                    className="vids-preview-title"
-                    color={"white"}
-                    variant="subtitle2"
-                    contentEditable="true"
-                    suppressContentEditableWarning={true}
-                    onInput={onInputName}
-                  >
-                    {formik.values.name}
-                  </Typography>
+                  {isEditing ? (
+                    <PreviewInput
+                      autoFocus
+                      value={formik.values.name}
+                      onBlur={handleBlur}
+                      onKeyPress={handleKeyPress}
+                      onChange={onInputName}
+                    />
+                  ) : (
+                    <Typography
+                      className="vids-preview-title"
+                      color={"white"}
+                      variant="subtitle2"
+                      sx={{
+                        cursor: "pointer",
+                      }}
+                      onClick={handleClick}
+                    >
+                      {formik.values.name}
+                    </Typography>
+                  )}
                 </div>
               }
             />

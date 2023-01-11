@@ -5,6 +5,7 @@ import * as yup from "yup";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSnackbar } from "notistack";
 import { Icon as Iconify } from "@iconify/react";
+import escape from "lodash/escape";
 
 import AppHeader from "AppHeader";
 import VideoPreviewer from "common/VideoPreviewer";
@@ -447,12 +448,15 @@ export default function VideoMeetJoin() {
   }
 
   function onInputChangeNameFn(e: React.ChangeEvent<HTMLInputElement>) {
-    formik.setFieldValue("name", e.target.innerHTML);
+    formik.setFieldValue("name", e.target.value);
+
+    const sanitizedText = escape(e.target.value);
+
     socket.emit("peerActionStatus", {
       room_id: meetId,
       socket_id: socket.id,
       element: "name",
-      status: e.target.innerHTML,
+      status: sanitizedText,
     } as PeerActionStatusConfig);
   }
 
@@ -541,26 +545,28 @@ export default function VideoMeetJoin() {
 
   if (canJoinMeeting) {
     return (
-      <LoadingContent
-        loading={getTurnServerQuery.loading || getAvatarQuery.loading}
-        error={!!getTurnServerQuery.error || !!getAvatarQuery.error}
-      >
-        <VideoMeet
-          camera={camera}
-          hand={handRaised}
-          mic={mic}
-          toggleCamera={toggleCameraFn}
-          raiseHand={raiseHandFn}
-          toggleAudio={toggleAudioFn}
-          hangUp={hangUpFn}
-          shareScreen={shareScreenFn}
-          onInputName={onInputChangeNameFn}
-          localMediaStream={localMediaStream}
-          formik={formik}
-          peers={peers}
-          getAvatarQuery={getAvatarQuery}
-        />
-      </LoadingContent>
+      <>
+        <LoadingContent
+          loading={getTurnServerQuery.loading || getAvatarQuery.loading}
+          error={!!getTurnServerQuery.error || !!getAvatarQuery.error}
+        >
+          <VideoMeet
+            camera={camera}
+            hand={handRaised}
+            mic={mic}
+            toggleCamera={toggleCameraFn}
+            raiseHand={raiseHandFn}
+            toggleAudio={toggleAudioFn}
+            hangUp={hangUpFn}
+            shareScreen={shareScreenFn}
+            onInputName={onInputChangeNameFn}
+            localMediaStream={localMediaStream}
+            formik={formik}
+            peers={peers}
+            getAvatarQuery={getAvatarQuery}
+          />
+        </LoadingContent>
+      </>
     );
   }
 

@@ -79,14 +79,14 @@ export default function VideoMeet({
         size: "small",
         icon: "emojione-monotone:hand-with-fingers-splayed",
       },
-      {
-        title: "Share Screen",
-        variant: "opaque",
-        color: "primary",
-        onClick: shareScreen,
-        size: "small",
-        icon: "fluent:share-screen-start-24-regular",
-      },
+      // {
+      //   title: "Share Screen",
+      //   variant: "opaque",
+      //   color: "primary",
+      //   onClick: shareScreen,
+      //   size: "small",
+      //   icon: "fluent:share-screen-start-24-regular",
+      // },
       {
         title: "End Call",
         variant: "opaque",

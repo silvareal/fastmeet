@@ -56,7 +56,7 @@ export default function VideoMeetJoin() {
   const [canJoinMeeting, setCanJoinMeeting] = useState<boolean>(false);
   const [peers, setPeers] = useState<PeersType[]>([]);
 
-  const numberOfParticipant: number = peersRef.current.length;
+  // const numberOfParticipant: number = peersRef.current.length;
 
   const addPeerSound = usePlaySound("addPeer");
   const raisedHandSound = usePlaySound("raiseHand");

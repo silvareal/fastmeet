@@ -12,7 +12,7 @@ export default function VideoMeetJoinVideoPreviewerHeader({
 }: {
   localMediaStream: MediaStream | undefined;
 }) {
-  const [openVideoSettings, setOpenVideoSettings] = useState(false);
+  const [, setOpenVideoSettings] = useState(false);
 
   const videoSettingsActions = [
     {

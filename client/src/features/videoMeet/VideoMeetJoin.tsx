@@ -2,26 +2,17 @@ import { Container, Icon } from "@mui/material";
 import React, { useRef, useEffect, useState } from "react";
 import { useFormik } from "formik";
 import * as yup from "yup";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useSnackbar } from "notistack";
 import { Icon as Iconify } from "@iconify/react";
-import escape from "lodash/escape";
 
 import AppHeader from "AppHeader";
 import VideoPreviewer from "common/VideoPreviewer";
-import {
-  getPeerInfo,
-  hangUp,
-  toggleAudio,
-  toggleCamera,
-  addPeer,
-  createPeer,
-} from "./VideoMeetCommon";
+import { getPeerInfo, addPeerSignal, createPeer } from "./VideoMeetCommon";
 import VideoMeetJoinVideoPreviewerBody from "./VideoMeetJoinVideoPreviewerBody";
 import VideoMeetJoinVideoPreviewerHeader from "./VideoMeetJoinVideoPreviewerHeader";
 import VideoMeetJoinVideoPreviewerFooter from "./VideoMeetJoinVideoPreviewerFooter";
 import VideoMeet from "./VideoMeet";
-import useAxios from "axios-hooks";
 import {
   PeersType,
   UserObjType,
@@ -33,29 +24,18 @@ import LoadingContent from "common/LoadingContent";
 import VideoMeetJoinForm from "./VideoMeetJoinForm";
 import { genderToPronoun } from "utils/GLobalUtils";
 import usePlaySound from "hooks/usePlaySound";
-import ThemeConfig from "configs/ThemeConfig";
-import { BASE_URL, socket } from "utils/VideoUtils";
+import useMeeting from "hooks/useMeeting";
+import fastmeetApi from "store/StoreQuerySlice";
+import { socket } from "utils/VideoUtils";
 
 export default function VideoMeetJoin() {
   const { meetId } = useParams();
-  const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
 
   const peersRef: { current: any } = useRef([]);
   const screenRecordRef: { current: any } = useRef<boolean>(false);
 
-  console.log("peersRef", peersRef);
-  const [camera, setCamera] = useState<boolean>(false);
-  const [mic, setMic] = useState<boolean>(false);
-
-  // eslint-disable-next-line
-  const [screenShare, setScreenShare] = useState<boolean>(false);
-  const [handRaised, setHandRaised] = useState<boolean>(false);
-  const [localMediaStream, setLocalMediaStream] = useState<MediaStream>();
-  const [streamError, setStreamError] = useState<string>("");
-  const [iceServers, setIceServers] = useState<RTCIceServer[]>();
   const [canJoinMeeting, setCanJoinMeeting] = useState<boolean>(false);
-  const [peers, setPeers] = useState<PeersType[]>([]);
 
   // const numberOfParticipant: number = peersRef.current.length;
 
@@ -63,10 +43,24 @@ export default function VideoMeetJoin() {
   const raisedHandSound = usePlaySound("raiseHand");
   const onlyParticipantSound = usePlaySound("onlyParticipant");
 
-  const [getTurnServerQuery] = useAxios({
-    url: `${BASE_URL}/api/turn-server`,
-    method: "GET",
-  });
+  const {
+    localMediaStream,
+    handRaised,
+    streamError,
+    mic,
+    camera,
+    peers,
+    setPeers,
+    screenShare,
+    toggleCamera,
+    toggleMic,
+    hangUp,
+    raiseHand,
+    iceServers,
+    setStreamError,
+    onInputChangeName,
+    getTurnServerQuery,
+  } = useMeeting(meetId, { canJoinMeeting });
 
   const formik = useFormik({
     initialValues: {
@@ -84,13 +78,11 @@ export default function VideoMeetJoin() {
     },
   });
 
-  const [getAvatarQuery] = useAxios({
-    url: `${BASE_URL}/api/get-avatar`,
-    method: "GET",
-    params: {
-      category: formik.values.gender,
-    },
+  const getAvatarQuery = fastmeetApi.useGetAvatarQuery({
+    category: formik.values.gender,
   });
+
+  const getAvatarResult = getAvatarQuery.data as { data: string };
 
   /**
    * join to channel and send some peer info
@@ -100,7 +92,7 @@ export default function VideoMeetJoin() {
     socket.emit("join", meetId, {
       userAgent: navigator.userAgent.toLowerCase(),
       channel_password: "",
-      avatar: getAvatarQuery.data.data,
+      avatar: getAvatarResult?.data,
       peer_info: getPeerInfo(),
       peer_name: formik.values.name,
       peer_gender: formik.values.gender,
@@ -157,7 +149,7 @@ export default function VideoMeetJoin() {
     socket.on("user-joined", (payload: UserJoinedPayloadType) => {
       console.log("payload", payload);
       if (iceServers !== undefined) {
-        const peer = addPeer(
+        const peer = addPeerSignal(
           payload.signal,
           payload.callerId,
           stream,
@@ -308,48 +300,6 @@ export default function VideoMeetJoin() {
     });
   }
 
-  function initEnumerateDevices() {
-    navigator.mediaDevices
-      ?.getUserMedia({ video: true, audio: { echoCancellation: true } })
-      .then((stream: MediaStream) => {
-        setLocalMediaStream(stream);
-        setCamera(true);
-        setMic(true);
-      })
-      .catch((err) => {
-        console.log("err", err);
-        setCamera(false);
-        setMic(false);
-        setStreamError(err?.name);
-        /* handle the error */
-        if (
-          err.name === "NotFoundError" ||
-          err.name === "DevicesNotFoundError"
-        ) {
-          // Required track is missing
-        } else if (
-          err.name === "NotReadableError" ||
-          err.name === "TrackStartError"
-        ) {
-          //webcam or mic are already in use
-        } else if (
-          err.name === "OverconstrainedError" ||
-          err.name === "ConstraintNotSatisfiedError"
-        ) {
-          //constraints can not be satisfied by avb. devices
-        } else if (
-          err.name === "NotAllowedError" ||
-          err.name === "PermissionDeniedError"
-        ) {
-          //permission denied in browser
-        } else if (err.name === "TypeError" || err.name === "TypeError") {
-          //empty constraints object
-        } else {
-          //other errors
-        }
-      });
-  }
-
   useEffect(() => {
     if (
       canJoinMeeting &&
@@ -359,182 +309,62 @@ export default function VideoMeetJoin() {
       joinToChannel(localMediaStream);
     }
     // eslint-disable-next-line
-  }, [canJoinMeeting, localMediaStream]);
-
-  useEffect(() => {
-    if (!!getTurnServerQuery.response && !getTurnServerQuery.error) {
-      setIceServers(getTurnServerQuery.data.data.iceServers);
-    }
-  }, [getTurnServerQuery]);
-
-  useEffect(() => {
-    if (!!iceServers) {
-      initEnumerateDevices();
-    }
-  }, [iceServers]);
-
-  function toggleCameraFn() {
-    toggleCamera(localMediaStream, setCamera, function (camera) {
-      setCamera((camera) => {
-        socket.emit("peerActionStatus", {
-          room_id: meetId,
-          socket_id: socket.id,
-          element: "video",
-          status: camera,
-        } as PeerActionStatusConfig);
-        return camera;
-      });
-
-      enqueueSnackbar(
-        <>
-          <Icon style={{ color: `${ThemeConfig.palette.common.white}` }}>
-            <Iconify
-              icon={`${
-                camera
-                  ? "heroicons:video-camera-solid"
-                  : "heroicons:video-camera-slash-solid"
-              }`}
-            />
-          </Icon>{" "}
-          {camera ? "Camera turned on" : "Camera turned off"}
-        </>,
-        {
-          anchorOrigin: {
-            vertical: "top",
-            horizontal: "right",
-          },
-        }
-      );
-    });
-  }
-
-  function toggleAudioFn() {
-    toggleAudio(localMediaStream, setMic, function (mic) {
-      socket.emit("peerActionStatus", {
-        room_id: meetId,
-        socket_id: socket.id,
-        element: "audio",
-        status: mic,
-      } as PeerActionStatusConfig);
-
-      enqueueSnackbar(
-        <>
-          <Icon style={{ color: `${ThemeConfig.palette.common.white}` }}>
-            <Iconify
-              icon={`${
-                mic
-                  ? "clarity:microphone-solid"
-                  : "clarity:microphone-mute-solid"
-              }`}
-            />
-          </Icon>
-          {mic ? "Microphone turned on" : "Microphone turned off"}
-        </>,
-        {
-          anchorOrigin: {
-            vertical: "top",
-            horizontal: "right",
-          },
-        }
-      );
-    });
-  }
-
-  function hangUpFn() {
-    hangUp(localMediaStream);
-    navigate("/");
-    onlyParticipantSound.pause();
-    socket.disconnect();
-  }
-
-  function onInputChangeNameFn(e: React.ChangeEvent<HTMLInputElement>) {
-    formik.setFieldValue("name", e.target.value);
-
-    const sanitizedText = escape(e.target.value);
-
-    socket.emit("peerActionStatus", {
-      room_id: meetId,
-      socket_id: socket.id,
-      element: "name",
-      status: sanitizedText,
-    } as PeerActionStatusConfig);
-  }
-
-  function raiseHandFn() {
-    setHandRaised((handRaised) => {
-      socket.emit("peerActionStatus", {
-        room_id: meetId,
-        socket_id: socket.id,
-        element: "hand",
-        status: !handRaised,
-      } as PeerActionStatusConfig);
-      if (!handRaised) {
-        raisedHandSound.play();
-      }
-      enqueueSnackbar(`${!handRaised ? "Hand Raised ✋" : "Hand Down ✋"}`, {
-        anchorOrigin: {
-          vertical: "top",
-          horizontal: "right",
-        },
-      });
-      return !handRaised;
-    });
-  }
+  }, [canJoinMeeting]);
 
   /**
    * Enable - disable screen sharing
    * https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia
    */
-  async function toggleScreenSharing() {
-    const constraints = {
-      // audio: true, // enable tab audio
-      audio: {
-        echoCancellation: true,
-        noiseSuppression: true,
-        sampleRate: 44100,
-      },
-      // video: { frameRate: { max: screenMaxFrameRate } },
-      video: true,
-    };
+  // async function toggleScreenSharing() {
+  //   const constraints = {
+  //     // audio: true, // enable tab audio
+  //     audio: {
+  //       echoCancellation: true,
+  //       noiseSuppression: true,
+  //       sampleRate: 44100,
+  //     },
+  //     // video: { frameRate: { max: screenMaxFrameRate } },
+  //     video: true,
+  //   };
 
-    let screenMediaPromise: MediaStream;
+  //   let screenMediaPromise: MediaStream;
 
-    try {
-      if (!screenRecordRef.current) {
-        // on screen sharing start
-        screenMediaPromise = await navigator.mediaDevices.getDisplayMedia(
-          constraints
-        );
-      } else {
-        // on screen sharing stop
-        screenMediaPromise = await navigator.mediaDevices.getUserMedia({
-          audio: true,
-          video: true,
-        });
-      }
-      if (screenMediaPromise) {
-        console.log("screenMediaPromise", screenMediaPromise);
-        screenRecordRef.current = !screenRecordRef.current;
-        socket.emit("peerActionStatus", {
-          room_id: meetId,
-          socket_id: socket.id,
-          element: "screen",
-          status: !screenRecordRef,
-        } as PeerActionStatusConfig);
+  //   try {
+  //     if (!screenRecordRef.current) {
+  //       // on screen sharing start
+  //       screenMediaPromise = await navigator.mediaDevices.getDisplayMedia(
+  //         constraints
+  //       );
+  //     } else {
+  //       // on screen sharing stop
+  //       screenMediaPromise = await navigator.mediaDevices.getUserMedia({
+  //         audio: true,
+  //         video: true,
+  //       });
+  //     }
+  //     if (screenMediaPromise) {
+  //       console.log("screenMediaPromise", screenMediaPromise);
+  //       screenRecordRef.current = !screenRecordRef.current;
+  //       socket.emit("peerActionStatus", {
+  //         room_id: meetId,
+  //         socket_id: socket.id,
+  //         element: "screen",
+  //         status: !screenRecordRef,
+  //       } as PeerActionStatusConfig);
 
-        setLocalMediaStream(screenMediaPromise);
+  //       setLocalMediaStream(screenMediaPromise);
 
-        // await stopLocalVideoTrack();
-        // await refreshMyLocalStream(screenMediaPromise);
-        // await refreshMyStreamToPeers(screenMediaPromise);
-      }
-    } catch (err) {
-      console.error("[Error] Unable to share the screen", err);
-    }
-  }
+  //       // await stopLocalVideoTrack();
+  //       // await refreshMyLocalStream(screenMediaPromise);
+  //       // await refreshMyStreamToPeers(screenMediaPromise);
+  //     }
+  //   } catch (err) {
+  //     console.error("[Error] Unable to share the screen", err);
+  //   }
+  // }
 
   function shareScreenFn() {
-    toggleScreenSharing();
+    // toggleScreenSharing();
   }
 
   useEffect(() => {
@@ -547,19 +377,19 @@ export default function VideoMeetJoin() {
     return (
       <>
         <LoadingContent
-          loading={getTurnServerQuery.loading || getAvatarQuery.loading}
+          loading={getTurnServerQuery.isLoading || getAvatarQuery.isLoading}
           error={!!getTurnServerQuery.error || !!getAvatarQuery.error}
         >
           <VideoMeet
             camera={camera}
             hand={handRaised}
             mic={mic}
-            toggleCamera={toggleCameraFn}
-            raiseHand={raiseHandFn}
-            toggleAudio={toggleAudioFn}
-            hangUp={hangUpFn}
+            toggleCamera={toggleCamera}
+            raiseHand={raiseHand}
+            toggleAudio={toggleMic}
+            hangUp={hangUp}
             shareScreen={shareScreenFn}
-            onInputName={onInputChangeNameFn}
+            onInputName={onInputChangeName}
             localMediaStream={localMediaStream}
             formik={formik}
             peers={peers}
@@ -574,7 +404,7 @@ export default function VideoMeetJoin() {
     <div className="bg-gray-100 min-h-screen">
       <AppHeader />
       <LoadingContent
-        loading={getTurnServerQuery.loading}
+        loading={getTurnServerQuery.isLoading}
         error={!!getTurnServerQuery.error}
       >
         <Container maxWidth="xl" className="flex min-h-screen items-center">
@@ -599,16 +429,14 @@ export default function VideoMeetJoin() {
                   <VideoMeetJoinVideoPreviewerFooter
                     camera={camera}
                     toggleCamera={() => {
-                      toggleCamera(localMediaStream, setCamera, (camera) =>
+                      toggleCamera((camera) => {
                         camera
                           ? setStreamError("")
-                          : setStreamError("Camera is turned off")
-                      );
+                          : setStreamError("Camera is turned off");
+                      });
                     }}
                     mic={mic}
-                    toggleAudio={() => {
-                      toggleAudio(localMediaStream, setMic);
-                    }}
+                    toggleAudio={toggleMic}
                   />
                 }
               />

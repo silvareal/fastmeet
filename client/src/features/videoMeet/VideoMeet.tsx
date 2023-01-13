@@ -45,7 +45,7 @@ interface VideoMeetProps {
     meetId: string | undefined;
   }>;
   getAvatarQuery: any;
-  onInputName: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onInputName: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 interface MainActionProps {

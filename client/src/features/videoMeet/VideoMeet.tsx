@@ -112,7 +112,7 @@ export default function VideoMeet({
         color: "error",
         onClick: hangUp,
         size: "small",
-        icon: "bi-telephone",
+        icon: "simple-line-icons:call-end",
       },
       // {
       //   title: "Layout",

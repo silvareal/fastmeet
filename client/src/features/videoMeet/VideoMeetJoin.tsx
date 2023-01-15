@@ -13,6 +13,7 @@ import VideoMeetJoinVideoPreviewerBody from "./VideoMeetJoinVideoPreviewerBody";
 import VideoMeetJoinVideoPreviewerHeader from "./VideoMeetJoinVideoPreviewerHeader";
 import VideoMeetJoinVideoPreviewerFooter from "./VideoMeetJoinVideoPreviewerFooter";
 import VideoMeet from "./VideoMeet";
+
 import {
   PeersType,
   UserObjType,
@@ -24,9 +25,9 @@ import LoadingContent from "common/LoadingContent";
 import VideoMeetJoinForm from "./VideoMeetJoinForm";
 import { genderToPronoun } from "utils/GLobalUtils";
 import usePlaySound from "hooks/usePlaySound";
+import { socket } from "utils/VideoUtils";
 import useMeeting from "hooks/useMeeting";
 import fastmeetApi from "store/StoreQuerySlice";
-import { socket } from "utils/VideoUtils";
 
 export default function VideoMeetJoin() {
   const { meetId } = useParams();
@@ -37,8 +38,6 @@ export default function VideoMeetJoin() {
 
   const [canJoinMeeting, setCanJoinMeeting] = useState<boolean>(false);
 
-  // const numberOfParticipant: number = peersRef.current.length;
-
   const addPeerSound = usePlaySound("addPeer");
   const raisedHandSound = usePlaySound("raiseHand");
   const onlyParticipantSound = usePlaySound("onlyParticipant");
@@ -48,9 +47,9 @@ export default function VideoMeetJoin() {
     handRaised,
     streamError,
     mic,
-    camera,
     peers,
     setPeers,
+    camera,
     screenShare,
     toggleCamera,
     toggleMic,
@@ -60,6 +59,7 @@ export default function VideoMeetJoin() {
     setStreamError,
     onInputChangeName,
     getTurnServerQuery,
+    toggleScreenSharing,
   } = useMeeting(meetId, { canJoinMeeting });
 
   const formik = useFormik({
@@ -89,21 +89,25 @@ export default function VideoMeetJoin() {
    * @param stream MediaStream
    */
   function joinToChannel(stream: MediaStream) {
-    socket.emit("join", meetId, {
-      userAgent: navigator.userAgent.toLowerCase(),
-      channel_password: "",
-      avatar: getAvatarResult?.data,
-      peer_info: getPeerInfo(),
-      peer_name: formik.values.name,
-      peer_gender: formik.values.gender,
-      peer_video: camera,
-      peer_audio: mic,
-      peer_raised_hand: handRaised,
-      peer_screen_record: screenRecordRef.current,
-      peer_screen_share: screenShare,
-    });
+    if (peers.length === 0) {
+      socket.emit("join", meetId, {
+        userAgent: navigator.userAgent.toLowerCase(),
+        channel_password: "",
+        avatar: getAvatarResult?.data,
+        peer_info: getPeerInfo(),
+        peer_name: formik.values.name,
+        peer_gender: formik.values.gender,
+        peer_video: camera,
+        peer_audio: mic,
+        peer_raised_hand: handRaised,
+        peer_screen_record: screenRecordRef.current,
+        peer_screen_share: screenShare,
+      });
+    }
 
     socket.on("clients-in-room", (users: UserObjType[]) => {
+      console.log("clients-in-room", peersRef.current, "---", users);
+
       const peers: PeersType[] = [];
       // To all users who are already in the room initiating a peer connection
       users.forEach((user: UserObjType) => {
@@ -115,13 +119,7 @@ export default function VideoMeetJoin() {
             iceServers,
             socket
           );
-
           addPeerSound.play();
-          peersRef.current.push({
-            peerId: user.socketId,
-            peerObj: peer,
-            userObj: user,
-          });
           peers.push({
             peerId: user.socketId,
             peerObj: peer,
@@ -138,7 +136,7 @@ export default function VideoMeetJoin() {
         onlyParticipantSound.play();
         onlyParticipantSound.loop = true;
       }
-
+      peersRef.current = peers;
       setPeers(peers);
     });
 
@@ -147,7 +145,7 @@ export default function VideoMeetJoin() {
      * to acknowledge the signal and send the stream
      */
     socket.on("user-joined", (payload: UserJoinedPayloadType) => {
-      console.log("payload", payload);
+      console.log("user-joined", peersRef.current, "---", peers);
       if (iceServers !== undefined) {
         const peer = addPeerSignal(
           payload.signal,
@@ -157,14 +155,41 @@ export default function VideoMeetJoin() {
           socket
         );
         peersRef.current.push({
-          peerId: payload.user?.socketId,
+          peerId: payload.callerId,
           peerObj: peer,
           userObj: payload.user,
         });
-        setPeers((users: PeersType[]) => [
-          ...users,
-          { peerId: payload.callerId, peerObj: peer, userObj: payload.user },
-        ]);
+        setPeers((peers: PeersType[]) => {
+          const users = [...peers];
+
+          const newUserIndex = users.findIndex(
+            (user) => user.peerId === payload.callerId
+          );
+          console.log(
+            "old users",
+            users,
+            !!newUserIndex,
+            payload.callerId,
+            newUserIndex
+          );
+          if (newUserIndex !== undefined) {
+            users[newUserIndex] = {
+              peerId: payload.callerId,
+              peerObj: peer,
+              userObj: payload.user,
+            };
+            return users;
+          } else {
+            return [
+              ...users,
+              {
+                peerId: payload.callerId,
+                peerObj: peer,
+                userObj: payload.user,
+              },
+            ];
+          }
+        });
 
         if (peersRef.current.length >= 1) {
           onlyParticipantSound.pause();
@@ -197,6 +222,8 @@ export default function VideoMeetJoin() {
      *from other user so that stream can flow between peers
      */
     socket.on("signal-accepted", (payload: { signal: any; id: string }) => {
+      console.log("signal-accepted", peersRef.current, "---", peers);
+
       const item: PeersRefType = peersRef.current.find(
         (peer: PeersType) => peer.peerId === payload.id
       );
@@ -238,6 +265,7 @@ export default function VideoMeetJoin() {
 
       peersRef.current = peers;
       setPeers(peers);
+      console.log("peers", peersRef.current, "---", peers);
     });
 
     /**
@@ -311,61 +339,7 @@ export default function VideoMeetJoin() {
     // eslint-disable-next-line
   }, [canJoinMeeting]);
 
-  /**
-   * Enable - disable screen sharing
-   * https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia
-   */
-  // async function toggleScreenSharing() {
-  //   const constraints = {
-  //     // audio: true, // enable tab audio
-  //     audio: {
-  //       echoCancellation: true,
-  //       noiseSuppression: true,
-  //       sampleRate: 44100,
-  //     },
-  //     // video: { frameRate: { max: screenMaxFrameRate } },
-  //     video: true,
-  //   };
-
-  //   let screenMediaPromise: MediaStream;
-
-  //   try {
-  //     if (!screenRecordRef.current) {
-  //       // on screen sharing start
-  //       screenMediaPromise = await navigator.mediaDevices.getDisplayMedia(
-  //         constraints
-  //       );
-  //     } else {
-  //       // on screen sharing stop
-  //       screenMediaPromise = await navigator.mediaDevices.getUserMedia({
-  //         audio: true,
-  //         video: true,
-  //       });
-  //     }
-  //     if (screenMediaPromise) {
-  //       console.log("screenMediaPromise", screenMediaPromise);
-  //       screenRecordRef.current = !screenRecordRef.current;
-  //       socket.emit("peerActionStatus", {
-  //         room_id: meetId,
-  //         socket_id: socket.id,
-  //         element: "screen",
-  //         status: !screenRecordRef,
-  //       } as PeerActionStatusConfig);
-
-  //       setLocalMediaStream(screenMediaPromise);
-
-  //       // await stopLocalVideoTrack();
-  //       // await refreshMyLocalStream(screenMediaPromise);
-  //       // await refreshMyStreamToPeers(screenMediaPromise);
-  //     }
-  //   } catch (err) {
-  //     console.error("[Error] Unable to share the screen", err);
-  //   }
-  // }
-
-  function shareScreenFn() {
-    // toggleScreenSharing();
-  }
+  function shareScreenFn() {}
 
   useEffect(() => {
     return () => {
@@ -373,6 +347,10 @@ export default function VideoMeetJoin() {
     };
   }, []);
 
+  const commonProps = {
+    camera,
+    mic,
+  };
   if (canJoinMeeting) {
     return (
       <>
@@ -381,19 +359,20 @@ export default function VideoMeetJoin() {
           error={!!getTurnServerQuery.error || !!getAvatarQuery.error}
         >
           <VideoMeet
-            camera={camera}
-            hand={handRaised}
-            mic={mic}
-            toggleCamera={toggleCamera}
-            raiseHand={raiseHand}
-            toggleAudio={toggleMic}
-            hangUp={hangUp}
-            shareScreen={shareScreenFn}
-            onInputName={onInputChangeName}
-            localMediaStream={localMediaStream}
-            formik={formik}
-            peers={peers}
-            getAvatarQuery={getAvatarQuery}
+            {...commonProps}
+            {...{
+              toggleCamera,
+              raiseHand,
+              hangUp,
+              formik,
+              peers,
+              localMediaStream,
+              getAvatarQuery,
+              hand: handRaised,
+              toggleAudio: toggleMic,
+              shareScreen: toggleScreenSharing,
+              onInputName: onInputChangeName,
+            }}
           />
         </LoadingContent>
       </>

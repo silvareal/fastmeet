@@ -14,6 +14,7 @@ import {
   toggleCameraAction,
   toggleHandRaisedAction,
   toggleMicAction,
+  toggleScreenShareAction,
 } from "store/StoreSlice";
 import { initEnumerateDevices, socket } from "utils/VideoUtils";
 import { Icon as Iconify } from "@iconify/react";
@@ -40,6 +41,7 @@ function useMeeting(
   peers: PeersType[];
   setPeers: Dispatch<SetStateAction<PeersType[]>>;
   getTurnServerQuery: UseQueryStateResult<{ data: { [key: string]: string } }>;
+  toggleScreenSharing: () => void;
 } {
   const globalState: GlobalInitialStateType = useSelector(
     (state: any) => state.global
@@ -79,7 +81,7 @@ function useMeeting(
     }
   }, [iceServers]);
 
-  function toggleCamera(callback?: (camera: boolean) => void) {
+  async function toggleCamera(callback?: (camera: boolean) => void) {
     // https://developer.mozilla.org/en-US/docs/Web/API/MediaStream/getVideoTracks
     if (localMediaStream !== undefined) {
       localMediaStream.getVideoTracks()[0].enabled =
@@ -119,7 +121,7 @@ function useMeeting(
     }
   }
 
-  function toggleMic(callback?: (mic: boolean) => void) {
+  async function toggleMic(callback?: (mic: boolean) => void) {
     // https://developer.mozilla.org/en-US/docs/Web/API/MediaStream/getAudioTracks
     if (localMediaStream !== undefined) {
       localMediaStream.getAudioTracks()[0].enabled =
@@ -155,6 +157,58 @@ function useMeeting(
           }
         );
       }
+    }
+  }
+
+  /**
+   * Enable - disable screen sharing
+   * https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia
+   */
+  async function toggleScreenSharing() {
+    const constraints = {
+      // audio: true, // enable tab audio
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        sampleRate: 44100,
+      },
+      // video: { frameRate: { max: screenMaxFrameRate } },
+      video: true,
+    };
+
+    let screenMediaPromise: MediaStream;
+
+    try {
+      if (!screenShare) {
+        // on screen sharing start
+        screenMediaPromise = await navigator.mediaDevices.getDisplayMedia(
+          constraints
+        );
+      } else {
+        // on screen sharing stop
+        screenMediaPromise = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+          video: true,
+        });
+      }
+      if (screenMediaPromise) {
+        console.log("screenMediaPromise", screenMediaPromise);
+        dispatch(toggleScreenShareAction(!screenShare));
+        socket.emit("peerActionStatus", {
+          room_id: meetId,
+          socket_id: socket.id,
+          element: "screen",
+          status: !screenShare,
+        } as PeerActionStatusConfig);
+
+        setLocalMediaStream(screenMediaPromise);
+
+        // await stopLocalVideoTrack();
+        // await refreshMyLocalStream(screenMediaPromise);
+        // await refreshMyStreamToPeers(screenMediaPromise);
+      }
+    } catch (err) {
+      console.error("[Error] Unable to share the screen", err);
     }
   }
 
@@ -233,6 +287,7 @@ function useMeeting(
     iceServers,
     setStreamError,
     getTurnServerQuery,
+    toggleScreenSharing,
   };
 }
 

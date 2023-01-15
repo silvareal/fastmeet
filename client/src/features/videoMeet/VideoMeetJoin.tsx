@@ -106,8 +106,6 @@ export default function VideoMeetJoin() {
     }
 
     socket.on("clients-in-room", (users: UserObjType[]) => {
-      console.log("clients-in-room", peersRef.current, "---", users);
-
       const peers: PeersType[] = [];
       // To all users who are already in the room initiating a peer connection
       users.forEach((user: UserObjType) => {
@@ -145,7 +143,6 @@ export default function VideoMeetJoin() {
      * to acknowledge the signal and send the stream
      */
     socket.on("user-joined", (payload: UserJoinedPayloadType) => {
-      console.log("user-joined", peersRef.current, "---", peers);
       if (iceServers !== undefined) {
         const peer = addPeerSignal(
           payload.signal,
@@ -164,13 +161,6 @@ export default function VideoMeetJoin() {
 
           const newUserIndex = users.findIndex(
             (user) => user.peerId === payload.callerId
-          );
-          console.log(
-            "old users",
-            users,
-            !!newUserIndex,
-            payload.callerId,
-            newUserIndex
           );
           if (newUserIndex !== undefined) {
             users[newUserIndex] = {
@@ -222,8 +212,6 @@ export default function VideoMeetJoin() {
      *from other user so that stream can flow between peers
      */
     socket.on("signal-accepted", (payload: { signal: any; id: string }) => {
-      console.log("signal-accepted", peersRef.current, "---", peers);
-
       const item: PeersRefType = peersRef.current.find(
         (peer: PeersType) => peer.peerId === payload.id
       );
@@ -265,13 +253,13 @@ export default function VideoMeetJoin() {
 
       peersRef.current = peers;
       setPeers(peers);
-      console.log("peers", peersRef.current, "---", peers);
     });
 
     /**
      * Relay peer actions
      */
     socket.on("peerActionStatus", (payload: PeerActionStatusConfig) => {
+      console.log("peerActionStatus", payload);
       setPeers((peers: PeersType[]) => {
         const peerIndex = peers.findIndex(
           (peer: PeersType) => peer.peerId === payload.socket_id
@@ -347,10 +335,6 @@ export default function VideoMeetJoin() {
     };
   }, []);
 
-  const commonProps = {
-    camera,
-    mic,
-  };
   if (canJoinMeeting) {
     return (
       <>
@@ -359,8 +343,9 @@ export default function VideoMeetJoin() {
           error={!!getTurnServerQuery.error || !!getAvatarQuery.error}
         >
           <VideoMeet
-            {...commonProps}
             {...{
+              camera,
+              mic,
               toggleCamera,
               raiseHand,
               hangUp,

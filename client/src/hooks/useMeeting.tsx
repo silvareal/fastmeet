@@ -32,7 +32,10 @@ function useMeeting(
   toggleCamera: (callback?: (camera: boolean) => void) => void;
   hangUp: () => void;
   raiseHand: () => void;
-  onInputChangeName: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onInputChangeName: (
+    e: React.ChangeEvent<HTMLInputElement>,
+    callback?: (value: string) => void
+  ) => void;
   addPeer: (peer: PeersType) => void;
   editPeer: (peer: PeersType) => void;
   deletePeer: (peer: PeersType) => void;
@@ -86,7 +89,10 @@ function useMeeting(
     if (localMediaStream !== undefined) {
       localMediaStream.getVideoTracks()[0].enabled =
         !localMediaStream.getVideoTracks()[0].enabled;
-      if (callback) callback(!!localMediaStream.getVideoTracks()[0].enabled);
+      console.log(
+        "localMediaStream.getVideoTracks()[0].enabled",
+        localMediaStream.getVideoTracks()[0].enabled
+      );
       dispatch(
         toggleCameraAction(!!localMediaStream.getVideoTracks()[0].enabled)
       );
@@ -118,6 +124,8 @@ function useMeeting(
           }
         );
       }
+
+      if (callback) callback(!!localMediaStream.getVideoTracks()[0].enabled);
     }
   }
 
@@ -126,7 +134,6 @@ function useMeeting(
     if (localMediaStream !== undefined) {
       localMediaStream.getAudioTracks()[0].enabled =
         !localMediaStream.getAudioTracks()[0].enabled;
-      if (callback) callback(!!localMediaStream.getAudioTracks()[0].enabled);
       dispatch(toggleMicAction(!!localMediaStream.getAudioTracks()[0].enabled));
       if (canJoinMeeting) {
         socket.emit("peerActionStatus", {
@@ -157,6 +164,7 @@ function useMeeting(
           }
         );
       }
+      if (callback) callback(!!localMediaStream.getAudioTracks()[0].enabled);
     }
   }
 
@@ -246,15 +254,18 @@ function useMeeting(
     return !handRaised;
   }
 
-  function onInputChangeName(e: React.ChangeEvent<HTMLInputElement>) {
+  function onInputChangeName(
+    e: React.ChangeEvent<HTMLInputElement>,
+    callback?: (value: string) => void
+  ) {
     const sanitizedText = escape(e.target.value);
-
     socket.emit("peerActionStatus", {
       room_id: meetId,
       socket_id: socket.id,
       element: "name",
-      status: sanitizedText,
+      status: `${sanitizedText}`,
     } as PeerActionStatusConfig);
+    callback && callback(sanitizedText);
   }
 
   function addPeer(peer: PeersType) {

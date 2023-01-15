@@ -10,9 +10,9 @@ const storeQ = configureStore({
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
-      fastmeetApi.middleware,
+      fastmeetApi.middleware
       // @ts-ignore
-      rtkqOnResetMiddleware(fastmeetApi)
+      //   rtkqOnResetMiddleware(fastmeetApi)
     ),
 });
 

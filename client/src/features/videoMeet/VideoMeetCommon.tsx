@@ -117,7 +117,7 @@ export function createPeer(
  * @param {Socket} socket
  * @returns peer
  */
-export function addPeer(
+export function addPeerSignal(
   incomingSignal: string,
   callerId: string,
   stream: MediaStream,

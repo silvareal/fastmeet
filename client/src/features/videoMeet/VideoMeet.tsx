@@ -50,7 +50,10 @@ interface VideoMeetProps {
     meetId: string | undefined;
   }>;
   getAvatarQuery: any;
-  onInputName: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onInputName: (
+    e: React.ChangeEvent<HTMLInputElement>,
+    callback?: (value: string) => void
+  ) => void;
 }
 
 interface MainActionProps {
@@ -119,7 +122,7 @@ export default function VideoMeet({
         color: "error",
         onClick: hangUp,
         size: "small",
-        icon: "bi-telephone",
+        icon: "simple-line-icons:call-end",
       },
       // {
       //   title: "Layout",
@@ -133,21 +136,12 @@ export default function VideoMeet({
     // eslint-disable-next-line
     [camera, mic]
   );
-  const [isEditing, setIsEditing] = useState(false);
 
-  function handleClick() {
-    setIsEditing(true);
-  }
-
-  function handleBlur() {
-    setIsEditing(false);
-  }
-
-  function handleKeyPress(event: KeyboardEvent<HTMLInputElement>) {
-    if (event.key === "Enter") {
-      setIsEditing(false);
-    }
-  }
+  const onChangePreviewName = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onInputName(e, (value) => {
+      formik.setFieldValue("name", value);
+    });
+  };
 
   const { enqueueSnackbar } = useSnackbar();
   const chatMessageSound = usePlaySound("chatMessage");
@@ -232,16 +226,10 @@ export default function VideoMeet({
                         </Icon>
                       </Tooltip>
                     )}
-                    <Typography
-                      className="vids-preview-title"
-                      color={"white"}
-                      variant="subtitle2"
-                      suppressContentEditableWarning={true}
-                      contentEditable={true}
-                      onInput={onInputName}
-                    >
-                      {formik.values.name}
-                    </Typography>{" "}
+                    <PreviewInput
+                      value={formik.values.name || ""}
+                      onChange={onChangePreviewName}
+                    />
                   </div>
                 }
               />
@@ -331,27 +319,10 @@ export default function VideoMeet({
                       </Icon>
                     </Tooltip>
                   )}
-                  {isEditing ? (
-                    <PreviewInput
-                      autoFocus
-                      value={formik.values.name}
-                      onBlur={handleBlur}
-                      onKeyPress={handleKeyPress}
-                      onChange={onInputName}
-                    />
-                  ) : (
-                    <Typography
-                      className="vids-preview-title"
-                      color={"white"}
-                      variant="subtitle2"
-                      sx={{
-                        cursor: "pointer",
-                      }}
-                      onClick={handleClick}
-                    >
-                      {formik.values.name}
-                    </Typography>
-                  )}
+                  <PreviewInput
+                    value={formik.values.name || ""}
+                    onChange={onChangePreviewName}
+                  />
                 </div>
               }
             />

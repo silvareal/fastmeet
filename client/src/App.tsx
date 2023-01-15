@@ -9,7 +9,7 @@ import Suspense from "common/Suspense";
 import { SnackbarProvider } from "notistack";
 
 const TRACKING_ID = process.env.REACT_APP_GA_TRACKING_ID;
-if (process.env.NODE_ENV === "production" && TRACKING_ID) {
+if (TRACKING_ID) {
   ReactGA.initialize(TRACKING_ID);
 }
 

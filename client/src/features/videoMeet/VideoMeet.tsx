@@ -3,22 +3,33 @@ import {
   Badge,
   Fab,
   Icon,
-  IconButton,
-  Tooltip,
-  Typography,
+  IconButton, InputBase,
+  styled, Tooltip,
+  Typography
 } from "@mui/material";
 import { format } from "date-fns";
 import { FormikProps } from "formik";
-import React, { useMemo, useState } from "react";
+import React, { KeyboardEvent, useMemo, useState } from "react";
 
 import VideoPreviewer from "common/VideoPreviewer";
 import ThemeConfig from "configs/ThemeConfig";
-import { ChatDrawer } from "features/chat/ChatDrawer";
 import { MessageDetailsType } from "features/chat/ChatType";
 import usePlaySound from "hooks/usePlaySound";
 import { useSnackbar } from "notistack";
 import "./VideoMeet.css";
 import { PeersRefType, PeersType } from "./VideoMeetType";
+
+const PreviewInput = styled(InputBase)(({ theme }) => ({
+  "& .MuiInputBase-input": {
+    position: "relative",
+    backgroundColor: "transparent",
+    border: "none",
+    width: "auto",
+    padding: ".2rem .5rem",
+    color: "white",
+    fontSize: "0.75rem",
+  },
+}));
 
 interface VideoMeetProps {
   toggleCamera: () => void;
@@ -94,14 +105,14 @@ export default function VideoMeet({
         size: "small",
         icon: "emojione-monotone:hand-with-fingers-splayed",
       },
-      {
-        title: "Share Screen",
-        variant: "opaque",
-        color: "primary",
-        onClick: shareScreen,
-        size: "small",
-        icon: "fluent:share-screen-start-24-regular",
-      },
+      // {
+      //   title: "Share Screen",
+      //   variant: "opaque",
+      //   color: "primary",
+      //   onClick: shareScreen,
+      //   size: "small",
+      //   icon: "fluent:share-screen-start-24-regular",
+      // },
       {
         title: "End Call",
         variant: "opaque",
@@ -122,6 +133,21 @@ export default function VideoMeet({
     // eslint-disable-next-line
     [camera, mic]
   );
+  const [isEditing, setIsEditing] = useState(false);
+
+  function handleClick() {
+    setIsEditing(true);
+  }
+
+  function handleBlur() {
+    setIsEditing(false);
+  }
+
+  function handleKeyPress(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key === "Enter") {
+      setIsEditing(false);
+    }
+  }
 
   const { enqueueSnackbar } = useSnackbar();
   const chatMessageSound = usePlaySound("chatMessage");
@@ -305,16 +331,27 @@ export default function VideoMeet({
                       </Icon>
                     </Tooltip>
                   )}
-                  <Typography
-                    className="vids-preview-title"
-                    color={"white"}
-                    variant="subtitle2"
-                    contentEditable="true"
-                    suppressContentEditableWarning={true}
-                    onInput={onInputName}
-                  >
-                    {formik.values.name}
-                  </Typography>
+                  {isEditing ? (
+                    <PreviewInput
+                      autoFocus
+                      value={formik.values.name}
+                      onBlur={handleBlur}
+                      onKeyPress={handleKeyPress}
+                      onChange={onInputName}
+                    />
+                  ) : (
+                    <Typography
+                      className="vids-preview-title"
+                      color={"white"}
+                      variant="subtitle2"
+                      sx={{
+                        cursor: "pointer",
+                      }}
+                      onClick={handleClick}
+                    >
+                      {formik.values.name}
+                    </Typography>
+                  )}
                 </div>
               }
             />

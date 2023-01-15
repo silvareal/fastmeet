@@ -4,8 +4,8 @@ import { useFormik } from "formik";
 import * as yup from "yup";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSnackbar } from "notistack";
-import { io } from "socket.io-client";
 import { Icon as Iconify } from "@iconify/react";
+import escape from "lodash/escape";
 
 import AppHeader from "AppHeader";
 import VideoPreviewer from "common/VideoPreviewer";
@@ -34,7 +34,7 @@ import VideoMeetJoinForm from "./VideoMeetJoinForm";
 import { genderToPronoun } from "utils/GLobalUtils";
 import usePlaySound from "hooks/usePlaySound";
 import ThemeConfig from "configs/ThemeConfig";
-import { socket } from "utils/VideoUtils";
+import { BASE_URL, socket } from "utils/VideoUtils";
 
 export default function VideoMeetJoin() {
   const { meetId } = useParams();
@@ -57,14 +57,14 @@ export default function VideoMeetJoin() {
   const [canJoinMeeting, setCanJoinMeeting] = useState<boolean>(false);
   const [peers, setPeers] = useState<PeersType[]>([]);
 
-  const numberOfParticipant: number = peersRef.current.length;
+  // const numberOfParticipant: number = peersRef.current.length;
 
   const addPeerSound = usePlaySound("addPeer");
   const raisedHandSound = usePlaySound("raiseHand");
   const onlyParticipantSound = usePlaySound("onlyParticipant");
 
   const [getTurnServerQuery] = useAxios({
-    url: `${process.env.REACT_APP_BASE_URL}/api/turn-server`,
+    url: `${BASE_URL}/api/turn-server`,
     method: "GET",
   });
 
@@ -85,7 +85,7 @@ export default function VideoMeetJoin() {
   });
 
   const [getAvatarQuery] = useAxios({
-    url: `${process.env.REACT_APP_BASE_URL}/api/get-avatar`,
+    url: `${BASE_URL}/api/get-avatar`,
     method: "GET",
     params: {
       category: formik.values.gender,
@@ -310,7 +310,7 @@ export default function VideoMeetJoin() {
 
   function initEnumerateDevices() {
     navigator.mediaDevices
-      .getUserMedia({ video: true, audio: { echoCancellation: true } })
+      ?.getUserMedia({ video: true, audio: { echoCancellation: true } })
       .then((stream: MediaStream) => {
         setLocalMediaStream(stream);
         setCamera(true);
@@ -321,7 +321,6 @@ export default function VideoMeetJoin() {
         setCamera(false);
         setMic(false);
         setStreamError(err?.name);
-
         /* handle the error */
         if (
           err.name === "NotFoundError" ||
@@ -449,12 +448,15 @@ export default function VideoMeetJoin() {
   }
 
   function onInputChangeNameFn(e: React.ChangeEvent<HTMLInputElement>) {
-    formik.setFieldValue("name", e.target.innerHTML);
+    formik.setFieldValue("name", e.target.value);
+
+    const sanitizedText = escape(e.target.value);
+
     socket.emit("peerActionStatus", {
       room_id: meetId,
       socket_id: socket.id,
       element: "name",
-      status: e.target.innerHTML,
+      status: sanitizedText,
     } as PeerActionStatusConfig);
   }
 
@@ -576,9 +578,9 @@ export default function VideoMeetJoin() {
         error={!!getTurnServerQuery.error}
       >
         <Container maxWidth="xl" className="flex min-h-screen items-center">
-          <div className="grid grid-cols-3 gap-10 w-full">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 w-full">
             <VideoMeetJoinForm formik={formik} />
-            <div className="col-span-2 h-[450px]">
+            <div className="col-span-2 -order-1 md:order-1 h-[450px]">
               <VideoPreviewer
                 camera={camera}
                 mic={mic}

@@ -13,14 +13,6 @@ import VideoMeetJoinVideoPreviewerBody from "./VideoMeetJoinVideoPreviewerBody";
 import VideoMeetJoinVideoPreviewerHeader from "./VideoMeetJoinVideoPreviewerHeader";
 import VideoMeetJoinVideoPreviewerFooter from "./VideoMeetJoinVideoPreviewerFooter";
 import VideoMeet from "./VideoMeet";
-
-import {
-  PeersType,
-  UserObjType,
-  UserJoinedPayloadType,
-  PeersRefType,
-  PeerActionStatusConfig,
-} from "./VideoMeetType";
 import LoadingContent from "common/LoadingContent";
 import VideoMeetJoinForm from "./VideoMeetJoinForm";
 import { genderToPronoun } from "utils/GLobalUtils";
@@ -28,6 +20,13 @@ import usePlaySound from "hooks/usePlaySound";
 import { socket } from "utils/VideoUtils";
 import useMeeting from "hooks/useMeeting";
 import fastmeetApi from "store/StoreQuerySlice";
+import {
+  PeersType,
+  UserObjType,
+  UserJoinedPayloadType,
+  PeersRefType,
+  PeerActionStatusConfig,
+} from "./VideoMeetType";
 
 export default function VideoMeetJoin() {
   const { meetId } = useParams();
@@ -311,6 +310,7 @@ export default function VideoMeetJoin() {
           }
         }
         peersRef.current = newPeer;
+        console.log("newPeer", newPeer);
         return newPeer;
       });
     });

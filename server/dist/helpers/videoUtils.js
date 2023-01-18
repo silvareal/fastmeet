@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendToPeer = exports.sendToRoom = exports.getRandomMemojiImage = void 0;
+exports.sendToPeer = exports.sendToRoom = exports.hangUp = exports.toggleCamera = exports.toggleAudio = exports.getRandomMemojiImage = void 0;
 const path_1 = __importDefault(require("path"));
 const promises_1 = require("node:fs/promises");
 /**
@@ -37,6 +37,65 @@ function getRandomMemojiImage(category) {
     });
 }
 exports.getRandomMemojiImage = getRandomMemojiImage;
+/**
+ * Toggle Audio on/off
+ * @param {MediaStream} localMediaStream media stream
+ * @param {Function} setter setter hooks setState
+ * @param {Function} callback callback function
+ */
+const toggleAudio = (localMediaStream, setter, callback) => {
+    // https://developer.mozilla.org/en-US/docs/Web/API/MediaStream/getAudioTracks
+    if (localMediaStream !== undefined) {
+        localMediaStream.getAudioTracks()[0].enabled =
+            !localMediaStream.getAudioTracks()[0].enabled;
+        setter(localMediaStream.getAudioTracks()[0].enabled);
+        callback !== undefined &&
+            callback(localMediaStream.getAudioTracks()[0].enabled);
+    }
+};
+exports.toggleAudio = toggleAudio;
+/**
+ * Toggle video on/off
+ * @param {MediaStream} localMediaStream media stream
+ * @param {Function} setter setter hooks setState
+ * @param {Function} callback callback function
+ */
+const toggleCamera = (localMediaStream, setter) => {
+    // https://developer.mozilla.org/en-US/docs/Web/API/MediaStream/getVideoTracks
+    if (localMediaStream !== undefined) {
+        localMediaStream.getVideoTracks()[0].enabled =
+            !localMediaStream.getVideoTracks()[0].enabled;
+        setter(localMediaStream.getVideoTracks()[0].enabled);
+    }
+};
+exports.toggleCamera = toggleCamera;
+/**
+ *
+ * @param {MediaStream | undefined} localMediaStream media stream
+ */
+function hangUp(localMediaStream) {
+    if (localMediaStream !== undefined) {
+        localMediaStream.getVideoTracks()[0].enabled = false;
+    }
+}
+exports.hangUp = hangUp;
+// /**
+//  * Get peer info using DetecRTC
+//  * https://github.com/muaz-khan/DetectRTC
+//  * @returns {object} peer info
+//  */
+// export function getPeerInfo() {
+//   return {
+//     detectRTCversion: DetectRTC.version,
+//     isWebRTCSupported: DetectRTC.isWebRTCSupported,
+//     // isDesktopDevice: !DetectRTC.isMobileDevice && !isTabletDevice && !isIPadDevice,
+//     isMobileDevice: DetectRTC.isMobileDevice,
+//     osName: DetectRTC.osName,
+//     osVersion: DetectRTC.osVersion,
+//     browserName: DetectRTC.browser.name,
+//     browserVersion: DetectRTC.browser.version,
+//   };
+// }
 /**
  * Send async data to all peers in the same room except yourself
  * @param {string} room_id id of the room to send data

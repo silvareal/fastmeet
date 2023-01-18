@@ -26,6 +26,73 @@ export async function getRandomMemojiImage(category: "male" | "female") {
 }
 
 /**
+ * Toggle Audio on/off
+ * @param {MediaStream} localMediaStream media stream
+ * @param {Function} setter setter hooks setState
+ * @param {Function} callback callback function
+ */
+export const toggleAudio = (
+  localMediaStream: MediaStream | undefined,
+  setter: (e: boolean) => void,
+  callback?: (camera: boolean) => void
+) => {
+  // https://developer.mozilla.org/en-US/docs/Web/API/MediaStream/getAudioTracks
+  if (localMediaStream !== undefined) {
+    localMediaStream.getAudioTracks()[0].enabled =
+      !localMediaStream.getAudioTracks()[0].enabled;
+    setter(localMediaStream.getAudioTracks()[0].enabled);
+    callback !== undefined &&
+      callback(localMediaStream.getAudioTracks()[0].enabled);
+  }
+};
+
+/**
+ * Toggle video on/off
+ * @param {MediaStream} localMediaStream media stream
+ * @param {Function} setter setter hooks setState
+ * @param {Function} callback callback function
+ */
+export const toggleCamera = (
+  localMediaStream: MediaStream | undefined,
+  setter: (e: boolean) => void,
+) => {
+  // https://developer.mozilla.org/en-US/docs/Web/API/MediaStream/getVideoTracks
+  if (localMediaStream !== undefined) {
+    localMediaStream.getVideoTracks()[0].enabled =
+      !localMediaStream.getVideoTracks()[0].enabled;
+    setter(localMediaStream.getVideoTracks()[0].enabled);
+  }
+};
+
+/**
+ *
+ * @param {MediaStream | undefined} localMediaStream media stream
+ */
+export function hangUp(localMediaStream: MediaStream | undefined) {
+  if (localMediaStream !== undefined) {
+    localMediaStream.getVideoTracks()[0].enabled = false;
+  }
+}
+
+// /**
+//  * Get peer info using DetecRTC
+//  * https://github.com/muaz-khan/DetectRTC
+//  * @returns {object} peer info
+//  */
+// export function getPeerInfo() {
+//   return {
+//     detectRTCversion: DetectRTC.version,
+//     isWebRTCSupported: DetectRTC.isWebRTCSupported,
+//     // isDesktopDevice: !DetectRTC.isMobileDevice && !isTabletDevice && !isIPadDevice,
+//     isMobileDevice: DetectRTC.isMobileDevice,
+//     osName: DetectRTC.osName,
+//     osVersion: DetectRTC.osVersion,
+//     browserName: DetectRTC.browser.name,
+//     browserVersion: DetectRTC.browser.version,
+//   };
+// }
+
+/**
  * Send async data to all peers in the same room except yourself
  * @param {string} room_id id of the room to send data
  * @param {string} socket_id socket id of peer that send data

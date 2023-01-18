@@ -11,6 +11,7 @@ import {
   addPeerAction,
   editPeerAction,
   removePeerAction,
+  setLocalMediaStreamAction,
   toggleCameraAction,
   toggleHandRaisedAction,
   toggleMicAction,
@@ -55,17 +56,33 @@ function useMeeting(
   const [streamError, setStreamError] = useState<string>("");
   const [localMediaStream, setLocalMediaStream] = useState<MediaStream>();
   const [peers, setPeers] = useState<PeersType[]>([]);
+  const [screenShare, setScreenShare] = useState<boolean>(false);
 
   const camera = globalState.camera;
   const mic = globalState.mic;
   const handRaised = globalState.handRaised;
-  const screenShare = globalState.screenShare;
+  //   const screenShare = globalState.screenShare;
   //   const peers = globalState.peers;
   const iceServers = globalState.iceServers;
 
   const raisedHandSound = usePlaySound("raiseHand");
 
   const getTurnServerQuery = fastmeetApi.useGetTurnServerQuery({});
+
+  /**
+   * Add my localMediaStream Tracks to connected peer
+   * https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/addTrack
+   * @param {string} peer_id socket.id
+   */
+  //   async function handleAddTracks(peer_id) {
+  //     let peer_name = allPeers[peer_id]["peer_name"];
+  //     await localMediaStream.getTracks().forEach((track) => {
+  //       console.log(
+  //         "[ADD TRACK] to Peer Name [" + peer_name + "] kind - " + track.kind
+  //       );
+  //       peerConnections[peer_id].addTrack(track, localMediaStream);
+  //     });
+  //   }
 
   useEffect(() => {
     if (!!iceServers) {
@@ -101,7 +118,7 @@ function useMeeting(
           room_id: meetId,
           socket_id: socket.id,
           element: "video",
-          status: camera,
+          status: !!localMediaStream.getVideoTracks()[0].enabled,
         } as PeerActionStatusConfig);
         enqueueSnackbar(
           <>
@@ -140,7 +157,7 @@ function useMeeting(
           room_id: meetId,
           socket_id: socket.id,
           element: "audio",
-          status: mic,
+          status: !!localMediaStream.getAudioTracks()[0].enabled,
         } as PeerActionStatusConfig);
 
         enqueueSnackbar(
@@ -169,10 +186,72 @@ function useMeeting(
   }
 
   /**
+   * Refresh my local stream
+   * @param {object} stream media stream audio - video
+   * @param {boolean} localAudioTrackChange default false
+   */
+  async function refreshMyLocalStream(
+    stream: MediaStream,
+    localAudioTrackChange = false
+  ) {
+    console.log("screenShare", screenShare);
+    if (localMediaStream === undefined) return;
+
+    if (screenShare) stream.getVideoTracks()[0].enabled = true;
+
+    let newStream = null;
+
+    // https://developer.mozilla.org/en-US/docs/Web/API/MediaStream
+    if (!screenShare) {
+      console.log("Refresh my local media stream VIDEO - AUDIO");
+      newStream = new MediaStream([
+        stream.getVideoTracks()[0],
+        localAudioTrackChange
+          ? stream.getAudioTracks()[0]
+          : localMediaStream.getAudioTracks()[0],
+      ]);
+    } else {
+      console.log("Refresh my local media stream AUDIO");
+      newStream = new MediaStream([
+        localAudioTrackChange
+          ? stream.getAudioTracks()[0]
+          : localMediaStream.getAudioTracks()[0],
+      ]);
+    }
+
+    setLocalMediaStream(newStream);
+    // localMediaStream.addTrack(newStream, localMediaStream);
+
+    // attachMediaStream is a part of the adapter.js library
+    // attachMediaStream(myVideo, localMediaStream); // newstream
+
+    // on toggleScreenSharing video stop
+    // if (!screenShare) {
+    //   stream.getVideoTracks()[0].onended = () => {
+    //     console.log("newStream");
+    //     dispatch(toggleScreenShareAction(false));
+
+    //     toggleScreenSharing();
+    //   };
+    // }
+
+    /**
+     * When you stop the screen sharing, on default i turn back to the webcam with video stream ON.
+     * If you want the webcam with video stream OFF, just disable it with the button (Stop the video),
+     * before to stop the screen sharing.
+     */
+    if (!screenShare) localMediaStream.getVideoTracks()[0].enabled = false;
+  }
+
+  console.log("screenShare screenShare", screenShare);
+
+  /**
    * Enable - disable screen sharing
    * https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia
    */
   async function toggleScreenSharing() {
+    console.log("toggleScreenSharing", screenShare);
+
     const constraints = {
       // audio: true, // enable tab audio
       audio: {
@@ -187,71 +266,74 @@ function useMeeting(
     let screenMediaPromise: MediaStream;
 
     try {
-      if (!screenShare) {
+      if (screenShare === false) {
         // on screen sharing start
+        console.log("on screen sharing start");
         screenMediaPromise = await navigator.mediaDevices.getDisplayMedia(
           constraints
         );
       } else {
         // on screen sharing stop
+        console.log("on screen sharing stop");
         screenMediaPromise = await navigator.mediaDevices.getUserMedia({
           audio: true,
           video: true,
         });
       }
       if (screenMediaPromise) {
-        console.log("screenMediaPromise", screenMediaPromise);
-        dispatch(toggleScreenShareAction(!screenShare));
+        console.log("call refresh localstream");
+        await refreshMyLocalStream(screenMediaPromise);
+
         socket.emit("peerActionStatus", {
           room_id: meetId,
           socket_id: socket.id,
           element: "screen",
           status: !screenShare,
         } as PeerActionStatusConfig);
-
-        setLocalMediaStream(screenMediaPromise);
-
-        // await stopLocalVideoTrack();
-        // await refreshMyLocalStream(screenMediaPromise);
-        // await refreshMyStreamToPeers(screenMediaPromise);
       }
+      setScreenShare(!screenShare);
     } catch (err) {
       console.error("[Error] Unable to share the screen", err);
     }
   }
 
   function hangUp() {
-    if (!canJoinMeeting) return;
-    if (localMediaStream !== undefined) {
-      localMediaStream.getVideoTracks()[0].enabled =
-        !localMediaStream.getVideoTracks()[0].enabled;
-    }
-    socket.disconnect();
-    if (typeof window !== "undefined") {
-      window.location.href = "/";
+    if (canJoinMeeting) {
+      if (localMediaStream !== undefined) {
+        localMediaStream.getVideoTracks()[0].enabled =
+          !localMediaStream.getVideoTracks()[0].enabled;
+      }
+      socket.disconnect();
+      if (typeof window !== "undefined") {
+        window.location.href = "/";
+      }
     }
   }
 
-  function raiseHand() {
-    if (!canJoinMeeting) return;
-    console.log("!handRaised, !handRaised", !handRaised);
-    socket.emit("peerActionStatus", {
-      room_id: meetId,
-      socket_id: socket.id,
-      element: "hand",
-      status: !handRaised,
-    } as PeerActionStatusConfig);
-    dispatch(toggleHandRaisedAction(!handRaised));
-    if (!handRaised) {
-      raisedHandSound.play();
+  async function raiseHand() {
+    if (canJoinMeeting) {
+      const raiseHand = !handRaised;
+
+      dispatch(toggleHandRaisedAction());
+
+      enqueueSnackbar(`${raiseHand ? "Hand Raised ✋" : "Hand Down ✋"}`, {
+        anchorOrigin: {
+          vertical: "top",
+          horizontal: "right",
+        },
+      });
+
+      console.log("!handRaised, !handRaised", handRaised, raiseHand);
+      if (raiseHand) {
+        raisedHandSound.play();
+      }
+      socket.emit("peerActionStatus", {
+        room_id: meetId,
+        socket_id: socket.id,
+        element: "hand",
+        status: raiseHand,
+      } as PeerActionStatusConfig);
     }
-    enqueueSnackbar(`${!handRaised ? "Hand Raised ✋" : "Hand Down ✋"}`, {
-      anchorOrigin: {
-        vertical: "top",
-        horizontal: "right",
-      },
-    });
-    return !handRaised;
   }
 
   function onInputChangeName(

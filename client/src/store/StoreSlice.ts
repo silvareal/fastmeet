@@ -22,7 +22,7 @@ const slice = createSlice({
     toggleMicAction: (state, { payload }) => {
       state.mic = payload !== undefined ? payload : !state.mic;
     },
-    toggleHandRaisedAction: (state, { payload }) => {
+    toggleHandRaisedAction: (state, { payload }: { payload?: boolean } ) => {
       state.handRaised = payload !== undefined ? payload : !state.handRaised;
     },
     toggleScreenShareAction: (state, { payload }) => {

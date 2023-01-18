@@ -23,6 +23,7 @@ import { useSnackbar } from "notistack";
 import usePlaySound from "./usePlaySound";
 import escape from "lodash/escape";
 import fastmeetApi from "store/StoreQuerySlice";
+import useExtendedState from "./useExtendedState";
 
 function useMeeting(
   meetId: string | undefined,
@@ -56,7 +57,8 @@ function useMeeting(
   const [streamError, setStreamError] = useState<string>("");
   const [localMediaStream, setLocalMediaStream] = useState<MediaStream>();
   const [peers, setPeers] = useState<PeersType[]>([]);
-  const [screenShare, setScreenShare] = useState<boolean>(false);
+  const [screenShare, setScreenShare, getScreenShare] =
+    useExtendedState<boolean>(false);
 
   const camera = globalState.camera;
   const mic = globalState.mic;
@@ -194,7 +196,6 @@ function useMeeting(
     stream: MediaStream,
     localAudioTrackChange = false
   ) {
-    console.log("screenShare", screenShare);
     if (localMediaStream === undefined) return;
 
     if (screenShare) stream.getVideoTracks()[0].enabled = true;
@@ -220,20 +221,17 @@ function useMeeting(
     }
 
     setLocalMediaStream(newStream);
-    // localMediaStream.addTrack(newStream, localMediaStream);
-
-    // attachMediaStream is a part of the adapter.js library
-    // attachMediaStream(myVideo, localMediaStream); // newstream
 
     // on toggleScreenSharing video stop
-    // if (!screenShare) {
-    //   stream.getVideoTracks()[0].onended = () => {
-    //     console.log("newStream");
-    //     dispatch(toggleScreenShareAction(false));
+    getScreenShare().then(async (isScreenShare) => {
+      if (isScreenShare) {
+        stream.getVideoTracks()[0].onended = () => {
+          console.log("newStream");
 
-    //     toggleScreenSharing();
-    //   };
-    // }
+          toggleScreenSharing();
+        };
+      }
+    });
 
     /**
      * When you stop the screen sharing, on default i turn back to the webcam with video stream ON.
@@ -250,51 +248,52 @@ function useMeeting(
    * https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia
    */
   async function toggleScreenSharing() {
-    console.log("toggleScreenSharing", screenShare);
+    getScreenShare().then(async (isScreenShare) => {
+      const constraints = {
+        // audio: true, // enable tab audio
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          sampleRate: 44100,
+          cursor: "always",
+        },
+        //   video: { frameRate: { max: screenMaxFrameRate } },
+        video: true,
+      };
 
-    const constraints = {
-      // audio: true, // enable tab audio
-      audio: {
-        echoCancellation: true,
-        noiseSuppression: true,
-        sampleRate: 44100,
-      },
-      // video: { frameRate: { max: screenMaxFrameRate } },
-      video: true,
-    };
+      let screenMediaPromise: MediaStream;
 
-    let screenMediaPromise: MediaStream;
+      try {
+        if (isScreenShare === false) {
+          // on screen sharing start
+          console.log("on screen sharing start");
+          screenMediaPromise = await navigator.mediaDevices.getDisplayMedia(
+            constraints
+          );
+        } else {
+          // on screen sharing stop
+          console.log("on screen sharing stop");
+          screenMediaPromise = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+            video: true,
+          });
+        }
+        if (screenMediaPromise) {
+          console.log("call refresh localstream");
+          await refreshMyLocalStream(screenMediaPromise);
 
-    try {
-      if (screenShare === false) {
-        // on screen sharing start
-        console.log("on screen sharing start");
-        screenMediaPromise = await navigator.mediaDevices.getDisplayMedia(
-          constraints
-        );
-      } else {
-        // on screen sharing stop
-        console.log("on screen sharing stop");
-        screenMediaPromise = await navigator.mediaDevices.getUserMedia({
-          audio: true,
-          video: true,
-        });
+          socket.emit("peerActionStatus", {
+            room_id: meetId,
+            socket_id: socket.id,
+            element: "screen",
+            status: !isScreenShare,
+          } as PeerActionStatusConfig);
+        }
+        setScreenShare(!isScreenShare);
+      } catch (err) {
+        console.error("[Error] Unable to share the screen", err);
       }
-      if (screenMediaPromise) {
-        console.log("call refresh localstream");
-        await refreshMyLocalStream(screenMediaPromise);
-
-        socket.emit("peerActionStatus", {
-          room_id: meetId,
-          socket_id: socket.id,
-          element: "screen",
-          status: !screenShare,
-        } as PeerActionStatusConfig);
-      }
-      setScreenShare(!screenShare);
-    } catch (err) {
-      console.error("[Error] Unable to share the screen", err);
-    }
+    });
   }
 
   function hangUp() {

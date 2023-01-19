@@ -24,6 +24,7 @@ import usePlaySound from "./usePlaySound";
 import escape from "lodash/escape";
 import fastmeetApi from "store/StoreQuerySlice";
 import useExtendedState from "./useExtendedState";
+import Peer from "simple-peer";
 
 function useMeeting(
   meetId: string | undefined,
@@ -55,7 +56,8 @@ function useMeeting(
   const { enqueueSnackbar } = useSnackbar();
   const dispatch = useDispatch();
   const [streamError, setStreamError] = useState<string>("");
-  const [localMediaStream, setLocalMediaStream] = useState<MediaStream>();
+  const [localMediaStream, setLocalMediaStream, getLocalMediaStream] =
+    useExtendedState<MediaStream>();
   const [peers, setPeers] = useState<PeersType[]>([]);
   const [screenShare, setScreenShare, getScreenShare] =
     useExtendedState<boolean>(false);
@@ -70,21 +72,6 @@ function useMeeting(
   const raisedHandSound = usePlaySound("raiseHand");
 
   const getTurnServerQuery = fastmeetApi.useGetTurnServerQuery({});
-
-  /**
-   * Add my localMediaStream Tracks to connected peer
-   * https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/addTrack
-   * @param {string} peer_id socket.id
-   */
-  //   async function handleAddTracks(peer_id) {
-  //     let peer_name = allPeers[peer_id]["peer_name"];
-  //     await localMediaStream.getTracks().forEach((track) => {
-  //       console.log(
-  //         "[ADD TRACK] to Peer Name [" + peer_name + "] kind - " + track.kind
-  //       );
-  //       peerConnections[peer_id].addTrack(track, localMediaStream);
-  //     });
-  //   }
 
   useEffect(() => {
     if (!!iceServers) {
@@ -219,29 +206,30 @@ function useMeeting(
           : localMediaStream.getAudioTracks()[0],
       ]);
     }
-
     setLocalMediaStream(newStream);
 
-    // on toggleScreenSharing video stop
-    getScreenShare().then(async (isScreenShare) => {
-      if (isScreenShare) {
+    getScreenShare().then((isScreenShare) => {
+      if (!isScreenShare) {
         stream.getVideoTracks()[0].onended = () => {
-          console.log("newStream");
-
           toggleScreenSharing();
         };
+        localMediaStream.getVideoTracks()[0].enabled = false;
       }
     });
-
-    /**
-     * When you stop the screen sharing, on default i turn back to the webcam with video stream ON.
-     * If you want the webcam with video stream OFF, just disable it with the button (Stop the video),
-     * before to stop the screen sharing.
-     */
-    if (!screenShare) localMediaStream.getVideoTracks()[0].enabled = false;
   }
 
-  console.log("screenShare screenShare", screenShare);
+  /**
+   * Replace Video Tracks
+   * @param {object} stream media stream audio - video
+   * @param {object} recipientPeer
+   */
+  function replaceVideoTrack(stream: MediaStream, recipientPeer: any) {
+    recipientPeer.replaceTrack(
+      recipientPeer.streams[0].getVideoTracks()[0],
+      stream.getVideoTracks()[0],
+      recipientPeer.streams[0]
+    );
+  }
 
   /**
    * Enable - disable screen sharing
@@ -281,6 +269,13 @@ function useMeeting(
         if (screenMediaPromise) {
           console.log("call refresh localstream");
           await refreshMyLocalStream(screenMediaPromise);
+          setPeers((peers) => {
+            let newPeers = [...peers];
+            newPeers.forEach((peer) =>
+              replaceVideoTrack(screenMediaPromise, peer.peerObj)
+            );
+            return newPeers;
+          });
 
           socket.emit("peerActionStatus", {
             room_id: meetId,

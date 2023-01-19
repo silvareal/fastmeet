@@ -97,6 +97,8 @@ export function createPeer(
     },
   });
 
+  console.log("peer", peer);
+
   peer.on("signal", (signal) => {
     socket.emit("initiate-signal", {
       userToSignal,

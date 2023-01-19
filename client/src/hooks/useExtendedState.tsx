@@ -1,9 +1,9 @@
-import React from "react";
+import React, { Dispatch, SetStateAction } from "react";
 
-export default function useExtendedState<T>(initialState?: T) {
-  const [state, setState] = React.useState<T>(
-    initialState !== undefined && initialState
-  );
+export default function useExtendedState<T>(
+  initialState?: any
+): [T, Dispatch<SetStateAction<T>>, () => Promise<T>] {
+  const [state, setState] = React.useState<T>(initialState && initialState);
   const getLatestState = () => {
     return new Promise<T>((resolve, reject) => {
       setState((s) => {
@@ -13,5 +13,5 @@ export default function useExtendedState<T>(initialState?: T) {
     });
   };
 
-  return [state, setState, getLatestState] as const;
+  return [state, setState, getLatestState];
 }

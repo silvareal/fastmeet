@@ -40,6 +40,7 @@ export default function VideoMeetJoin() {
   const addPeerSound = usePlaySound("addPeer");
   const raisedHandSound = usePlaySound("raiseHand");
   const onlyParticipantSound = usePlaySound("onlyParticipant");
+  const screenShareSound = usePlaySound("newMessage");
 
   const {
     localMediaStream,
@@ -277,6 +278,9 @@ export default function VideoMeetJoin() {
               break;
             case "screen":
               peerItem.userObj.peer_screen_share = payload.status as boolean;
+              if (peerItem.userObj.peer_screen_share) {
+                screenShareSound.play();
+              }
               break;
             case "hand":
               peerItem.userObj.peer_raised_hand = payload.status as boolean;

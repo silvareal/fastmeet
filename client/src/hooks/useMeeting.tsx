@@ -11,11 +11,8 @@ import {
   addPeerAction,
   editPeerAction,
   removePeerAction,
-  setLocalMediaStreamAction,
   toggleCameraAction,
-  toggleHandRaisedAction,
   toggleMicAction,
-  toggleScreenShareAction,
 } from "store/StoreSlice";
 import { initEnumerateDevices, socket } from "utils/VideoUtils";
 import { Icon as Iconify } from "@iconify/react";
@@ -24,7 +21,6 @@ import usePlaySound from "./usePlaySound";
 import escape from "lodash/escape";
 import fastmeetApi from "store/StoreQuerySlice";
 import useExtendedState from "./useExtendedState";
-import Peer from "simple-peer";
 
 function useMeeting(
   meetId: string | undefined,
@@ -55,18 +51,18 @@ function useMeeting(
 
   const { enqueueSnackbar } = useSnackbar();
   const dispatch = useDispatch();
-  const [streamError, setStreamError] = useState<string>("");
-  const [localMediaStream, setLocalMediaStream, getLocalMediaStream] =
-    useExtendedState<MediaStream>();
   const [peers, setPeers] = useState<PeersType[]>([]);
+  const [streamError, setStreamError] = useState<string>("");
+
+  const [localMediaStream, setLocalMediaStream] =
+    useExtendedState<MediaStream>();
+  const [handRaised, setHandRaised] = useExtendedState<boolean>(false);
   const [screenShare, setScreenShare, getScreenShare] =
     useExtendedState<boolean>(false);
 
   const camera = globalState.camera;
   const mic = globalState.mic;
-  const handRaised = globalState.handRaised;
-  //   const screenShare = globalState.screenShare;
-  //   const peers = globalState.peers;
+
   const iceServers = globalState.iceServers;
 
   const raisedHandSound = usePlaySound("raiseHand");
@@ -306,27 +302,27 @@ function useMeeting(
 
   async function raiseHand() {
     if (canJoinMeeting) {
-      const raiseHand = !handRaised;
+      setHandRaised((handRaised) => {
+        console.log("handRaisedref", handRaised);
+        enqueueSnackbar(`${handRaised ? "Hand Raised ✋" : "Hand Down ✋"}`, {
+          anchorOrigin: {
+            vertical: "top",
+            horizontal: "right",
+          },
+        });
 
-      dispatch(toggleHandRaisedAction());
+        if (handRaised) {
+          raisedHandSound.play();
+        }
+        socket.emit("peerActionStatus", {
+          room_id: meetId,
+          socket_id: socket.id,
+          element: "hand",
+          status: !handRaised,
+        } as PeerActionStatusConfig);
 
-      enqueueSnackbar(`${raiseHand ? "Hand Raised ✋" : "Hand Down ✋"}`, {
-        anchorOrigin: {
-          vertical: "top",
-          horizontal: "right",
-        },
+        return !handRaised;
       });
-
-      console.log("!handRaised, !handRaised", handRaised, raiseHand);
-      if (raiseHand) {
-        raisedHandSound.play();
-      }
-      socket.emit("peerActionStatus", {
-        room_id: meetId,
-        socket_id: socket.id,
-        element: "hand",
-        status: raiseHand,
-      } as PeerActionStatusConfig);
     }
   }
 

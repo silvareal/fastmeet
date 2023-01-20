@@ -21,6 +21,11 @@ import usePlaySound from "./usePlaySound";
 import escape from "lodash/escape";
 import fastmeetApi from "store/StoreQuerySlice";
 import useExtendedState from "./useExtendedState";
+import {
+  getDataTimeString,
+  getSupportedMimeTypes,
+  saveBlobToFile,
+} from "utils/GLobalUtils";
 
 function useMeeting(
   meetId: string | undefined,
@@ -31,6 +36,7 @@ function useMeeting(
   toggleCamera: (callback?: (camera: boolean) => void) => void;
   hangUp: () => void;
   raiseHand: () => void;
+  isScreenRecord: boolean;
   onInputChangeName: (
     e: React.ChangeEvent<HTMLInputElement>,
     callback?: (value: string) => void
@@ -44,6 +50,7 @@ function useMeeting(
   setPeers: Dispatch<SetStateAction<PeersType[]>>;
   getTurnServerQuery: UseQueryStateResult<{ data: { [key: string]: string } }>;
   toggleScreenSharing: () => void;
+  toggleRecordStream: () => void;
 } {
   const globalState: GlobalInitialStateType = useSelector(
     (state: any) => state.global
@@ -59,13 +66,22 @@ function useMeeting(
   const [handRaised, setHandRaised] = useExtendedState<boolean>(false);
   const [screenShare, setScreenShare, getScreenShare] =
     useExtendedState<boolean>(false);
+  const [mediaRecorder, setMediaRecorder, getMediaRecorder] =
+    useExtendedState<MediaRecorder>();
+  const [isScreenRecord, setIsScreenRecord, getIsScreenRecord] =
+    useExtendedState<boolean>(false);
+  const [recordedBlobs, setRecordedBlobs, getRecordedBlobs] =
+    useExtendedState<any>([]);
 
   const camera = globalState.camera;
   const mic = globalState.mic;
+  let isMobileDevice = false;
 
   const iceServers = globalState.iceServers;
 
   const raisedHandSound = usePlaySound("raiseHand");
+  const screenRecStartSound = usePlaySound("recStart");
+  const screenRecStopSound = usePlaySound("recStop");
 
   const getTurnServerQuery = fastmeetApi.useGetTurnServerQuery({});
 
@@ -168,6 +184,156 @@ function useMeeting(
       }
       if (callback) callback(!!localMediaStream.getAudioTracks()[0].enabled);
     }
+  }
+
+  /**
+   * Stop recording
+   */
+  function stopStreamRecording() {
+    getMediaRecorder().then((mediaRecorder) => {
+      mediaRecorder.stop();
+    });
+  }
+
+  /**
+   * Download recorded stream
+   */
+  function downloadRecordedStream() {
+    try {
+      getRecordedBlobs().then((recordedBlobs) => {
+        if (recordedBlobs === undefined) return;
+
+        const type = recordedBlobs[0].type.includes("mp4") ? "mp4" : "webm";
+        const blob = new Blob(recordedBlobs, { type: "video/" + type });
+        const recFileName = getDataTimeString() + "-REC." + type;
+        const currentDevice = isMobileDevice ? "MOBILE" : "PC";
+
+        console.log(
+          `Please wait to be processed, then will be downloaded to your ${currentDevice} device`
+        );
+
+        saveBlobToFile(blob, recFileName);
+      });
+    } catch (err) {
+      console.log("error", "Recording save failed: " + err);
+    }
+  }
+  /**
+   * Handle Media Recorder onstop event
+   * @param {object} event of media recorder
+   */
+  function handleMediaRecorderStop(event: any) {
+    screenRecStopSound.play();
+    console.log("MediaRecorder stopped: ", event);
+    setIsScreenRecord(false);
+    socket.emit("peerActionStatus", {
+      room_id: meetId,
+      socket_id: socket.id,
+      element: "rec",
+      status: false,
+    } as PeerActionStatusConfig);
+    downloadRecordedStream();
+  }
+
+  /**
+   * Handle Media Recorder ondata event
+   * @param {object} event of media recorder
+   */
+  function handleMediaRecorderData(event: any) {
+    console.log("MediaRecorder data: ", event);
+    if (event.data && event.data.size > 0)
+      setRecordedBlobs((prevRecordedBlobs: any) => {
+        return [...prevRecordedBlobs, event.data];
+      });
+  }
+
+  /**
+   * Handle Media Recorder
+   * @param {object} mediaRecorder
+   */
+  function handleMediaRecorder() {
+    getMediaRecorder().then((mediaRecorder) => {
+      console.log("mediaRecorder", mediaRecorder);
+      screenRecStartSound.play();
+      mediaRecorder.start();
+      mediaRecorder.addEventListener("dataavailable", handleMediaRecorderData);
+      mediaRecorder.addEventListener("stop", handleMediaRecorderStop);
+    });
+  }
+
+  /**
+   * Start Recording
+   * https://github.com/webrtc/samples/tree/gh-pages/src/content/getusermedia/record
+   * https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder
+   * https://developer.mozilla.org/en-US/docs/Web/API/MediaStream
+   */
+  function startStreamRecording() {
+    setRecordedBlobs([]);
+
+    let mimeoptions = getSupportedMimeTypes();
+    console.log("MediaRecorder options supported", mimeoptions);
+    let options = { mimeType: mimeoptions?.[0] }; // select the first available as mimeType
+
+    try {
+      if (isMobileDevice) {
+        // on mobile devices recording camera + audio
+        setMediaRecorder(new MediaRecorder(localMediaStream, options));
+        setIsScreenRecord(true);
+        handleMediaRecorder();
+        socket.emit("peerActionStatus", {
+          room_id: meetId,
+          socket_id: socket.id,
+          element: "rec",
+          status: true,
+        } as PeerActionStatusConfig);
+      } else {
+        // on desktop devices recording screen + audio
+        // screenMaxFrameRate = parseInt(screenFpsSelect.value);
+        const constraints = {
+          // video: { frameRate: { max: screenMaxFrameRate } },
+          video: true,
+        };
+        let recScreenStreamPromise =
+          navigator.mediaDevices.getDisplayMedia(constraints);
+        recScreenStreamPromise
+          .then((screenStream) => {
+            const newStream = new MediaStream([
+              screenStream.getVideoTracks()[0],
+              localMediaStream.getAudioTracks()[0],
+            ]);
+            setMediaRecorder(new MediaRecorder(newStream, options));
+            setIsScreenRecord(true);
+            handleMediaRecorder();
+            socket.emit("peerActionStatus", {
+              room_id: meetId,
+              socket_id: socket.id,
+              element: "rec",
+              status: true,
+            } as PeerActionStatusConfig);
+          })
+          .catch((err) => {
+            console.error(
+              "[Error] Unable to recording the screen + audio",
+              err
+            );
+          });
+      }
+    } catch (err) {
+      console.error("Exception while creating MediaRecorder: ", err);
+    }
+  }
+
+  /**
+   * Start - Stop Stream recording
+   */
+  function toggleRecordStream() {
+    getIsScreenRecord().then((isStreamRecording) => {
+      if (isStreamRecording) {
+        stopStreamRecording();
+      } else {
+        startStreamRecording();
+      }
+    });
   }
 
   /**
@@ -365,11 +531,13 @@ function useMeeting(
     onInputChangeName,
     addPeer,
     editPeer,
+    isScreenRecord,
     deletePeer,
     setPeers,
     iceServers,
     setStreamError,
     getTurnServerQuery,
+    toggleRecordStream,
     toggleScreenSharing,
   };
 }

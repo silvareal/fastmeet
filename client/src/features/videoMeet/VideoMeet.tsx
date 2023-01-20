@@ -31,12 +31,14 @@ const PreviewInput = styled(InputBase)(({ theme }) => ({
 interface VideoMeetProps {
   toggleCamera: () => void;
   toggleAudio: () => void;
+  toggleRecordStream: () => void;
   hangUp: () => void;
   raiseHand: () => void;
   shareScreen: () => void;
   mic: boolean;
   camera: boolean;
   hand: boolean;
+  isScreenRecord: boolean;
   localMediaStream: MediaStream | undefined;
   peers: PeersType[];
   formik: FormikProps<{
@@ -69,6 +71,8 @@ export default function VideoMeet({
   mic,
   camera,
   hand,
+  toggleRecordStream,
+  isScreenRecord,
   localMediaStream,
   peers,
   formik,
@@ -108,6 +112,14 @@ export default function VideoMeet({
         onClick: shareScreen,
         size: "small",
         icon: "fluent:share-screen-start-24-regular",
+      },
+      {
+        title: "Record",
+        variant: "opaque",
+        color: `${isScreenRecord ? "error" : "primary"}`,
+        onClick: toggleRecordStream,
+        size: "small",
+        icon: "mdi:record-circle-outline",
       },
       {
         title: "End Call",

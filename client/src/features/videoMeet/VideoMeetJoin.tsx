@@ -41,6 +41,8 @@ export default function VideoMeetJoin() {
   const raisedHandSound = usePlaySound("raiseHand");
   const onlyParticipantSound = usePlaySound("onlyParticipant");
   const screenShareSound = usePlaySound("newMessage");
+  const screenRecStartSound = usePlaySound("recStart");
+  const screenRecStopSound = usePlaySound("recStop");
 
   const {
     localMediaStream,
@@ -52,6 +54,8 @@ export default function VideoMeetJoin() {
     camera,
     screenShare,
     toggleCamera,
+    toggleRecordStream,
+    isScreenRecord,
     toggleMic,
     hangUp,
     raiseHand,
@@ -278,9 +282,20 @@ export default function VideoMeetJoin() {
               break;
             case "screen":
               peerItem.userObj.peer_screen_share = payload.status as boolean;
-              if (peerItem.userObj.peer_screen_share) {
-                screenShareSound.play();
-              }
+              screenShareSound.play();
+              enqueueSnackbar(
+                <>
+                  {peerItem.userObj.peer_name} `$
+                  {payload.status ? "Started" : "Stopped"}`Sharing Screen
+                </>,
+                {
+                  anchorOrigin: {
+                    vertical: "top",
+                    horizontal: "right",
+                  },
+                }
+              );
+
               break;
             case "hand":
               peerItem.userObj.peer_raised_hand = payload.status as boolean;
@@ -307,6 +322,29 @@ export default function VideoMeetJoin() {
               break;
             case "rec":
               peerItem.userObj.peer_screen_record = payload.status as boolean;
+              if (peerItem.userObj.peer_screen_record) {
+                screenRecStartSound.play();
+                enqueueSnackbar(
+                  <>{peerItem.userObj.peer_name} started 🔴 REC</>,
+                  {
+                    anchorOrigin: {
+                      vertical: "top",
+                      horizontal: "right",
+                    },
+                  }
+                );
+              } else {
+                screenRecStopSound.play();
+                enqueueSnackbar(
+                  <>{peerItem.userObj.peer_name} stopped 🔴 REC</>,
+                  {
+                    anchorOrigin: {
+                      vertical: "top",
+                      horizontal: "right",
+                    },
+                  }
+                );
+              }
               break;
             case "name":
               peerItem.userObj.peer_name = payload.status as string;
@@ -331,8 +369,6 @@ export default function VideoMeetJoin() {
     // eslint-disable-next-line
   }, [canJoinMeeting]);
 
-  function shareScreenFn() {}
-
   useEffect(() => {
     return () => {
       onlyParticipantSound.pause();
@@ -355,8 +391,10 @@ export default function VideoMeetJoin() {
               hangUp,
               formik,
               peers,
+              isScreenRecord,
               localMediaStream,
               getAvatarQuery,
+              toggleRecordStream,
               hand: handRaised,
               toggleAudio: toggleMic,
               shareScreen: toggleScreenSharing,

@@ -34,10 +34,11 @@ interface VideoMeetProps {
   toggleRecordStream: () => void;
   hangUp: () => void;
   raiseHand: () => void;
-  shareScreen: () => void;
+  toggleScreenSharing: () => void;
   mic: boolean;
   camera: boolean;
   hand: boolean;
+  screenShare: boolean;
   isScreenRecord: boolean;
   localMediaStream: MediaStream | undefined;
   peers: PeersType[];
@@ -67,12 +68,13 @@ export default function VideoMeet({
   toggleAudio,
   raiseHand,
   hangUp,
-  shareScreen,
+  toggleScreenSharing,
   mic,
   camera,
   hand,
   toggleRecordStream,
   isScreenRecord,
+  screenShare,
   localMediaStream,
   peers,
   formik,
@@ -82,7 +84,7 @@ export default function VideoMeet({
   const mainActions: MainActionProps[] = useMemo(
     () => [
       {
-        title: "on/off microphone",
+        title: `${mic ? "Off Mic" : "On Mic"}`,
         variant: "opaque",
         color: `${mic ? "primary" : "error"}`,
         onClick: toggleAudio,
@@ -90,7 +92,7 @@ export default function VideoMeet({
         icon: `${mic ? "carbon:microphone" : "carbon:microphone-off"}`,
       },
       {
-        title: "on/off camera",
+        title: `${camera ? "Off Camera" : "On Camera"}`,
         variant: "opaque",
         color: `${camera ? "primary" : "error"}`,
         onClick: toggleCamera,
@@ -98,7 +100,7 @@ export default function VideoMeet({
         icon: `${camera ? "bi:camera-video" : "bi:camera-video-off"}`,
       },
       {
-        title: "Raise Hand",
+        title: `${hand ? "End Raise Hand" : "Raise Hand"}`,
         variant: "opaque",
         color: "primary",
         onClick: raiseHand,
@@ -109,12 +111,12 @@ export default function VideoMeet({
         title: "Share Screen",
         variant: "opaque",
         color: "primary",
-        onClick: shareScreen,
+        onClick: toggleScreenSharing,
         size: "small",
         icon: "fluent:share-screen-start-24-regular",
       },
       {
-        title: "Record",
+        title: `${isScreenRecord ? "End Record" : "Record"}`,
         variant: "opaque",
         color: `${isScreenRecord ? "error" : "primary"}`,
         onClick: toggleRecordStream,
@@ -139,7 +141,7 @@ export default function VideoMeet({
       // },
     ],
     // eslint-disable-next-line
-    [camera, mic]
+    [camera, mic, isScreenRecord, hand]
   );
 
   const onChangePreviewName = (e: React.ChangeEvent<HTMLInputElement>) => {

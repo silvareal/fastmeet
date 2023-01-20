@@ -27,6 +27,7 @@ import {
   PeersRefType,
   PeerActionStatusConfig,
 } from "./VideoMeetType";
+import ScreenRecorderContainer from "common/ScreenRecorderContainer";
 
 export default function VideoMeetJoin() {
   const { meetId } = useParams();
@@ -382,32 +383,36 @@ export default function VideoMeetJoin() {
           loading={getTurnServerQuery.isLoading || getAvatarQuery.isLoading}
           error={!!getTurnServerQuery.error || !!getAvatarQuery.error}
         >
-          <VideoMeet
-            {...{
-              camera,
-              mic,
-              toggleCamera,
-              raiseHand,
-              hangUp,
-              formik,
-              peers,
-              isScreenRecord,
-              localMediaStream,
-              getAvatarQuery,
-              toggleRecordStream,
-              hand: handRaised,
-              toggleAudio: toggleMic,
-              shareScreen: toggleScreenSharing,
-              onInputName: onInputChangeName,
-            }}
-          />
+          <>
+            {isScreenRecord ? <ScreenRecorderContainer /> : null}
+            <VideoMeet
+              {...{
+                camera,
+                mic,
+                toggleCamera,
+                raiseHand,
+                hangUp,
+                formik,
+                peers,
+                isScreenRecord,
+                localMediaStream,
+                getAvatarQuery,
+                screenShare,
+                toggleRecordStream,
+                toggleScreenSharing,
+                hand: handRaised,
+                toggleAudio: toggleMic,
+                onInputName: onInputChangeName,
+              }}
+            />
+          </>
         </LoadingContent>
       </>
     );
   }
 
   return (
-    <div className="bg-gray-100 min-h-screen">
+    <div className="bg-gray-100  min-h-screen">
       <AppHeader />
       <LoadingContent
         loading={getTurnServerQuery.isLoading}

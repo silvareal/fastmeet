@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 
+type MediaInputType = { label: string; kind: string; id: string };
 export default function VideoMeetSettingsActionModal({
   open,
   handleClose,
@@ -18,66 +19,75 @@ export default function VideoMeetSettingsActionModal({
   handleClose: () => void;
   localMediaStream: MediaStream | undefined;
 }) {
-  const [audioInputSelect, setAudioInputSelect] = useState<
-    { label: string; kind: string; id: string }[]
-  >([]);
-  const [audioOutputSelect, setAudioOutputSelect] = useState<
-    { label: string; kind: string; id: string }[]
-  >([]);
-  const [videoSelect, setVideoSelect] = useState<
-    { label: string; kind: string; id: string }[]
-  >([]);
+  const [audioInputSelect, setAudioInputSelect] = useState<MediaInputType[]>(
+    []
+  );
+  const [audioOutputSelect, setAudioOutputSelect] = useState<MediaInputType[]>(
+    []
+  );
+  const [videoSelect, setVideoSelect] = useState<MediaInputType[]>([]);
+
+  const addUpdateDevice = (
+    prev: MediaInputType[],
+    deviceInfo: MediaDeviceInfo
+  ) => {
+    const newDeviceInfo = [...prev];
+    const deviceIndex = newDeviceInfo.findIndex(
+      (device) => device.id === deviceInfo.deviceId
+    );
+    if (deviceIndex >= 0) {
+      newDeviceInfo[deviceIndex] = {
+        label: deviceInfo.label,
+        kind: deviceInfo.kind,
+        id: deviceInfo.deviceId,
+      };
+    } else {
+      newDeviceInfo.push({
+        label: deviceInfo.label,
+        kind: deviceInfo.kind,
+        id: deviceInfo.deviceId,
+      });
+    }
+    return newDeviceInfo;
+  };
 
   function gotDevices(deviceInfos: MediaDeviceInfo[]) {
     deviceInfos.forEach((deviceInfo: MediaDeviceInfo) => {
-      if (deviceInfo.kind === "audioinput") {
-        setAudioInputSelect([
-          ...audioInputSelect,
-          {
-            label: deviceInfo.label,
-            kind: deviceInfo.kind,
-            id: deviceInfo.deviceId,
-          },
-        ]);
-      } else if (deviceInfo.kind === "audiooutput") {
-        setAudioOutputSelect([
-          ...audioOutputSelect,
-          {
-            label: deviceInfo.label,
-            kind: deviceInfo.kind,
-            id: deviceInfo.deviceId,
-          },
-        ]);
-      } else if (deviceInfo.kind === "videoinput") {
-        setVideoSelect([
-          ...videoSelect,
-          {
-            label: deviceInfo.label,
-            kind: deviceInfo.kind,
-            id: deviceInfo.deviceId,
-          },
-        ]);
-      } else {
-        console.log("Some other kind of source/device: ", deviceInfo);
+      switch (deviceInfo.kind) {
+        case "audioinput":
+          setAudioInputSelect((prev) => {
+            return addUpdateDevice(prev, deviceInfo);
+          });
+          break;
+        case "audiooutput":
+          setAudioOutputSelect((prev) => {
+            return addUpdateDevice(prev, deviceInfo);
+          });
+          break;
+        case "videoinput":
+          setVideoSelect((prev) => {
+            return addUpdateDevice(prev, deviceInfo);
+          });
+          break;
+        default:
+          console.log("Some other kind of source/device: ", deviceInfo);
+          break;
       }
     });
   }
 
   useEffect(() => {
-    if (!navigator.mediaDevices?.enumerateDevices) {
-      console.log("enumerateDevices() not supported.");
-    } else {
-      navigator.mediaDevices
-        .enumerateDevices()
-        .then(gotDevices)
-        .catch((error) =>
-          console.log(
-            "navigator.MediaDevices.getUserMedia error: ",
-            error.message,
-            error.name
-          )
-        );
-    }
+    navigator?.mediaDevices
+      ?.enumerateDevices()
+      .then(gotDevices)
+      .catch((error) =>
+        console.log(
+          "navigator.MediaDevices.getUserMedia error: ",
+          error.message,
+          error.name
+        )
+      );
+
     // eslint-disable-next-line
   }, []);
 

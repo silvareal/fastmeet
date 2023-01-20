@@ -6,13 +6,14 @@ import Paper from "@mui/material/Paper";
 
 import { Icon as Iconify } from "@iconify/react";
 import { Fab, Icon, MenuItem } from "@mui/material";
+import VideoMeetSettingsActionModal from "./VideoMeetSettingsActionModal";
 
 export default function VideoMeetJoinVideoPreviewerHeader({
   localMediaStream,
 }: {
   localMediaStream: MediaStream | undefined;
 }) {
-  const [, setOpenVideoSettings] = useState(false);
+  const [openVideoSettings, setOpenVideoSettings] = useState(false);
 
   const videoSettingsActions = [
     {
@@ -63,6 +64,14 @@ export default function VideoMeetJoinVideoPreviewerHeader({
           </PopupState>
         </div>
       </div>
+
+      {openVideoSettings && (
+        <VideoMeetSettingsActionModal
+          open={openVideoSettings}
+          handleClose={() => setOpenVideoSettings(false)}
+          localMediaStream={localMediaStream}
+        />
+      )}
     </>
   );
 }

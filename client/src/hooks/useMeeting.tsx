@@ -202,12 +202,10 @@ function useMeeting(
     try {
       getRecordedBlobs().then((recordedBlobs) => {
         if (recordedBlobs === undefined) return;
-
         const type = recordedBlobs[0].type.includes("mp4") ? "mp4" : "webm";
         const blob = new Blob(recordedBlobs, { type: "video/" + type });
         const recFileName = getDataTimeString() + "-REC." + type;
         const currentDevice = isMobileDevice ? "MOBILE" : "PC";
-
         console.log(
           `Please wait to be processed, then will be downloaded to your ${currentDevice} device`
         );

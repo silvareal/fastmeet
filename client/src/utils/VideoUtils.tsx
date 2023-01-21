@@ -21,7 +21,7 @@ export function initEnumerateDevices(
   err: (err: any) => void
 ) {
   navigator.mediaDevices
-    ?.getUserMedia({ video: true, audio: { echoCancellation: true } })
+    ?.getUserMedia({ video: true, audio: true })
     .then((stream: MediaStream) => {
       success(stream);
     })

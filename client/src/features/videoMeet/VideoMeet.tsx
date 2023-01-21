@@ -159,7 +159,7 @@ export default function VideoMeet({
               <VideoPreviewer
                 camera={camera}
                 mic={mic}
-                muted={true}
+                muted={false}
                 active={true}
                 name={formik.values.name}
                 avatar={getAvatarQuery.data.data}
@@ -202,7 +202,7 @@ export default function VideoMeet({
                   key={index}
                   camera={peer.userObj.peer_video}
                   mic={peer.userObj.peer_audio}
-                  muted={true}
+                  muted={false}
                   active={false}
                   avatar={peer.userObj.avatar}
                   peer={peer.peerObj}
@@ -252,7 +252,7 @@ export default function VideoMeet({
               className="h-[calc(100vh-100px)]"
               camera={camera}
               mic={mic}
-              muted={true}
+              muted={false}
               active={true}
               name={formik.values.name}
               avatar={getAvatarQuery.data.data}

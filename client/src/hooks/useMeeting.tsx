@@ -83,6 +83,11 @@ function useMeeting(
   const screenRecStartSound = usePlaySound("recStart");
   const screenRecStopSound = usePlaySound("recStop");
 
+  //   console.log(
+  //     "localMediaStream?.getAudioTracks()",
+  //     localMediaStream?.getAudioTracks()[0]
+  //   );
+
   const getTurnServerQuery = fastmeetApi.useGetTurnServerQuery({});
 
   useEffect(() => {
@@ -94,7 +99,7 @@ function useMeeting(
           dispatch(toggleCameraAction(true));
           dispatch(toggleMicAction(true));
         },
-        () => {
+        (err) => {
           dispatch(toggleCameraAction(false));
           dispatch(toggleMicAction(false));
         }
@@ -143,7 +148,8 @@ function useMeeting(
         );
       }
 
-      if (callback) callback(!!localMediaStream.getVideoTracks()[0].enabled);
+      if (callback && typeof callback === "function")
+        callback(!!localMediaStream.getVideoTracks()[0].enabled);
     }
   }
 
@@ -182,7 +188,8 @@ function useMeeting(
           }
         );
       }
-      if (callback) callback(!!localMediaStream.getAudioTracks()[0].enabled);
+      if (callback && typeof callback === "function")
+        callback(!!localMediaStream.getAudioTracks()[0].enabled);
     }
   }
 
@@ -501,7 +508,7 @@ function useMeeting(
       element: "name",
       status: `${sanitizedText}`,
     } as PeerActionStatusConfig);
-    callback && callback(sanitizedText);
+    if (callback && typeof callback === "function") callback(sanitizedText);
   }
 
   function addPeer(peer: PeersType) {

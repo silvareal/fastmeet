@@ -37,7 +37,7 @@ const socketServer = new Server(server, {
 });
 
 async function startServer() {
-  server.listen(PORT, () => {
+  server.listen(PORT, () => { 
     console.log(`Listening on port ${PORT}...`);
   });
   sockets(socketServer);

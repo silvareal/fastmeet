@@ -132,12 +132,12 @@ export default function VideoMeetJoin() {
       });
 
       if (peers.length >= 1) {
-        onlyParticipantSound.pause();
-        onlyParticipantSound.currentTime = 0;
-        onlyParticipantSound.loop = false;
+        // onlyParticipantSound.pause();
+        // onlyParticipantSound.currentTime = 0;
+        // onlyParticipantSound.loop = false;
       } else {
-        onlyParticipantSound.play();
-        onlyParticipantSound.loop = true;
+        // onlyParticipantSound.play();
+        // onlyParticipantSound.loop = true;
       }
       peersRef.current = peers;
       setPeers(peers);
@@ -187,9 +187,9 @@ export default function VideoMeetJoin() {
         });
 
         if (peersRef.current.length >= 1) {
-          onlyParticipantSound.pause();
-          onlyParticipantSound.currentTime = 0;
-          onlyParticipantSound.loop = false;
+          // onlyParticipantSound.pause();
+          // onlyParticipantSound.currentTime = 0;
+          // onlyParticipantSound.loop = false;
         }
 
         addPeerSound.play();
@@ -241,12 +241,12 @@ export default function VideoMeetJoin() {
       );
 
       if (peers.length >= 1) {
-        onlyParticipantSound.pause();
-        onlyParticipantSound.currentTime = 0;
-        onlyParticipantSound.loop = false;
+        // onlyParticipantSound.pause();
+        // onlyParticipantSound.currentTime = 0;
+        // onlyParticipantSound.loop = false;
       } else {
-        onlyParticipantSound.play();
-        onlyParticipantSound.loop = true;
+        // onlyParticipantSound.play();
+        // onlyParticipantSound.loop = true;
       }
 
       enqueueSnackbar(`${item.userObj.peer_name} Left meeting`, {
@@ -372,7 +372,7 @@ export default function VideoMeetJoin() {
 
   useEffect(() => {
     return () => {
-      onlyParticipantSound.pause();
+      // onlyParticipantSound.pause();
     };
   }, []);
 

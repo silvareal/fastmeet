@@ -8,7 +8,7 @@ import AppThemeProvider from "AppThemeProvider";
 import Suspense from "common/Suspense";
 import { SnackbarProvider } from "notistack";
 
-const TRACKING_ID = process.env.REACT_APP_GA_TRACKING_ID;
+const TRACKING_ID = import.meta.env.VITE_GA_TRACKING_ID;
 if (TRACKING_ID) {
   ReactGA.initialize(TRACKING_ID);
 }
@@ -31,20 +31,20 @@ function App() {
 const ROUTES = configureRoutes([
   {
     path: "*",
-    element: <Navigate to={RouteEnum.HOME} replace />,
+    element: <Navigate to={RouteEnum.HOME} replace />
   },
   {
     path: RouteEnum.MEET_JOIN,
-    element: lazy(() => import("features/videoMeet/VideoMeetJoin")),
+    element: lazy(() => import("features/videoMeet/VideoMeetJoin"))
   },
   {
     path: RouteEnum.MEET,
-    element: lazy(() => import("features/videoMeet/VideoMeetJoin")),
+    element: lazy(() => import("features/videoMeet/VideoMeetJoin"))
   },
   {
     path: RouteEnum.HOME,
-    element: lazy(() => import("features/home/Home")),
-  },
+    element: lazy(() => import("features/home/Home"))
+  }
 ]);
 
 export default App;

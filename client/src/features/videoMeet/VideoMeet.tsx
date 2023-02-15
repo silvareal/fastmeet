@@ -1,20 +1,25 @@
+import { Icon as Iconify } from "@iconify/react";
 import {
+  Badge,
   Fab,
   Icon,
   InputBase,
-  styled,
+  IconButton,
   Tooltip,
   Typography,
 } from "@mui/material";
-import React, { KeyboardEvent, useMemo, useState } from "react";
-import { Icon as Iconify } from "@iconify/react";
 import { format } from "date-fns";
 import { FormikProps } from "formik";
-
+import React, { useMemo, useState } from "react";
 import VideoPreviewer from "common/VideoPreviewer";
-import "./VideoMeet.css";
 import ThemeConfig from "configs/ThemeConfig";
-import { PeersType } from "./VideoMeetType";
+import { ChatDrawer } from "features/chat/ChatDrawer";
+import { MessageDetailsType } from "features/chat/ChatType";
+import usePlaySound from "hooks/usePlaySound";
+import { useSnackbar } from "notistack";
+import "./VideoMeet.css";
+import { PeersRefType, PeersType } from "./VideoMeetType";
+import styled from "@emotion/styled";
 
 const PreviewInput = styled(InputBase)(({ theme }) => ({
   "& .MuiInputBase-input": {
@@ -42,6 +47,8 @@ interface VideoMeetProps {
   isScreenRecord: boolean;
   localMediaStream: MediaStream | undefined;
   peers: PeersType[];
+  setPeers: Function;
+  peersRef: { current: PeersRefType[] };
   formik: FormikProps<{
     name: string;
     gender: string;
@@ -77,6 +84,8 @@ export default function VideoMeet({
   screenShare,
   localMediaStream,
   peers,
+  setPeers,
+  peersRef,
   formik,
   getAvatarQuery,
   onInputName,
@@ -150,12 +159,55 @@ export default function VideoMeet({
     });
   };
 
+  const { enqueueSnackbar } = useSnackbar();
+  const chatMessageSound = usePlaySound("chatMessage");
+  const [isChatDrawerOpen, setIsChatDrawerOpen] = useState<boolean>(false);
+  const [messages, setMessages] = useState<MessageDetailsType[]>([]);
+
+  const hasUnreadMessages = messages
+    .map((message) => message.isMessageRead)
+    .includes(false);
+
+  const toggleOpenChatDrawer = () => {
+    setIsChatDrawerOpen((prev) => {
+      if (!prev == true) {
+        const readMessages = messages.map((message) => {
+          return { ...message, isMessageRead: true };
+        });
+        setMessages(readMessages);
+      }
+      return !prev;
+    });
+  };
+
+  const updateMessages = (message: MessageDetailsType) => {
+    if (!isChatDrawerOpen && !message.senderDetails?.isFromMe) {
+      enqueueSnackbar(
+        ` you have a message from ${message?.senderDetails?.userName} 💬`,
+        {
+          anchorOrigin: {
+            vertical: "top",
+            horizontal: "right",
+          },
+        }
+      );
+      chatMessageSound.play();
+    }
+    const incomingMessage: MessageDetailsType = {
+      ...message,
+      isMessageRead: isChatDrawerOpen ? true : false,
+    };
+    setMessages([...messages, incomingMessage]);
+
+    return;
+  };
+
   return (
     <div className="bg-[#000000] overflow-y-hidden h-screen max-h-screen min-h-[500px]">
-      <main className="overflow-y-scroll">
-        <div className="h-[calc(100vh-80px)] pt-5 px-3">
+      <main className="overflow-y-scroll w-100">
+        <div className="h-[calc(100vh-80px)] pt-5 px-3 flex gap-2 w-full">
           {peers.length >= 1 ? (
-            <div className="layout-grid-auto h-full">
+            <div className="grid grid-col-1 md:grid-col-2 gap-1 h-full">
               <VideoPreviewer
                 camera={camera}
                 mic={mic}
@@ -291,7 +343,17 @@ export default function VideoMeet({
               }
             />
           )}
-        </div>
+
+          {/* <ChatDrawer
+            messages={messages}
+            updateMessages={updateMessages}
+            onClose={toggleOpenChatDrawer}
+            open={isChatDrawerOpen}
+            title="In-Call Messages"
+            setPeers={setPeers}
+            peersRef={peersRef}
+          /> */}
+        </div>{" "}
       </main>
 
       <footer className="flex justify-between gap-2 items-center my-3 mx-3">
@@ -316,7 +378,20 @@ export default function VideoMeet({
             </Tooltip>
           ))}
         </div>
-        <div></div>
+        <div>
+          <Tooltip title="chat" placement="top">
+            <IconButton onClick={toggleOpenChatDrawer}>
+              <Badge variant="dot" color="info" invisible={!hasUnreadMessages}>
+                <Icon>
+                  <Iconify
+                    icon="carbon:chat"
+                    color={ThemeConfig.palette.common.white}
+                  />
+                </Icon>
+              </Badge>
+            </IconButton>
+          </Tooltip>
+        </div>
       </footer>
     </div>
   );

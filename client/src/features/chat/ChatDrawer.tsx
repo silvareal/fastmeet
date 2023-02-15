@@ -1,14 +1,22 @@
-import { Icon } from "@iconify/react";
-import { Box, IconButton, Typography } from "@mui/material";
-import ThemeConfig from "configs/ThemeConfig";
+import { IconButton, Typography } from "@mui/material";
 import { PeersRefType, PeersType } from "features/videoMeet/VideoMeetType";
 import { useFormik } from "formik";
 import { FC } from "react";
-import { socket } from "utils/VideoUtils";
-import { Chat } from "./Chat";
-import { MessageDetailsType } from "./ChatType";
-import * as yup from "yup";
 import { useParams } from "react-router-dom";
+import { socket } from "utils/VideoUtils";
+import * as yup from "yup";
+import { MessageDetailsType } from "./ChatType";
+import Divider from "@mui/material/Divider";
+import Drawer from "@mui/material/Drawer";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import { Box } from "@mui/system";
+import { Chat } from "./Chat";
+import { Icon } from "@iconify/react";
+import ThemeConfig from "configs/ThemeConfig";
 
 export const ChatDrawer: FC<{
   open: boolean;
@@ -89,21 +97,35 @@ export const ChatDrawer: FC<{
     },
   });
 
+  const drawerWidth = open ? "450px" : 0;
+
   return (
-    <Box
-      className={`rounded-lg ${
-        !!open ? "max-w-[450px] min-w-[300px] w-full" : "w-0"
-      }  h-full min-h-full box-border bg-common-white flex flex-col justify-between pb-4`}
-      style={{
+    <Drawer
+      sx={{
+        width: drawerWidth,
+        flexShrink: 0,
+        backgroundColor: "#000",
+        "& .MuiDrawer-paper": {
+          width: drawerWidth,
+          boxSizing: "border-box",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          maxHeight: "100%",
+          backgroundColor: "#000",
+        },
         transition: ThemeConfig.transitions.create("width", {
           easing: ThemeConfig.transitions.easing.easeInOut,
           duration: ThemeConfig.transitions.duration.enteringScreen,
         }),
       }}
+      className={`rounded-lg  h-full min-h-full box-border bg-common-white  flex flex-col justify-between pb-4`}
+      variant="persistent"
+      anchor="right"
+      open={open}
     >
-      {/* chat header */}
       {!!open && (
-        <Box className="flex px-2 py-4 pr-0 justify-between items-center">
+        <Box className="flex px-2 py-4 pr-0 justify-between items-center text-common-white">
           <Typography variant="h5">{title}</Typography>
           <IconButton onClick={() => onClose()}>
             <Icon icon="iconoir:cancel" fontSize={30} />
@@ -112,6 +134,6 @@ export const ChatDrawer: FC<{
       )}
 
       {!!open && <Chat formik={formik} messages={messages} />}
-    </Box>
+    </Drawer>
   );
 };

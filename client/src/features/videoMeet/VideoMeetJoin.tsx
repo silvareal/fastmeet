@@ -394,6 +394,8 @@ export default function VideoMeetJoin() {
                 hangUp,
                 formik,
                 peers,
+                setPeers, // TODO: remove
+                peersRef, // TODO: remove
                 isScreenRecord,
                 localMediaStream,
                 getAvatarQuery,

@@ -136,6 +136,31 @@ function video(io) {
                 socketId: socket.id,
             });
         }));
+        /**
+         * Message to peers or specific peer in the same room
+         */
+        socket.on("messageAction", (config) => __awaiter(this, void 0, void 0, function* () {
+            const room_id = config.room_id;
+            const message = config.message;
+            try {
+                log.debug("[" +
+                    socket.id +
+                    "] emit messageAction to [room_id: " +
+                    room_id +
+                    "]", {
+                    room_id,
+                    message,
+                });
+                yield (0, videoUtils_1.sendToRoom)(socket, room_id, socket.id, clients, "messageAction", {
+                    room_id: room_id,
+                    socket_id: socket.id,
+                    message,
+                });
+            }
+            catch (err) {
+                log.error("message Peer", err);
+            }
+        }));
     });
 }
 exports.video = video;

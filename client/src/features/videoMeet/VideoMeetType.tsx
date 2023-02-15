@@ -37,3 +37,4 @@ export interface PeerActionStatusConfig {
   element: "name" | "video" | "hand" | "audio" | "screen" | "rec";
   status: string | boolean;
 }
+

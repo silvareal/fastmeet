@@ -353,6 +353,8 @@ export default function VideoMeetJoin() {
               peers,
               localMediaStream,
               getAvatarQuery,
+              setPeers,
+              peersRef,
               hand: handRaised,
               toggleAudio: toggleMic,
               shareScreen: toggleScreenSharing,

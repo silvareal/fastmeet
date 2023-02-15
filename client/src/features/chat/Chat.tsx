@@ -13,7 +13,7 @@ export const Chat = (props: {
   const { messages, formik } = props;
 
   return (
-    <Box className="max-h-full mx-4 my-0 flex flex-col box-border">
+    <Box className="max-h-[calc(100vh-100px)] mx-4 my-0 flex flex-col box-border">
       <Box className="max-h-full overflow-scroll box-border flex flex-col">
         {messages.map((message, index) => (
           <ChatMessagePill key={index} message={message} />
@@ -26,8 +26,12 @@ export const Chat = (props: {
           fullWidth
           placeholder="type here"
           autoFocus
-          className="self-end flex rounded-18xl"
+          multiline
+          minRows={1}
+          className="chatInput-variant"
           InputProps={{
+            sx: [{ color: "common.white" }],
+           
             endAdornment: (
               <IconButton
                 type="submit"

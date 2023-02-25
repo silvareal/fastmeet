@@ -21,6 +21,8 @@ import { useSnackbar } from "notistack";
 import "./VideoMeet.css";
 import { PeersRefType, PeersType } from "./VideoMeetType";
 import { ChatDrawer } from "features/chat/ChatDrawer";
+import { APP_SIDE_MENU_WIDTH } from "constants/Global";
+import useChatDrawer from "hooks/useChatDrawer";
 
 const PreviewInput = styled(InputBase)(({ theme }) => ({
   "& .MuiInputBase-input": {
@@ -164,6 +166,7 @@ export default function VideoMeet({
   const chatMessageSound = usePlaySound("chatMessage");
   const [isChatDrawerOpen, setIsChatDrawerOpen] = useState<boolean>(false);
   const [messages, setMessages] = useState<MessageDetailsType[]>([]);
+  const { isChatDrawer, toggleChatDrawer } = useChatDrawer();
 
   const hasUnreadMessages = messages
     .map((message) => message.isMessageRead)
@@ -203,9 +206,16 @@ export default function VideoMeet({
     return;
   };
 
+  const isMd = ThemeConfig.breakpoints.down("md");
   return (
     <div className="bg-[#000000]  h-screen max-h-screen min-h-[500px] flex ">
-      <div className="w-100 border-box w-full">
+      <div
+        className="w-100 border-box w-full"
+        style={{
+          paddingRight:
+            isMd && isChatDrawer ? `calc(${APP_SIDE_MENU_WIDTH}px)` : "",
+        }}
+      >
         <main className="overflow-y-scroll w-100">
           <div className="h-[calc(100vh-80px)] pt-5 px-3 flex gap-2 w-full">
             {peers.length >= 1 ? (
@@ -256,7 +266,7 @@ export default function VideoMeet({
                     key={index}
                     camera={peer.userObj.peer_video}
                     mic={peer.userObj.peer_audio}
-                    muted={true}
+                    // muted={false}
                     active={false}
                     avatar={peer.userObj.avatar}
                     peer={peer.peerObj}
@@ -306,7 +316,7 @@ export default function VideoMeet({
                 className="h-[calc(100vh-100px)]"
                 camera={camera}
                 mic={mic}
-                muted={false}
+                muted={true}
                 active={true}
                 name={formik.values.name}
                 avatar={getAvatarQuery.data.data}
@@ -372,7 +382,7 @@ export default function VideoMeet({
           </div>
           <div>
             <Tooltip title="chat" placement="top">
-              <IconButton onClick={toggleOpenChatDrawer}>
+              <IconButton onClick={() => toggleChatDrawer?.()}>
                 <Badge
                   variant="dot"
                   color="info"
@@ -395,7 +405,7 @@ export default function VideoMeet({
         updateMessages={updateMessages}
         onClose={toggleOpenChatDrawer}
         open={isChatDrawerOpen}
-        title="In-Call Messages"
+        title="Messages"
         setPeers={setPeers}
         peersRef={peersRef}
       />

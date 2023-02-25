@@ -1,22 +1,19 @@
-import { IconButton, Typography } from "@mui/material";
-import { PeersRefType, PeersType } from "features/videoMeet/VideoMeetType";
+import { Fab, IconButton, Typography, useMediaQuery } from "@mui/material";
 import { useFormik } from "formik";
 import { FC } from "react";
 import { useParams } from "react-router-dom";
-import { socket } from "utils/VideoUtils";
 import * as yup from "yup";
-import { MessageDetailsType } from "./ChatType";
-import Divider from "@mui/material/Divider";
 import Drawer from "@mui/material/Drawer";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
 import { Box } from "@mui/system";
-import { Chat } from "./Chat";
+
 import { Icon } from "@iconify/react";
 import ThemeConfig from "configs/ThemeConfig";
+import { APP_SIDE_MENU_WIDTH } from "constants/Global";
+import { PeersRefType, PeersType } from "features/videoMeet/VideoMeetType";
+import { Chat } from "./Chat";
+import { socket } from "utils/VideoUtils";
+import { MessageDetailsType } from "./ChatType";
+import useChatDrawer from "hooks/useChatDrawer";
 
 export const ChatDrawer: FC<{
   open: boolean;
@@ -36,6 +33,8 @@ export const ChatDrawer: FC<{
   updateMessages,
 }) => {
   const { meetId } = useParams();
+  const isMd = useMediaQuery(ThemeConfig.breakpoints.down("md"));
+  const { isChatDrawer, toggleChatDrawer } = useChatDrawer();
 
   socket.on(
     "messageAction",
@@ -97,43 +96,37 @@ export const ChatDrawer: FC<{
     },
   });
 
-  const drawerWidth = open ? "450px" : 0;
-
   return (
     <Drawer
       sx={{
-        width: drawerWidth,
-        flexShrink: 0,
-        backgroundColor: "#000",
+        border: "none",
+
         "& .MuiDrawer-paper": {
-          width: drawerWidth,
-          boxSizing: "border-box",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          maxHeight: "100%",
-          backgroundColor: "#000",
+          width: "100%",
+          border: "none",
+          maxWidth: APP_SIDE_MENU_WIDTH,
+          backgroundColor: ThemeConfig.palette.primary.main,
         },
-        transition: ThemeConfig.transitions.create("width", {
-          easing: ThemeConfig.transitions.easing.easeInOut,
-          duration: ThemeConfig.transitions.duration.enteringScreen,
-        }),
       }}
-      className={`rounded-lg  h-full min-h-full box-border bg-common-white  flex flex-col justify-between pb-4`}
-      variant="persistent"
+      variant={"persistent"}
       anchor="right"
-      open={open}
+      open={isChatDrawer}
     >
-      {!!open && (
-        <Box className="flex px-2 py-4 pr-0 justify-between items-center text-common-white">
-          <Typography variant="h5">{title}</Typography>
-          <IconButton onClick={() => onClose()}>
-            <Icon icon="iconoir:cancel" fontSize={30} />
-          </IconButton>
+      {!!isChatDrawer && (
+        <Box className="inline-flex px-3 py-4 pr-0 justify-between items-center text-common-white">
+          <Typography variant="h6">{title}</Typography>
+          <Fab
+            variant="opaque"
+            color="primary"
+            size="small"
+            onClick={() => toggleChatDrawer?.()}
+          >
+            <Icon icon="iconoir:cancel" fontSize={16} />
+          </Fab>
         </Box>
       )}
 
-      {!!open && <Chat formik={formik} messages={messages} />}
+      {!!isChatDrawer && <Chat formik={formik} messages={messages} />}
     </Drawer>
   );
 };

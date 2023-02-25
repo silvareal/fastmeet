@@ -53,7 +53,7 @@ function useMeeting(
   toggleRecordStream: () => void;
 } {
   const globalState: GlobalInitialStateType = useSelector(
-    (state: any) => state.global
+    (state: { global: GlobalInitialStateType }) => state.global
   );
 
   const { enqueueSnackbar } = useSnackbar();
@@ -75,6 +75,8 @@ function useMeeting(
 
   const camera = globalState.camera;
   const mic = globalState.mic;
+  const isChatDrawer = globalState.isChatDrawer;
+
   let isMobileDevice = false;
 
   const iceServers = globalState.iceServers;
@@ -524,6 +526,7 @@ function useMeeting(
   return {
     camera,
     mic,
+    isChatDrawer,
     handRaised,
     screenShare,
     localMediaStream,

@@ -104,9 +104,6 @@ export const theme: any = customizeComponents({
             borderRadius: 0,
           },
           "&.chatInput-variant": {
-            justify: "self-end",
-            display: " flex",
-            margin: "1rem 0",
             backgroundColor: "#222",
             borderRadius: "1rem",
             "& fieldset": {

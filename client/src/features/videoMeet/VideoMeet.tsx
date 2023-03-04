@@ -21,6 +21,8 @@ import { useSnackbar } from "notistack";
 import "./VideoMeet.css";
 import { PeersRefType, PeersType } from "./VideoMeetType";
 import { ChatDrawer } from "features/chat/ChatDrawer";
+import { APP_SIDE_MENU_WIDTH } from "constants/Global";
+import useChatDrawer from "hooks/useChatDrawer";
 
 const PreviewInput = styled(InputBase)(({ theme }) => ({
   "& .MuiInputBase-input": {
@@ -162,27 +164,33 @@ export default function VideoMeet({
 
   const { enqueueSnackbar } = useSnackbar();
   const chatMessageSound = usePlaySound("chatMessage");
-  const [isChatDrawerOpen, setIsChatDrawerOpen] = useState<boolean>(false);
   const [messages, setMessages] = useState<MessageDetailsType[]>([]);
+  const { isChatDrawer, toggleChatDrawer } = useChatDrawer();
 
   const hasUnreadMessages = messages
     .map((message) => message.isMessageRead)
     .includes(false);
 
   const toggleOpenChatDrawer = () => {
-    setIsChatDrawerOpen((prev) => {
-      if (!prev == true) {
-        const readMessages = messages.map((message) => {
-          return { ...message, isMessageRead: true };
-        });
-        setMessages(readMessages);
-      }
-      return !prev;
-    });
+    toggleChatDrawer?.();
+
+    if (!isChatDrawer === true) {
+      const readMessages = messages.map((message) => {
+        return { ...message, isMessageRead: true };
+      });
+      setMessages(readMessages);
+    }
+    return !isChatDrawer;
   };
 
   const updateMessages = (message: MessageDetailsType) => {
-    if (!isChatDrawerOpen && !message.senderDetails?.isFromMe) {
+    console.log(
+      "isChatDrawer",
+      isChatDrawer,
+      isChatDrawer === false,
+      !!message.senderDetails?.isFromMe
+    );
+    if (isChatDrawer && !!message.senderDetails?.isFromMe === false) {
       enqueueSnackbar(
         ` you have a message from ${message?.senderDetails?.userName} 💬`,
         {
@@ -196,16 +204,23 @@ export default function VideoMeet({
     }
     const incomingMessage: MessageDetailsType = {
       ...message,
-      isMessageRead: isChatDrawerOpen ? true : false,
+      isMessageRead: isChatDrawer ? true : false,
     };
     setMessages([...messages, incomingMessage]);
 
     return;
   };
 
+  const isMd = ThemeConfig.breakpoints.down("md");
   return (
     <div className="bg-[#000000]  h-screen max-h-screen min-h-[500px] flex ">
-      <div className="w-100 border-box w-full">
+      <div
+        className="w-100 border-box w-full"
+        style={{
+          paddingRight:
+            isMd && isChatDrawer ? `calc(${APP_SIDE_MENU_WIDTH}px)` : "",
+        }}
+      >
         <main className="overflow-y-scroll w-100">
           <div className="h-[calc(100vh-80px)] pt-5 px-3 flex gap-2 w-full">
             {peers.length >= 1 ? (
@@ -256,7 +271,7 @@ export default function VideoMeet({
                     key={index}
                     camera={peer.userObj.peer_video}
                     mic={peer.userObj.peer_audio}
-                    muted={true}
+                    // muted={false}
                     active={false}
                     avatar={peer.userObj.avatar}
                     peer={peer.peerObj}
@@ -306,7 +321,7 @@ export default function VideoMeet({
                 className="h-[calc(100vh-100px)]"
                 camera={camera}
                 mic={mic}
-                muted={false}
+                muted={true}
                 active={true}
                 name={formik.values.name}
                 avatar={getAvatarQuery.data.data}
@@ -345,7 +360,7 @@ export default function VideoMeet({
                 }
               />
             )}
-          </div>{" "}
+          </div>
         </main>
 
         <footer className="flex justify-between gap-2 items-center my-3 mx-3">
@@ -372,7 +387,7 @@ export default function VideoMeet({
           </div>
           <div>
             <Tooltip title="chat" placement="top">
-              <IconButton onClick={toggleOpenChatDrawer}>
+              <IconButton onClick={() => toggleChatDrawer?.()}>
                 <Badge
                   variant="dot"
                   color="info"
@@ -394,8 +409,8 @@ export default function VideoMeet({
         messages={messages}
         updateMessages={updateMessages}
         onClose={toggleOpenChatDrawer}
-        open={isChatDrawerOpen}
-        title="In-Call Messages"
+        open={isChatDrawer}
+        title="Messages"
         setPeers={setPeers}
         peersRef={peersRef}
       />

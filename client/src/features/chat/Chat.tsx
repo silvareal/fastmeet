@@ -13,37 +13,39 @@ export const Chat = (props: {
   const { messages, formik } = props;
 
   return (
-    <Box className="max-h-[calc(100vh-100px)] mx-4 my-0 flex flex-col box-border">
-      <Box className="max-h-full overflow-scroll box-border flex flex-col">
+    <Box className="px-3 h-full mb-8 flex flex-col justify-between">
+      <Box className="max-h-full overflow-y-scroll box-border flex flex-col">
         {messages.map((message, index) => (
           <ChatMessagePill key={index} message={message} />
         ))}
       </Box>
 
       <form onSubmit={formik.handleSubmit}>
-        <TextField
-          {...formik.getFieldProps("message")}
-          fullWidth
-          placeholder="type here"
-          autoFocus
-          multiline
-          minRows={1}
-          className="chatInput-variant"
-          InputProps={{
-            sx: [{ color: "common.white" }],
-           
-            endAdornment: (
-              <IconButton
-                type="submit"
-                disabled={
-                  formik.touched.message && Boolean(formik.errors.message)
-                }
-              >
-                <Icon icon="carbon:send" fontSize={30} />
-              </IconButton>
-            ),
-          }}
-        />
+        <div>
+          <TextField
+            {...formik.getFieldProps("message")}
+            fullWidth
+            autoComplete="false"
+            placeholder="Write a message"
+            autoFocus
+            size="small"
+            className="chatInput-variant"
+            InputProps={{
+              sx: [{ color: "common.white" }],
+
+              endAdornment: (
+                <IconButton
+                  type="submit"
+                  disabled={
+                    formik.touched.message && Boolean(formik.errors.message)
+                  }
+                >
+                  <Icon icon="carbon:send" />
+                </IconButton>
+              ),
+            }}
+          />
+        </div>
       </form>
     </Box>
   );

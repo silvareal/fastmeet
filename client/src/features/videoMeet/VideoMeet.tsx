@@ -164,7 +164,6 @@ export default function VideoMeet({
 
   const { enqueueSnackbar } = useSnackbar();
   const chatMessageSound = usePlaySound("chatMessage");
-  const [isChatDrawerOpen, setIsChatDrawerOpen] = useState<boolean>(false);
   const [messages, setMessages] = useState<MessageDetailsType[]>([]);
   const { isChatDrawer, toggleChatDrawer } = useChatDrawer();
 
@@ -173,19 +172,25 @@ export default function VideoMeet({
     .includes(false);
 
   const toggleOpenChatDrawer = () => {
-    setIsChatDrawerOpen((prev) => {
-      if (!prev == true) {
-        const readMessages = messages.map((message) => {
-          return { ...message, isMessageRead: true };
-        });
-        setMessages(readMessages);
-      }
-      return !prev;
-    });
+    toggleChatDrawer?.();
+
+    if (!isChatDrawer === true) {
+      const readMessages = messages.map((message) => {
+        return { ...message, isMessageRead: true };
+      });
+      setMessages(readMessages);
+    }
+    return !isChatDrawer;
   };
 
   const updateMessages = (message: MessageDetailsType) => {
-    if (!isChatDrawerOpen && !message.senderDetails?.isFromMe) {
+    console.log(
+      "isChatDrawer",
+      isChatDrawer,
+      isChatDrawer === false,
+      !!message.senderDetails?.isFromMe
+    );
+    if (isChatDrawer && !!message.senderDetails?.isFromMe === false) {
       enqueueSnackbar(
         ` you have a message from ${message?.senderDetails?.userName} 💬`,
         {
@@ -199,7 +204,7 @@ export default function VideoMeet({
     }
     const incomingMessage: MessageDetailsType = {
       ...message,
-      isMessageRead: isChatDrawerOpen ? true : false,
+      isMessageRead: isChatDrawer ? true : false,
     };
     setMessages([...messages, incomingMessage]);
 
@@ -355,7 +360,7 @@ export default function VideoMeet({
                 }
               />
             )}
-          </div>{" "}
+          </div>
         </main>
 
         <footer className="flex justify-between gap-2 items-center my-3 mx-3">
@@ -404,7 +409,7 @@ export default function VideoMeet({
         messages={messages}
         updateMessages={updateMessages}
         onClose={toggleOpenChatDrawer}
-        open={isChatDrawerOpen}
+        open={isChatDrawer}
         title="Messages"
         setPeers={setPeers}
         peersRef={peersRef}

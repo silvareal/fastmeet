@@ -16,7 +16,7 @@ import { RouteEnum } from "constants/RouteConstants";
 
 function AppHeader() {
   return (
-    <AppBar color="transparent" elevation={0}>
+    <AppBar sx={{ background: "#f9fafb" }} elevation={0}>
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           <Link to={RouteEnum.HOME}>

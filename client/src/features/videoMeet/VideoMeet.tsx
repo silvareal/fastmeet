@@ -8,6 +8,9 @@ import {
   styled,
   Tooltip,
   Typography,
+  useMediaQuery,
+  BottomNavigation,
+  Box,
 } from "@mui/material";
 import { format } from "date-fns";
 import { FormikProps } from "formik";
@@ -72,6 +75,7 @@ interface MainActionProps {
   onClick: () => void;
   size: "small" | "medium" | "large";
   icon: string;
+  isMobile?: boolean;
 }
 
 export default function VideoMeet({
@@ -94,6 +98,7 @@ export default function VideoMeet({
   getAvatarQuery,
   onInputName,
 }: VideoMeetProps) {
+  const isMobile = useMediaQuery(ThemeConfig.breakpoints.down("md"));
   const mainActions: MainActionProps[] = useMemo(
     () => [
       {
@@ -102,6 +107,7 @@ export default function VideoMeet({
         color: `${mic ? "primary" : "error"}`,
         onClick: toggleAudio,
         size: "small",
+        isMobile: true,
         icon: `${mic ? "carbon:microphone" : "carbon:microphone-off"}`,
       },
       {
@@ -110,6 +116,7 @@ export default function VideoMeet({
         color: `${camera ? "primary" : "error"}`,
         onClick: toggleCamera,
         size: "small",
+        isMobile: true,
         icon: `${camera ? "bi:camera-video" : "bi:camera-video-off"}`,
       },
       {
@@ -118,6 +125,7 @@ export default function VideoMeet({
         color: "primary",
         onClick: raiseHand,
         size: "small",
+        isMobile: true,
         icon: "emojione-monotone:hand-with-fingers-splayed",
       },
       {
@@ -142,6 +150,7 @@ export default function VideoMeet({
         color: "error",
         onClick: hangUp,
         size: "small",
+        isMobile: true,
         icon: "simple-line-icons:call-end",
       },
       // {
@@ -212,21 +221,136 @@ export default function VideoMeet({
     return;
   };
 
-  const isMd = ThemeConfig.breakpoints.down("md");
   return (
-    <div className="bg-[#000000]  h-screen max-h-screen min-h-[500px] flex ">
-      <div
-        className="w-100 border-box w-full"
-        style={{
-          paddingRight:
-            isMd && isChatDrawer ? `calc(${APP_SIDE_MENU_WIDTH}px)` : "",
-        }}
-      >
-        <main className="overflow-y-scroll w-100">
-          <div className="h-[calc(100vh-80px)] pt-5 px-3 flex gap-2 w-full">
-            {peers.length >= 1 ? (
-              <div className="layout-grid-auto h-full">
+    <>
+      <div className="bg-[#000000]  h-screen max-h-screen min-h-[500px] flex">
+        <div
+          className="w-100 border-box w-full"
+          style={{
+            paddingRight:
+              !isMobile && isChatDrawer ? `calc(${APP_SIDE_MENU_WIDTH}px)` : "",
+          }}
+        >
+          <main className="overflow-y-scroll h-full w-100">
+            <div
+              className={`${
+                isMobile
+                  ? "h-full max-h-[calc(100vh-56px)] overflow-y-scroll flex justify-center items-center"
+                  : "h-[calc(100vh-80px)]"
+              } pt-5 px-3 flex gap-2 w-full`}
+            >
+              {peers.length >= 1 ? (
+                <div className="layout-grid-auto h-full">
+                  <VideoPreviewer
+                    camera={camera}
+                    mic={mic}
+                    muted={true}
+                    active={true}
+                    name={formik.values.name}
+                    avatar={getAvatarQuery.data.data}
+                    srcObject={localMediaStream}
+                    header={
+                      <div className="flex justify-between items-center">
+                        <Icon
+                          style={{
+                            color: `${
+                              mic
+                                ? ThemeConfig.palette.common.white
+                                : ThemeConfig.palette.error
+                            }`,
+                          }}
+                        >
+                          <Iconify
+                            icon={`${
+                              mic
+                                ? "clarity:microphone-solid"
+                                : "clarity:microphone-mute-solid"
+                            }`}
+                          />
+                        </Icon>
+
+                        <VoicePitch stream={localMediaStream} />
+                      </div>
+                    }
+                    footer={
+                      <div className="flex gap-2">
+                        {hand && (
+                          <Tooltip title="Hand Raised" placement="top">
+                            <Icon className="wave-hand">
+                              <Iconify
+                                icon={`emojione:waving-hand-medium-dark-skin-tone`}
+                              />
+                            </Icon>
+                          </Tooltip>
+                        )}
+                        <PreviewInput
+                          value={formik.values.name || ""}
+                          onChange={onChangePreviewName}
+                        />
+                      </div>
+                    }
+                  />
+                  {peers?.map((peer: PeersType, index: number) => (
+                    <VideoPreviewer
+                      key={index}
+                      camera={peer.userObj.peer_video}
+                      mic={peer.userObj.peer_audio}
+                      // muted={false}
+                      active={false}
+                      avatar={peer.userObj.avatar}
+                      peer={peer.peerObj}
+                      name={peer.userObj.peer_name}
+                      header={
+                        <div className="flex justify-between items-center">
+                          <Icon
+                            style={{
+                              color: `${
+                                mic
+                                  ? ThemeConfig.palette.common.white
+                                  : ThemeConfig.palette.error
+                              }`,
+                            }}
+                          >
+                            <Iconify
+                              icon={`${
+                                peer.userObj.peer_audio
+                                  ? "clarity:microphone-solid"
+                                  : "clarity:microphone-mute-solid"
+                              }`}
+                            />
+                          </Icon>
+
+                          <VoicePitch stream={localMediaStream} />
+                        </div>
+                      }
+                      footer={
+                        <div className="flex gap-2">
+                          {peer.userObj.peer_raised_hand && (
+                            <Tooltip title="Hand Raised" placement="top">
+                              <Icon className="wave-hand">
+                                <Iconify
+                                  icon={`emojione:waving-hand-medium-dark-skin-tone`}
+                                />
+                              </Icon>
+                            </Tooltip>
+                          )}
+                          <Typography
+                            className="vids-preview-title"
+                            color={"white"}
+                            variant="subtitle2"
+                          >
+                            {peer.userObj.peer_name}
+                          </Typography>
+                        </div>
+                      }
+                    />
+                  ))}
+                </div>
+              ) : (
                 <VideoPreviewer
+                  className={`${
+                    isMobile ? "h-full max-h-[300px]" : "h-[calc(100vh-100px)]"
+                  }`}
                   camera={camera}
                   mic={mic}
                   muted={true}
@@ -247,7 +371,6 @@ export default function VideoMeet({
                           }`}
                         />
                       </Icon>
-
                       <VoicePitch stream={localMediaStream} />
                     </div>
                   }
@@ -269,148 +392,101 @@ export default function VideoMeet({
                     </div>
                   }
                 />
-                {peers?.map((peer: PeersType, index: number) => (
-                  <VideoPreviewer
-                    key={index}
-                    camera={peer.userObj.peer_video}
-                    mic={peer.userObj.peer_audio}
-                    // muted={false}
-                    active={false}
-                    avatar={peer.userObj.avatar}
-                    peer={peer.peerObj}
-                    name={peer.userObj.peer_name}
-                    header={
-                      <div className="flex justify-between items-center">
-                        <Icon
-                          style={{
-                            color: `${ThemeConfig.palette.common.white}`,
-                          }}
-                        >
-                          <Iconify
-                            icon={`${
-                              peer.userObj.peer_audio
-                                ? "clarity:microphone-solid"
-                                : "clarity:microphone-mute-solid"
-                            }`}
-                          />
-                        </Icon>
+              )}
+            </div>
+          </main>
 
-                        <VoicePitch stream={localMediaStream} />
-                      </div>
-                    }
-                    footer={
-                      <div className="flex gap-2">
-                        {peer.userObj.peer_raised_hand && (
-                          <Tooltip title="Hand Raised" placement="top">
-                            <Icon className="wave-hand">
-                              <Iconify
-                                icon={`emojione:waving-hand-medium-dark-skin-tone`}
-                              />
-                            </Icon>
-                          </Tooltip>
-                        )}
-                        <Typography
-                          className="vids-preview-title"
-                          color={"white"}
-                          variant="subtitle2"
-                        >
-                          {peer.userObj.peer_name}
-                        </Typography>
-                      </div>
-                    }
-                  />
+          {!isMobile && (
+            <footer className="flex justify-between gap-2 items-center fixed w-full bottom-0 z-50 my-3 px-3">
+              <div className="flex item-center">
+                <Typography color="white" variant="subtitle1" fontWeight={500}>
+                  {format(new Date(), "p")} | Fast Meet
+                </Typography>
+              </div>
+              <div className="flex gap-2">
+                {mainActions.map((action: MainActionProps, i: number) => (
+                  <Tooltip key={i} title={action.title}>
+                    <Fab
+                      variant={action.variant}
+                      color={action.color}
+                      onClick={action.onClick}
+                      size={action.size}
+                    >
+                      <Icon>
+                        <Iconify icon={action.icon} />
+                      </Icon>
+                    </Fab>
+                  </Tooltip>
                 ))}
               </div>
-            ) : (
-              <VideoPreviewer
-                className="h-[calc(100vh-100px)]"
-                camera={camera}
-                mic={mic}
-                muted={true}
-                active={true}
-                name={formik.values.name}
-                avatar={getAvatarQuery.data.data}
-                srcObject={localMediaStream}
-                header={
-                  <div className="flex justify-between items-center">
-                    <Icon
-                      style={{ color: `${ThemeConfig.palette.common.white}` }}
+              <div>
+                <Tooltip title="chat" placement="top">
+                  <IconButton onClick={() => toggleChatDrawer?.()}>
+                    <Badge
+                      variant="dot"
+                      color="info"
+                      invisible={!hasUnreadMessages}
                     >
-                      <Iconify
-                        icon={`${
-                          mic
-                            ? "clarity:microphone-solid"
-                            : "clarity:microphone-mute-solid"
-                        }`}
-                      />
-                    </Icon>
-                    <VoicePitch stream={localMediaStream} />
-                  </div>
-                }
-                footer={
-                  <div className="flex gap-2">
-                    {hand && (
-                      <Tooltip title="Hand Raised" placement="top">
-                        <Icon className="wave-hand">
-                          <Iconify
-                            icon={`emojione:waving-hand-medium-dark-skin-tone`}
-                          />
-                        </Icon>
-                      </Tooltip>
-                    )}
-                    <PreviewInput
-                      value={formik.values.name || ""}
-                      onChange={onChangePreviewName}
-                    />
-                  </div>
-                }
-              />
-            )}
-          </div>
-        </main>
+                      <Icon>
+                        <Iconify
+                          icon="carbon:chat"
+                          color={ThemeConfig.palette.common.white}
+                        />
+                      </Icon>
+                    </Badge>
+                  </IconButton>
+                </Tooltip>
+              </div>
+            </footer>
+          )}
 
-        <footer className="flex justify-between gap-2 items-center my-3 mx-3">
-          <div className="flex item-center">
-            <Typography color="white" variant="subtitle1" fontWeight={500}>
-              {format(new Date(), "p")} | Fast Meet
-            </Typography>
-          </div>
-          <div className="flex gap-2">
-            {mainActions.map((action: MainActionProps, i: number) => (
-              <Tooltip key={i} title={action.title}>
-                <Fab
-                  variant={action.variant}
-                  color={action.color}
-                  onClick={action.onClick}
-                  size={action.size}
-                >
-                  <Icon>
-                    <Iconify icon={action.icon} />
-                  </Icon>
-                </Fab>
-              </Tooltip>
-            ))}
-          </div>
-          <div>
-            <Tooltip title="chat" placement="top">
-              <IconButton onClick={() => toggleChatDrawer?.()}>
-                <Badge
-                  variant="dot"
-                  color="info"
-                  invisible={!hasUnreadMessages}
-                >
-                  <Icon>
-                    <Iconify
-                      icon="carbon:chat"
-                      color={ThemeConfig.palette.common.white}
-                    />
-                  </Icon>
-                </Badge>
-              </IconButton>
-            </Tooltip>
-          </div>
-        </footer>
+          {isMobile && (
+            <>
+              <BottomNavigation className="bg-[#000000] fixed w-full bottom-0 z-50">
+                <div className="flex gap-2 justify-between w-full px-3 py-6 items-center">
+                  <div className="flex gap-2">
+                    {mainActions
+                      .filter((action) => action.isMobile)
+                      ?.map((action: MainActionProps, i: number) => (
+                        <Tooltip key={i} title={action.title}>
+                          <Fab
+                            variant={action.variant}
+                            color={action.color}
+                            onClick={action.onClick}
+                            size={"small"}
+                          >
+                            <Icon>
+                              <Iconify icon={action.icon} />
+                            </Icon>
+                          </Fab>
+                        </Tooltip>
+                      ))}
+                  </div>
+                  <div>
+                    <Tooltip title="chat" placement="top">
+                      <IconButton onClick={() => toggleChatDrawer?.()}>
+                        <Badge
+                          variant="dot"
+                          color="info"
+                          invisible={!hasUnreadMessages}
+                        >
+                          <Icon>
+                            <Iconify
+                              icon="carbon:chat"
+                              color={ThemeConfig.palette.common.white}
+                            />
+                          </Icon>
+                        </Badge>
+                      </IconButton>
+                    </Tooltip>
+                  </div>
+                </div>
+              </BottomNavigation>
+            </>
+          )}
+        </div>
       </div>
+
       <ChatDrawer
         messages={messages}
         updateMessages={updateMessages}
@@ -420,6 +496,6 @@ export default function VideoMeet({
         setPeers={setPeers}
         peersRef={peersRef}
       />
-    </div>
+    </>
   );
 }

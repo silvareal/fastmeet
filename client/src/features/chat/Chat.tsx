@@ -13,7 +13,7 @@ export const Chat = (props: {
   const { messages, formik } = props;
 
   return (
-    <Box className="px-3 h-full mb-8 flex flex-col justify-between">
+    <Box className="px-3 h-full mb-4 flex flex-col justify-between">
       <Box className="max-h-full overflow-y-scroll box-border flex flex-col">
         {messages.map((message, index) => (
           <ChatMessagePill key={index} message={message} />

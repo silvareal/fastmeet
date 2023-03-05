@@ -20,7 +20,7 @@ export default function VideoMeetJoinForm({ formik }: VideoMeetJoinFormProps) {
   return (
     <form
       onSubmit={formik.handleSubmit}
-      className="flex flex-col  items-center w-full justify-around h-full"
+      className="flex flex-col  items-center w-full md:justify-around justify-center h-full"
     >
       <div className="w-full">
         <TextField

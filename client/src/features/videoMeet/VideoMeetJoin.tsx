@@ -414,47 +414,54 @@ export default function VideoMeetJoin() {
   return (
     <div className="bg-gray-100  min-h-screen">
       <AppHeader />
-      <LoadingContent
-        loading={getTurnServerQuery.isLoading}
-        error={!!getTurnServerQuery.error}
-      >
-        <Container maxWidth="xl" className="flex min-h-screen items-center">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 w-full">
-            <VideoMeetJoinForm formik={formik} />
-            <div className="col-span-2 -order-1 md:order-1 h-[450px]">
-              <VideoPreviewer
-                camera={camera}
-                mic={mic}
-                muted={true}
-                active={true}
-                srcObject={localMediaStream}
-                header={
-                  <VideoMeetJoinVideoPreviewerHeader
-                    localMediaStream={localMediaStream}
-                  />
-                }
-                body={
-                  <VideoMeetJoinVideoPreviewerBody streamError={streamError} />
-                }
-                footer={
-                  <VideoMeetJoinVideoPreviewerFooter
-                    camera={camera}
-                    toggleCamera={() => {
-                      toggleCamera((camera) => {
-                        camera
-                          ? setStreamError("")
-                          : setStreamError("Camera is turned off");
-                      });
-                    }}
-                    mic={mic}
-                    toggleAudio={toggleMic}
-                  />
-                }
-              />
+      <div className="my-8">
+        <LoadingContent
+          loading={getTurnServerQuery.isLoading}
+          error={!!getTurnServerQuery.error}
+        >
+          <Container maxWidth="xl" className="flex min-h-screen items-center">
+            <div className="flex md:flex-row flex-col-reverse gap-10 w-full">
+              <div className="md:w-[40%] w-full">
+                <VideoMeetJoinForm formik={formik} />
+              </div>
+
+              <div className="md:h-[450px] h-[300px] md:w-[60%] w-full">
+                <VideoPreviewer
+                  camera={camera}
+                  mic={mic}
+                  muted={true}
+                  active={true}
+                  srcObject={localMediaStream}
+                  // header={
+                  //   <VideoMeetJoinVideoPreviewerHeader
+                  //     localMediaStream={localMediaStream}
+                  //   />
+                  // }
+                  body={
+                    <VideoMeetJoinVideoPreviewerBody
+                      streamError={streamError}
+                    />
+                  }
+                  footer={
+                    <VideoMeetJoinVideoPreviewerFooter
+                      camera={camera}
+                      toggleCamera={() => {
+                        toggleCamera((camera) => {
+                          camera
+                            ? setStreamError("")
+                            : setStreamError("Camera is turned off");
+                        });
+                      }}
+                      mic={mic}
+                      toggleAudio={toggleMic}
+                    />
+                  }
+                />
+              </div>
             </div>
-          </div>
-        </Container>
-      </LoadingContent>
+          </Container>
+        </LoadingContent>
+      </div>
     </div>
   );
 }

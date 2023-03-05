@@ -2,6 +2,9 @@
 
 A p2p decentralized video conferencing application
 
+## Demo
+![Demo](client/src/assets/gif/demo-preview.gif)
+
 ## Getting Started
 
 1. Ensure you have Node.js installed.

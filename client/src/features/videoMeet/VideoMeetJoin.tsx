@@ -94,21 +94,19 @@ export default function VideoMeetJoin() {
    * @param stream MediaStream
    */
   function joinToChannel(stream: MediaStream) {
-    if (peers.length === 0) {
-      socket.emit("join", meetId, {
-        userAgent: navigator.userAgent.toLowerCase(),
-        channel_password: "",
-        avatar: getAvatarResult?.data,
-        peer_info: getPeerInfo(),
-        peer_name: formik.values.name,
-        peer_gender: formik.values.gender,
-        peer_video: camera,
-        peer_audio: mic,
-        peer_raised_hand: handRaised,
-        peer_screen_record: screenRecordRef.current,
-        peer_screen_share: screenShare,
-      });
-    }
+    socket.emit("join", meetId, {
+      userAgent: navigator.userAgent.toLowerCase(),
+      channel_password: "",
+      avatar: getAvatarResult?.data,
+      peer_info: getPeerInfo(),
+      peer_name: formik.values.name,
+      peer_gender: formik.values.gender,
+      peer_video: camera,
+      peer_audio: mic,
+      peer_raised_hand: handRaised,
+      peer_screen_record: screenRecordRef.current,
+      peer_screen_share: screenShare,
+    });
 
     socket.on("clients-in-room", (users: UserObjType[]) => {
       const peers: PeersType[] = [];

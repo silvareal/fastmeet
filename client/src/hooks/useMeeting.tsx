@@ -475,9 +475,10 @@ function useMeeting(
 
   async function raiseHand() {
     if (canJoinMeeting) {
+      console.log("handRaised1", handRaised);
       setHandRaised((handRaised) => {
         console.log("handRaisedref", handRaised);
-        enqueueSnackbar(`${handRaised ? "Hand Raised ✋" : "Hand Down ✋"}`, {
+        enqueueSnackbar(`${!handRaised ? "Hand Raised ✋" : "Hand Down ✋"}`, {
           anchorOrigin: {
             vertical: "top",
             horizontal: "right",
@@ -496,6 +497,7 @@ function useMeeting(
 
         return !handRaised;
       });
+      console.log("handRaised2", handRaised);
     }
   }
 

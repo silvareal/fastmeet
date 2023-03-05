@@ -23,6 +23,7 @@ import { PeersRefType, PeersType } from "./VideoMeetType";
 import { ChatDrawer } from "features/chat/ChatDrawer";
 import { APP_SIDE_MENU_WIDTH } from "constants/Global";
 import useChatDrawer from "hooks/useChatDrawer";
+import VoicePitch from "common/VoicePitch";
 
 const PreviewInput = styled(InputBase)(({ theme }) => ({
   "& .MuiInputBase-input": {
@@ -190,7 +191,7 @@ export default function VideoMeet({
       isChatDrawer === false,
       !!message.senderDetails?.isFromMe
     );
-    if (isChatDrawer && !!message.senderDetails?.isFromMe === false) {
+    if (isChatDrawer && !message.senderDetails?.isFromMe) {
       enqueueSnackbar(
         ` you have a message from ${message?.senderDetails?.userName} 💬`,
         {
@@ -224,7 +225,7 @@ export default function VideoMeet({
         <main className="overflow-y-scroll w-100">
           <div className="h-[calc(100vh-80px)] pt-5 px-3 flex gap-2 w-full">
             {peers.length >= 1 ? (
-              <div className="grid grid-col-2 md:grid-col-2 gap-1 h-full">
+              <div className="layout-grid-auto h-full">
                 <VideoPreviewer
                   camera={camera}
                   mic={mic}
@@ -234,7 +235,7 @@ export default function VideoMeet({
                   avatar={getAvatarQuery.data.data}
                   srcObject={localMediaStream}
                   header={
-                    <div>
+                    <div className="flex justify-between items-center">
                       <Icon
                         style={{ color: `${ThemeConfig.palette.common.white}` }}
                       >
@@ -246,6 +247,8 @@ export default function VideoMeet({
                           }`}
                         />
                       </Icon>
+
+                      <VoicePitch stream={localMediaStream} />
                     </div>
                   }
                   footer={
@@ -277,7 +280,7 @@ export default function VideoMeet({
                     peer={peer.peerObj}
                     name={peer.userObj.peer_name}
                     header={
-                      <div>
+                      <div className="flex justify-between items-center">
                         <Icon
                           style={{
                             color: `${ThemeConfig.palette.common.white}`,
@@ -291,6 +294,8 @@ export default function VideoMeet({
                             }`}
                           />
                         </Icon>
+
+                        <VoicePitch stream={localMediaStream} />
                       </div>
                     }
                     footer={
@@ -327,7 +332,7 @@ export default function VideoMeet({
                 avatar={getAvatarQuery.data.data}
                 srcObject={localMediaStream}
                 header={
-                  <div>
+                  <div className="flex justify-between items-center">
                     <Icon
                       style={{ color: `${ThemeConfig.palette.common.white}` }}
                     >
@@ -339,6 +344,7 @@ export default function VideoMeet({
                         }`}
                       />
                     </Icon>
+                    <VoicePitch stream={localMediaStream} />
                   </div>
                 }
                 footer={

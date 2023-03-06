@@ -5,14 +5,14 @@ import { useFormik } from "formik";
 import * as yup from "yup";
 import ReactGA from "react-ga";
 
-// import Memoji1 from "assets/img/memoji1.png";
-// import Memoji2 from "assets/img/memoji2.png";
-// import Memoji3 from "assets/img/memoji3.png";
-// import Memoji4 from "assets/img/memoji4.png";
+import Memoji1 from "assets/img/memoji1.png";
+import Memoji2 from "assets/img/memoji2.png";
+import Memoji3 from "assets/img/memoji3.png";
+import Memoji4 from "assets/img/memoji4.png";
 
-// import Document from "assets/img/document.png";
-// import Chat from "assets/img/chat.png";
-// import VideoCamera from "assets/img/video-camera.png";
+import Document from "assets/img/document.png";
+import Chat from "assets/img/chat.png";
+import VideoCamera from "assets/img/video-camera.png";
 
 import "./home.css";
 import { getRandomCharacters } from "utils/VideoUtils";
@@ -24,21 +24,6 @@ const Home: FunctionComponent<HomeProps> = () => {
   const navigate = useNavigate();
   const [xAxis, setXAxis] = useState(0);
   const [yAxis, setYAxis] = useState(0);
-
-  const Memoji1 =
-    "https://res.cloudinary.com/silva/image/upload/v1678081666/memoji1.png";
-  const Memoji2 =
-    "https://res.cloudinary.com/silva/image/upload/v1678081835/memoji2.png";
-  const Memoji3 =
-    "https://res.cloudinary.com/silva/image/upload/v1678081835/memoji3.png";
-  const Memoji4 =
-    "https://res.cloudinary.com/silva/image/upload/v1678081835/memoji4.png";
-  const Document =
-    "https://res.cloudinary.com/silva/image/upload/v1678081835/document.png";
-  const Chat =
-    "https://res.cloudinary.com/silva/image/upload/v1678081835/chat.png";
-  const VideoCamera =
-    "https://res.cloudinary.com/silva/image/upload/v1678081836/video-camera.png";
 
   const hoverRef = useRef<HTMLDivElement>(null);
 

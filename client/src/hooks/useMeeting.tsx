@@ -53,7 +53,7 @@ function useMeeting(
   toggleRecordStream: () => void;
 } {
   const globalState: GlobalInitialStateType = useSelector(
-    (state: any) => state.global
+    (state: { global: GlobalInitialStateType }) => state.global
   );
 
   const { enqueueSnackbar } = useSnackbar();
@@ -75,6 +75,8 @@ function useMeeting(
 
   const camera = globalState.camera;
   const mic = globalState.mic;
+  const isChatDrawer = globalState.isChatDrawer;
+
   let isMobileDevice = false;
 
   const iceServers = globalState.iceServers;
@@ -473,9 +475,10 @@ function useMeeting(
 
   async function raiseHand() {
     if (canJoinMeeting) {
+      console.log("handRaised1", handRaised);
       setHandRaised((handRaised) => {
         console.log("handRaisedref", handRaised);
-        enqueueSnackbar(`${handRaised ? "Hand Raised ✋" : "Hand Down ✋"}`, {
+        enqueueSnackbar(`${!handRaised ? "Hand Raised ✋" : "Hand Down ✋"}`, {
           anchorOrigin: {
             vertical: "top",
             horizontal: "right",
@@ -494,6 +497,7 @@ function useMeeting(
 
         return !handRaised;
       });
+      console.log("handRaised2", handRaised);
     }
   }
 
@@ -524,6 +528,7 @@ function useMeeting(
   return {
     camera,
     mic,
+    isChatDrawer,
     handRaised,
     screenShare,
     localMediaStream,

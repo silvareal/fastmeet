@@ -94,21 +94,19 @@ export default function VideoMeetJoin() {
    * @param stream MediaStream
    */
   function joinToChannel(stream: MediaStream) {
-    if (peers.length === 0) {
-      socket.emit("join", meetId, {
-        userAgent: navigator.userAgent.toLowerCase(),
-        channel_password: "",
-        avatar: getAvatarResult?.data,
-        peer_info: getPeerInfo(),
-        peer_name: formik.values.name,
-        peer_gender: formik.values.gender,
-        peer_video: camera,
-        peer_audio: mic,
-        peer_raised_hand: handRaised,
-        peer_screen_record: screenRecordRef.current,
-        peer_screen_share: screenShare,
-      });
-    }
+    socket.emit("join", meetId, {
+      userAgent: navigator.userAgent.toLowerCase(),
+      channel_password: "",
+      avatar: getAvatarResult?.data,
+      peer_info: getPeerInfo(),
+      peer_name: formik.values.name,
+      peer_gender: formik.values.gender,
+      peer_video: camera,
+      peer_audio: mic,
+      peer_raised_hand: handRaised,
+      peer_screen_record: screenRecordRef.current,
+      peer_screen_share: screenShare,
+    });
 
     socket.on("clients-in-room", (users: UserObjType[]) => {
       const peers: PeersType[] = [];
@@ -132,12 +130,12 @@ export default function VideoMeetJoin() {
       });
 
       if (peers.length >= 1) {
-        // onlyParticipantSound.pause();
-        // onlyParticipantSound.currentTime = 0;
-        // onlyParticipantSound.loop = false;
+        onlyParticipantSound.pause();
+        onlyParticipantSound.currentTime = 0;
+        onlyParticipantSound.loop = false;
       } else {
-        // onlyParticipantSound.play();
-        // onlyParticipantSound.loop = true;
+        onlyParticipantSound.play();
+        onlyParticipantSound.loop = true;
       }
       peersRef.current = peers;
       setPeers(peers);
@@ -187,9 +185,9 @@ export default function VideoMeetJoin() {
         });
 
         if (peersRef.current.length >= 1) {
-          // onlyParticipantSound.pause();
-          // onlyParticipantSound.currentTime = 0;
-          // onlyParticipantSound.loop = false;
+          onlyParticipantSound.pause();
+          onlyParticipantSound.currentTime = 0;
+          onlyParticipantSound.loop = false;
         }
 
         addPeerSound.play();
@@ -241,12 +239,12 @@ export default function VideoMeetJoin() {
       );
 
       if (peers.length >= 1) {
-        // onlyParticipantSound.pause();
-        // onlyParticipantSound.currentTime = 0;
-        // onlyParticipantSound.loop = false;
+        onlyParticipantSound.pause();
+        onlyParticipantSound.currentTime = 0;
+        onlyParticipantSound.loop = false;
       } else {
-        // onlyParticipantSound.play();
-        // onlyParticipantSound.loop = true;
+        onlyParticipantSound.play();
+        onlyParticipantSound.loop = true;
       }
 
       enqueueSnackbar(`${item.userObj.peer_name} Left meeting`, {
@@ -372,7 +370,7 @@ export default function VideoMeetJoin() {
 
   useEffect(() => {
     return () => {
-      // onlyParticipantSound.pause();
+      onlyParticipantSound.pause();
     };
   }, []);
 
@@ -394,6 +392,8 @@ export default function VideoMeetJoin() {
                 hangUp,
                 formik,
                 peers,
+                setPeers, // TODO: remove
+                peersRef, // TODO: remove
                 isScreenRecord,
                 localMediaStream,
                 getAvatarQuery,
@@ -414,47 +414,54 @@ export default function VideoMeetJoin() {
   return (
     <div className="bg-gray-100  min-h-screen">
       <AppHeader />
-      <LoadingContent
-        loading={getTurnServerQuery.isLoading}
-        error={!!getTurnServerQuery.error}
-      >
-        <Container maxWidth="xl" className="flex min-h-screen items-center">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 w-full">
-            <VideoMeetJoinForm formik={formik} />
-            <div className="col-span-2 -order-1 md:order-1 h-[450px]">
-              <VideoPreviewer
-                camera={camera}
-                mic={mic}
-                muted={true}
-                active={true}
-                srcObject={localMediaStream}
-                header={
-                  <VideoMeetJoinVideoPreviewerHeader
-                    localMediaStream={localMediaStream}
-                  />
-                }
-                body={
-                  <VideoMeetJoinVideoPreviewerBody streamError={streamError} />
-                }
-                footer={
-                  <VideoMeetJoinVideoPreviewerFooter
-                    camera={camera}
-                    toggleCamera={() => {
-                      toggleCamera((camera) => {
-                        camera
-                          ? setStreamError("")
-                          : setStreamError("Camera is turned off");
-                      });
-                    }}
-                    mic={mic}
-                    toggleAudio={toggleMic}
-                  />
-                }
-              />
+      <div className="my-8">
+        <LoadingContent
+          loading={getTurnServerQuery.isLoading}
+          error={!!getTurnServerQuery.error}
+        >
+          <Container maxWidth="xl" className="flex min-h-screen items-center">
+            <div className="flex md:flex-row flex-col-reverse gap-10 w-full">
+              <div className="md:w-[40%] w-full">
+                <VideoMeetJoinForm formik={formik} />
+              </div>
+
+              <div className="md:h-[450px] h-[300px] md:w-[60%] w-full">
+                <VideoPreviewer
+                  camera={camera}
+                  mic={mic}
+                  muted={true}
+                  active={true}
+                  srcObject={localMediaStream}
+                  // header={
+                  //   <VideoMeetJoinVideoPreviewerHeader
+                  //     localMediaStream={localMediaStream}
+                  //   />
+                  // }
+                  body={
+                    <VideoMeetJoinVideoPreviewerBody
+                      streamError={streamError}
+                    />
+                  }
+                  footer={
+                    <VideoMeetJoinVideoPreviewerFooter
+                      camera={camera}
+                      toggleCamera={() => {
+                        toggleCamera((camera) => {
+                          camera
+                            ? setStreamError("")
+                            : setStreamError("Camera is turned off");
+                        });
+                      }}
+                      mic={mic}
+                      toggleAudio={toggleMic}
+                    />
+                  }
+                />
+              </div>
             </div>
-          </div>
-        </Container>
-      </LoadingContent>
+          </Container>
+        </LoadingContent>
+      </div>
     </div>
   );
 }

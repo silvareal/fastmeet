@@ -8,6 +8,7 @@ export interface GlobalInitialStateType {
   localMediaStream?: MediaStream;
   peers: PeersType[];
   iceServers: RTCIceServer[];
+  isChatDrawer: boolean;
 }
 
 export type UseQueryStateResult<T> = {

@@ -2,6 +2,9 @@
 
 A p2p decentralized video conferencing application
 
+## Demo
+![Demo](client/src/assets/gif/demo-preview.gif)
+
 ## Getting Started
 
 1. Ensure you have Node.js installed.
@@ -23,3 +26,7 @@ A p2p decentralized video conferencing application
 To run any automated tests, run `npm test`. This will: 
 * Run all the client-side tests: `npm test --prefix client`
 * Run all the server-side tests: `npm test --prefix server` 
+
+# CREDITS
+
+Designer - Timothy Exodus

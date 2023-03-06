@@ -103,6 +103,16 @@ export const theme: any = customizeComponents({
           "& .MuiInputBase-root": {
             borderRadius: 0,
           },
+          "&.chatInput-variant": {
+            backgroundColor: "#222",
+            borderRadius: "1rem",
+            "& fieldset": {
+              border: "none",
+            },
+            "&.MuiInputBase-input-MuiOutlinedInput-input": {
+              color: "#fff",
+            },
+          },
         },
       },
     },

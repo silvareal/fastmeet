@@ -8,7 +8,8 @@ export const globalInitialState: GlobalInitialStateType = {
   handRaised: false,
   screenShare: false,
   peers: [],
-  iceServers: []
+  iceServers: [],
+  isChatDrawer: false,
 };
 
 const slice = createSlice({
@@ -16,22 +17,25 @@ const slice = createSlice({
   initialState: globalInitialState,
   reducers: {
     toggleCameraAction: (state, { payload }) => {
-      console.log("payload", payload)
+      console.log("payload", payload);
       state.camera = payload !== undefined ? payload : !state.camera;
     },
     toggleMicAction: (state, { payload }) => {
       state.mic = payload !== undefined ? payload : !state.mic;
     },
-    toggleHandRaisedAction: (state, { payload } ) => {
+    toggleChatDrawerAction: (state, { payload }) => {
+      state.isChatDrawer =
+        payload !== undefined ? payload : !state.isChatDrawer;
+    },
+    toggleHandRaisedAction: (state, { payload }) => {
       state.handRaised = payload !== undefined ? payload : !state.handRaised;
     },
     toggleScreenShareAction: (state, { payload }) => {
-      state.screenShare =
-        payload !== undefined ? payload : !state.screenShare;
+      state.screenShare = payload !== undefined ? payload : !state.screenShare;
     },
     setLocalMediaStreamAction: (state, { payload }) => {
       if (payload) {
-        state.localMediaStream = payload
+        state.localMediaStream = payload;
       }
     },
     addPeerAction: (state, { payload }) => {
@@ -60,14 +64,13 @@ const slice = createSlice({
     },
   },
   extraReducers: (builder: any) =>
-    builder
-      .addMatcher(
-        fastmeetApi.endpoints.getTurnServer.matchFulfilled,
-        (state: GlobalInitialStateType, { payload }: any) => {
-          if (payload !== undefined && payload.data)
-            state.iceServers = payload?.data?.iceServers;
-        }
-      )
+    builder.addMatcher(
+      fastmeetApi.endpoints.getTurnServer.matchFulfilled,
+      (state: GlobalInitialStateType, { payload }: any) => {
+        if (payload !== undefined && payload.data)
+          state.iceServers = payload?.data?.iceServers;
+      }
+    ),
 });
 
 export const {
@@ -79,6 +82,7 @@ export const {
   addPeerAction,
   editPeerAction,
   removePeerAction,
+  toggleChatDrawerAction,
 } = slice.actions;
 
 export default slice;

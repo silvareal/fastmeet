@@ -1,5 +1,4 @@
 import { io } from "socket.io-client";
-
 /**
  * Get random number
  * @param {integer} length of string

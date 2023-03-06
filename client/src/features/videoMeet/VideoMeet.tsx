@@ -10,6 +10,7 @@ import {
   Typography,
   useMediaQuery,
   BottomNavigation,
+  Box,
 } from "@mui/material";
 import { format } from "date-fns";
 import { FormikProps } from "formik";

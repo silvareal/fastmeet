@@ -11,7 +11,7 @@ export default defineConfig({
   },
   server: {
     open: true,
-    port: 5000
+    port: 4000
   },
   define: {
     // By default, Vite doesn't include shims for NodeJS/

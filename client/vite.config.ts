@@ -7,10 +7,15 @@ import tsconfigPaths from "vite-tsconfig-paths";
 export default defineConfig({
   plugins: [react(), tsconfigPaths(), svgr()],
   build: {
-    outDir: 'build',
+    outDir: "build"
   },
   server: {
     open: true,
-    port: 4000
+    port: 5000
+  },
+  define: {
+    // By default, Vite doesn't include shims for NodeJS/
+    // necessary for segment analytics lib to work
+    global:  'globalThis',
   }
 });

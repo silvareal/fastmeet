@@ -1,4 +1,5 @@
-const tailwindDefaultTheme = require("tailwindcss/defaultTheme");
+// const tailwindDefaultTheme = require("tailwindcss/defaultTheme");
+import tailwindDefaultTheme from "tailwindcss/defaultTheme"
 
 export const MediaQueryBreakpointEnum = {
   "2xl": `(min-width: ${tailwindDefaultTheme.screens["2xl"]})`,
